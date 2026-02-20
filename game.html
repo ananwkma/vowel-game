@@ -636,17 +636,22 @@
       const pickerEl = document.querySelector('.vowel-picker');
       const vowelOptions = Array.from(pickerEl.querySelectorAll('.vowel-option'));
 
-      // Position the guide centered horizontally below the given element
-      function positionBelow(element) {
+      const sepEl = pickerEl.querySelector('.vowel-guide-sep');
+
+      // Position guide so the '_' separator is vertically centred on the block.
+      // A and E float above the block; I, O, U float below.
+      function positionAround(element) {
         const rect = element.getBoundingClientRect();
-        const guideWidth = pickerEl.offsetWidth;
+        const guideWidth  = pickerEl.offsetWidth;
+        // offsetTop is layout-stable even when opacity:0
+        const sepCenter = sepEl.offsetTop + sepEl.offsetHeight / 2;
         pickerEl.style.left = (rect.left + rect.width / 2 - guideWidth / 2) + 'px';
-        pickerEl.style.top  = (rect.bottom + 8) + 'px';
+        pickerEl.style.top  = (rect.top  + rect.height / 2 - sepCenter) + 'px';
       }
 
       function show(element) {
         pickerEl.classList.add('visible');
-        positionBelow(element);
+        positionAround(element);
       }
 
       function hide() {
@@ -666,7 +671,7 @@
         return null;
       }
 
-      return { show, hide, positionBelow, getVowelAtPoint };
+      return { show, hide, positionAround, getVowelAtPoint };
     })();
 
     /* ============================================================
@@ -785,7 +790,7 @@
     }
 
     // Updates the dragged element's horizontal position (clamped to board bounds)
-    function moveAt(pageX) {
+    function moveAt(pageX, pageY) {
       const constrainedTranslateX = pageX - dragStartX;
       const currentLeftRelativeToBoard = initialDraggableXOffset + constrainedTranslateX;
       let finalTranslateX = constrainedTranslateX;
@@ -794,16 +799,17 @@
       } else if (currentLeftRelativeToBoard + initialDraggableRect.width > gameBoardRect.width) {
         finalTranslateX = gameBoardRect.width - initialDraggableRect.width - initialDraggableXOffset;
       }
-      currentDraggable.style.transform = `translate(${finalTranslateX}px, 0px) scale(1.1)`;
+      const translateY = pageY - dragStartY;
+      currentDraggable.style.transform = `translate(${finalTranslateX}px, ${translateY}px) scale(1.1)`;
     }
 
     function onPointerMove(event) {
       if (!currentDraggable) return;
       event.preventDefault();
-      moveAt(event.pageX);
+      moveAt(event.pageX, event.pageY);
 
-      // Keep guide centered below the block as it moves
-      vowelPicker.positionBelow(currentDraggable);
+      // Keep guide aligned around the block as it moves
+      vowelPicker.positionAround(currentDraggable);
 
       // Update the dragged block's letter based on which vowel the pointer is over.
       // Once a vowel is shown, never revert to '_' — only update when hovering a vowel.
