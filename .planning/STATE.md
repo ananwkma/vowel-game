@@ -20,7 +20,7 @@
 
 **Phase:** 4 / 4
 **Plan:** 04-03 (New Word Swipe)
-**Status:** Complete
+**Status:** Ready to plan
 **Progress:** [█████████░] 88%
 
 ```
