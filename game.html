@@ -678,11 +678,16 @@
       }
 
       function show(element) {
-        pickerEl.classList.add('visible');
+        // Position first so the picker is in the right place before it becomes visible.
+        // requestAnimationFrame defers adding 'visible' to the next paint, ensuring
+        // the browser registers the opacity:0 starting state and triggers the transition.
         positionAround(element);
+        requestAnimationFrame(() => pickerEl.classList.add('visible'));
       }
 
       function hide() {
+        // Removing 'visible' triggers the CSS fade-out transition (opacity 1 -> 0).
+        // The element remains in the DOM at opacity:0 (no removal needed).
         pickerEl.classList.remove('visible');
       }
 
@@ -785,20 +790,13 @@
     });
 
     /**
-     * Clears the current vowel guide from the DOM if it exists.
+     * Hides the vowel picker (guide column) by triggering its CSS fade-out.
+     * The picker element remains in the DOM at opacity:0; only the 'visible'
+     * class is removed so the CSS transition animates the fade.
+     * Called during initGame() to ensure no stale picker is visible between rounds.
      */
     function removeGuideColumn() {
-      if (guideEl) {
-        const elementToRemove = guideEl;
-        elementToRemove.classList.remove('is-visible');
-        guideEl = null; // Clear the global reference
-        // Allow time for fade-out transition before removal
-        setTimeout(() => {
-          if (elementToRemove && elementToRemove.parentNode) {
-            elementToRemove.parentNode.removeChild(elementToRemove);
-          }
-        }, 200);
-      }
+      vowelPicker.hide();
     }
 
     /* ============================================================
