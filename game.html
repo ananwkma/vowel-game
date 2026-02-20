@@ -217,8 +217,10 @@
 
     /* ============================================================
        SECTION: VOWEL GUIDE
-       Static horizontal strip — fades in on drag, fades out on release.
-       Selection feedback is shown on the dragged block, not here.
+       Static vertical strip — fades in on drag start, fades out on release.
+       opacity starts at 0; adding .visible triggers the CSS transition.
+       pointer-events: none ensures the strip never intercepts pointer events
+       (vowel hit-testing is done manually via getBoundingClientRect).
     ============================================================ */
     .vowel-picker {
       display: flex;
@@ -228,9 +230,10 @@
       z-index: 100;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.2s ease-in-out;
     }
 
+    /* Adding this class triggers the fade-in; removing it triggers the fade-out */
     .vowel-picker.visible {
       opacity: 1;
     }
