@@ -838,8 +838,7 @@
         currentDraggable.classList.remove('empty');
       }
 
-      const draggedElementCenter = currentDraggable.getBoundingClientRect().left + initialDraggableRect.width / 2;
-      const insertionPointIndex = getInsertionPoint(draggedElementCenter);
+      const insertionPointIndex = getInsertionPoint(event.clientX);
       const blocks = getCurrentBlocks();
 
       if (!placeholderEl) {
