@@ -2,7 +2,7 @@
 
 **Created:** 2026-02-19
 **Depth:** Standard
-**Coverage:** 15/15 v1 requirements mapped
+**Coverage:** 22/22 v1 requirements mapped
 
 ---
 
@@ -10,7 +10,8 @@
 
 - [x] **Phase 1: Game Foundation & Display** - Set up word engine, display puzzle structure with consonants and vowel slots
 - [x] **Phase 2: Block Manipulation & Vowel Selection** - Implement drag/click interaction and vowel picker
-- [ ] **Phase 3: Game States & Win Conditions** - Validate words, handle win/lose states, auto-advance
+- [x] **Phase 3: Game States & Win Conditions** - Validate words, handle win/lose states, auto-advance
+- [ ] **Phase 4: Animation Enhancements** - Introduce subtle animations for key interactions
 
 ---
 
@@ -55,7 +56,7 @@ Plans:
 4. When a vowel is selected, the bar fades out and the chosen letter appears in the yellow block (e.g., block shows "E")
 5. Player can manipulate each yellow block independently (placing and selecting vowels in any order)
 
-**Plans:** 7 plans
+**Plans:** 8 plans
 
 Plans:
 - [x] 02-01-PLAN.md — Core drag-and-drop mechanics using Pointer Events (CORE-03)
@@ -65,6 +66,7 @@ Plans:
 - [x] 02-05-PLAN.md — Refine drag movement and picker activation (CORE-03, CORE-04, CORE-05)
 - [x] 02-06-PLAN.md — Fix block snapping, vertical movement, and vowel display (CORE-03, CORE-04, CORE-05)
 - [x] 02-07-PLAN.md — Activate picker on drop & overlay (CORE-04, CORE-05)
+- [x] 02-08-PLAN.md — Vertical scroll refinement and interaction polish (CORE-03, CORE-04, CORE-05)
 
 ---
 
@@ -86,8 +88,30 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Word validation + state machine + visual feedback + Give Up handler + auto-advance (CORE-07, CORE-08, CORE-09, WORD-04, VIS-02, VIS-03)
-- [ ] 03-02-PLAN.md — Human verification of complete Phase 3 game loop
+- [x] 03-01-PLAN.md — Implement word validation, win/lose states, Give Up button, and auto-advance (CORE-07, CORE-08, CORE-09, WORD-04, VIS-02, VIS-03)
+- [x] 03-02-PLAN.md — Final verification and QA (CORE-01 through VIS-06)
+
+---
+
+### Phase 4: Animation Enhancements
+
+**Goal:** Introduce subtle animations for key interactions to enhance polish and user feedback.
+
+**Depends on:** Phase 3
+
+**Requirements:** VIS-07, VIS-08, VIS-09
+
+**Success Criteria** (observable user behaviors):
+1. Vowel picker appears and disappears with a smooth fade-in/fade-out animation.
+2. Dropped vowel blocks subtly "bounce" or settle into place instead of snapping rigidly.
+3. New game words "swipe" or transition in smoothly instead of an instant appearance.
+
+**Plans:** 3 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — Vowel picker fades in/out (VIS-07)
+- [ ] 04-02-PLAN.md — Vowel blocks bounce on snap (VIS-08)
+- [ ] 04-03-PLAN.md — New words swipe in (VIS-09)
 
 ---
 
@@ -96,8 +120,9 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Game Foundation & Display | 3/3 | Complete | 2026-02-19 |
-| 2. Block Manipulation & Vowel Selection | 7/7 | Complete | 2026-02-19 |
-| 3. Game States & Win Conditions | 0/2 | In progress | — |
+| 2. Block Manipulation & Vowel Selection | 8/8 | Complete | 2026-02-19 |
+| 3. Game States & Win Conditions | 2/2 | Complete | 2026-02-20 |
+| 4. Animation Enhancements | 0/3 | In progress | — |
 
 ---
 
@@ -111,27 +136,31 @@ Plans:
 | CORE-04 | 2 | Core Gameplay | Implemented |
 | CORE-05 | 2 | Core Gameplay | Implemented |
 | CORE-06 | 2 | Core Gameplay | Implemented |
-| CORE-07 | 3 | Core Gameplay | Pending |
-| CORE-08 | 3 | Core Gameplay | Pending |
-| CORE-09 | 3 | Core Gameplay | Pending |
+| CORE-07 | 3 | Core Gameplay | Implemented |
+| CORE-08 | 3 | Core Gameplay | Implemented |
+| CORE-09 | 3 | Core Gameplay | Implemented |
 | WORD-01 | 1 | Word Engine | Implemented |
 | WORD-02 | 1 | Word Engine | Implemented |
 | WORD-03 | 1 | Word Engine | Implemented |
-| WORD-04 | 3 | Word Engine | Pending |
+| WORD-04 | 3 | Word Engine | Implemented |
 | VIS-01 | 1 | Visuals | Implemented |
-| VIS-02 | 3 | Visuals | Pending |
-| VIS-03 | 3 | Visuals | Pending |
+| VIS-02 | 3 | Visuals | Implemented |
+| VIS-03 | 3 | Visuals | Implemented |
 | VIS-04 | 1 | Visuals | Implemented |
 | VIS-05 | 1 | Visuals | Implemented |
 | VIS-06 | 1 | Visuals | Implemented |
+| VIS-07 | 4 | Visuals | Planned |
+| VIS-08 | 4 | Visuals | Planned |
+| VIS-09 | 4 | Visuals | Planned |
 
 **Coverage Summary:**
-- Total v1 requirements: 15
-- Mapped to phases: 15
+- Total v1 requirements: 22
+- Mapped to phases: 22
 - Unmapped: 0 ✓
 - Orphaned requirements: 0 ✓
 
 ---
 
 *Roadmap created: 2026-02-19*
-*Updated: 2026-02-20 — Phase 3 plans created*
+*Updated: 2026-02-20 — Phase 3 plans created, Phase 3 completed, Phase 4 added*
+*Updated: 2026-02-21 — Phase 4 plans created*

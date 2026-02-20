@@ -723,6 +723,16 @@
       phase: 'playing',       // 'playing' | 'won' | 'gaveup' (used in Phase 3)
     };
 
+    // Global variables for drag and drop state
+    let currentDraggable = null;
+    let placeholderEl = null;
+    let guideEl = null;
+    const gameBoard = document.getElementById('game-board');
+    let dragStartX, dragStartY;
+    let initialDraggableRect;
+    let initialDraggableXOffset = 0;
+    let gameBoardRect;
+
     /* ============================================================
        SECTION 4: DOM RENDERING
        renderBoard(state) — pure function converting state to DOM.
@@ -774,12 +784,211 @@
       console.log('[GiveUp] Button clicked — logic implemented in Phase 3');
     });
 
+    /**
+     * Clears the current vowel guide from the DOM if it exists.
+     */
+    function removeGuideColumn() {
+      if (guideEl) {
+        const elementToRemove = guideEl;
+        elementToRemove.classList.remove('is-visible');
+        guideEl = null; // Clear the global reference
+        // Allow time for fade-out transition before removal
+        setTimeout(() => {
+          if (elementToRemove && elementToRemove.parentNode) {
+            elementToRemove.parentNode.removeChild(elementToRemove);
+          }
+        }, 200);
+      }
+    }
+
+    /* ============================================================
+       SECTION 5.5: DRAG AND DROP
+    ============================================================ */
+
+    // Returns all board children except the dragged block and placeholder
+    function getCurrentBlocks() {
+      return Array.from(gameBoard.children).filter(el => el !== currentDraggable && el !== placeholderEl);
+    }
+
+    // Returns the index at which to insert the dragged block based on its center X
+    function getInsertionPoint(draggedX) {
+      const blocks = getCurrentBlocks();
+      let targetIndex = blocks.length;
+      for (let i = 0; i < blocks.length; i++) {
+        const blockRect = blocks[i].getBoundingClientRect();
+        if (draggedX < blockRect.left + blockRect.width / 2) {
+          targetIndex = i;
+          break;
+        }
+      }
+      return targetIndex;
+    }
+
+    // Updates the dragged element's horizontal position (clamped to board bounds)
+    function moveAt(pageX) {
+      const constrainedTranslateX = pageX - dragStartX;
+      const currentLeftRelativeToBoard = initialDraggableXOffset + constrainedTranslateX;
+      let finalTranslateX = constrainedTranslateX;
+      if (currentLeftRelativeToBoard < 0) {
+        finalTranslateX = -initialDraggableXOffset;
+      } else if (currentLeftRelativeToBoard + initialDraggableRect.width > gameBoardRect.width) {
+        finalTranslateX = gameBoardRect.width - initialDraggableRect.width - initialDraggableXOffset;
+      }
+      currentDraggable.style.transform = `translate(${finalTranslateX}px, 0px) scale(1.1)`;
+      vowelPicker.moveWithTarget(currentDraggable);
+    }
+
+    function onPointerMove(event) {
+      if (!currentDraggable) return;
+      event.preventDefault();
+      moveAt(event.pageX);
+
+      const draggedElementCenter = currentDraggable.getBoundingClientRect().left + initialDraggableRect.width / 2;
+      const insertionPointIndex = getInsertionPoint(draggedElementCenter);
+      const blocks = getCurrentBlocks();
+
+      if (!placeholderEl) {
+        placeholderEl = document.createElement('div');
+        placeholderEl.className = 'block vowel-block placeholder-block';
+        placeholderEl.style.width = `${initialDraggableRect.width}px`;
+        placeholderEl.style.height = `${initialDraggableRect.height}px`;
+      }
+
+      const currentPlaceholderParent = placeholderEl.parentNode;
+      const currentPlaceholderNextSibling = placeholderEl.nextSibling;
+
+      if (insertionPointIndex < blocks.length) {
+        if (currentPlaceholderParent !== gameBoard || currentPlaceholderNextSibling !== blocks[insertionPointIndex]) {
+          gameBoard.insertBefore(placeholderEl, blocks[insertionPointIndex]);
+        }
+      } else {
+        if (currentPlaceholderParent !== gameBoard || currentPlaceholderNextSibling !== null) {
+          gameBoard.appendChild(placeholderEl);
+        }
+      }
+    }
+
+    document.addEventListener('pointermove', onPointerMove);
+
+    document.addEventListener('pointerdown', function(event) {
+      const draggable = event.target.closest('.vowel-block[data-draggable="true"]');
+      if (!draggable || event.button !== 0) return;
+
+      currentDraggable = draggable;
+      currentDraggable.classList.add('dragging');
+
+      dragStartX = event.clientX;
+      dragStartY = event.clientY;
+      initialDraggableRect = currentDraggable.getBoundingClientRect();
+      gameBoardRect = gameBoard.getBoundingClientRect();
+      initialDraggableXOffset = initialDraggableRect.left - gameBoardRect.left;
+
+      currentDraggable.style.position = 'absolute';
+      currentDraggable.style.zIndex = 1000;
+      currentDraggable.style.left = `${initialDraggableRect.left - gameBoardRect.left}px`;
+      currentDraggable.style.top = `${initialDraggableRect.top - gameBoardRect.top}px`;
+      currentDraggable.style.margin = '0';
+      currentDraggable.style.width = `${initialDraggableRect.width}px`;
+      currentDraggable.style.height = `${initialDraggableRect.height}px`;
+
+      const originalIndex = Array.from(gameBoard.children).indexOf(currentDraggable);
+      placeholderEl = document.createElement('div');
+      placeholderEl.className = 'block vowel-block placeholder-block';
+      placeholderEl.style.width = `${initialDraggableRect.width}px`;
+      placeholderEl.style.height = `${initialDraggableRect.height}px`;
+      if (originalIndex !== -1 && originalIndex < gameBoard.children.length) {
+        gameBoard.insertBefore(placeholderEl, gameBoard.children[originalIndex]);
+      } else {
+        gameBoard.appendChild(placeholderEl);
+      }
+
+      event.preventDefault();
+
+      // Capture block ref in closure so it's available even after currentDraggable is cleared
+      const dragBlock = currentDraggable;
+      vowelPicker.setSelectedVowelCallback((vowel) => {
+        dragBlock.textContent = vowel;
+        dragBlock.classList.remove('empty');
+        checkWinCondition();
+      });
+      vowelPicker.show(currentDraggable);
+    });
+
+    document.addEventListener('pointercancel', function() {
+      if (currentDraggable) {
+        currentDraggable.classList.remove('dragging');
+        currentDraggable.style.position = '';
+        currentDraggable.style.zIndex = '';
+        currentDraggable.style.left = '';
+        currentDraggable.style.top = '';
+        currentDraggable.style.transform = '';
+        currentDraggable.style.margin = '';
+        currentDraggable.style.width = '';
+        currentDraggable.style.height = '';
+        currentDraggable = null;
+      }
+      if (placeholderEl && placeholderEl.parentNode) {
+        placeholderEl.parentNode.removeChild(placeholderEl);
+      }
+      placeholderEl = null;
+      vowelPicker.hide();
+    });
+
+    document.addEventListener('pointerup', function(event) {
+      if (!currentDraggable) return;
+
+      const droppedElement = currentDraggable;
+      droppedElement.classList.remove('dragging');
+
+      if (placeholderEl && placeholderEl.parentNode) {
+        placeholderEl.parentNode.removeChild(placeholderEl);
+      }
+      placeholderEl = null;
+
+      const droppedElementCenter = droppedElement.getBoundingClientRect().left + initialDraggableRect.width / 2;
+      const finalInsertionIndex = getInsertionPoint(droppedElementCenter);
+      const blocks = getCurrentBlocks();
+
+      droppedElement.style.position = '';
+      droppedElement.style.zIndex = '';
+      droppedElement.style.left = '';
+      droppedElement.style.top = '';
+      droppedElement.style.transform = '';
+      droppedElement.style.margin = '';
+      droppedElement.style.width = '';
+      droppedElement.style.height = '';
+
+      if (finalInsertionIndex < blocks.length) {
+        gameBoard.insertBefore(droppedElement, blocks[finalInsertionIndex]);
+      } else {
+        gameBoard.appendChild(droppedElement);
+      }
+
+      // Keep picker visible so user can select a vowel after releasing
+      // (picker hides when vowel is selected or via Escape)
+      currentDraggable = null;
+    });
+
     /* ============================================================
        SECTION 6: INIT
        initGame() — called once on load and after each round ends.
        Selects a word, extracts letters, updates state, renders board.
     ============================================================ */
     function initGame() {
+      // Clear any active drag state or picker from previous round
+      if (currentDraggable) {
+        currentDraggable.classList.remove('dragging');
+        currentDraggable.style.cssText = ''; // Clear inline styles
+        currentDraggable = null;
+      }
+      if (placeholderEl && placeholderEl.parentNode) {
+        placeholderEl.parentNode.removeChild(placeholderEl);
+        placeholderEl = null;
+      }
+      removeGuideColumn();
+      vowelPicker.hide();
+
+      // Proceed with new game initialization
       const word = WordEngine.getRandomWord();
 
       gameState.currentWord = word;
@@ -790,206 +999,109 @@
 
       renderBoard(gameState);
 
-            // --- Drag and Drop Logic ---
-            let currentDraggable = null;
-            let dragStartX, dragStartY; // Initial coordinates of the pointer when drag started (relative to viewport)
-            let initialDraggableRect; // Bounding rect of the draggable at drag start
-            let placeholderEl = null; // Visual placeholder for insertion
-            let initialDraggableXOffset = 0; // Store initial X offset of draggable relative to gameBoard's left edge
-            let gameBoardRect; // Bounding rect of the gameBoard
-      
-            const gameBoard = document.getElementById('game-board');
-      
-            // Helper to get all current block elements on the board (excluding the one being dragged or the placeholder)
-            function getCurrentBlocks() {
-              return Array.from(gameBoard.children).filter(el => el !== currentDraggable && el !== placeholderEl);
-            }
-      
-            // Determines the correct insertion index for the dragged block based on its current X position
-            function getInsertionPoint(draggedX) {
-              const blocks = getCurrentBlocks();
-              let targetIndex = blocks.length; // Default to end
-      
-              for (let i = 0; i < blocks.length; i++) {
-                const blockRect = blocks[i].getBoundingClientRect();
-                // If the dragged block's center is to the left of this block's center, insert before it
-                if (draggedX < blockRect.left + blockRect.width / 2) {
-                  targetIndex = i;
-                  break;
-                }
-              }
-              return targetIndex;
-            }
-      
-            // Updates the position of the dragged element (horizontal only)
-            function moveAt(pageX) {
-              const constrainedTranslateX = (pageX - dragStartX);
-      
-              // Calculate current position relative to gameBoard left edge
-              const currentLeftRelativeToBoard = initialDraggableXOffset + constrainedTranslateX;
-      
-              // Apply constraints
-              // Note: The previous implementation had an issue with `minX` and `maxX` calculation
-              // The logic below ensures the block visually stays within the board
-              // It's a simplified version focusing on keeping the block within the visible game board boundaries
-              let finalTranslateX = constrainedTranslateX;
-              if (currentLeftRelativeToBoard < 0) {
-                  finalTranslateX = -initialDraggableXOffset;
-              } else if (currentLeftRelativeToBoard + initialDraggableRect.width > gameBoardRect.width) {
-                  finalTranslateX = gameBoardRect.width - initialDraggableRect.width - initialDraggableXOffset;
-              }
-
-              currentDraggable.style.transform = `translate(${finalTranslateX}px, 0px) scale(1.1)`;
-              vowelPicker.moveWithTarget(currentDraggable); // Update picker position
-            }
-      
-            function onPointerMove(event) {
-              if (!currentDraggable) return;
-      
-              event.preventDefault(); // Prevent text selection etc.
-      
-              moveAt(event.pageX); // Update visual position of dragged element
-      
-              // Dynamic spacing logic: update placeholder position
-              const draggedElementCenter = currentDraggable.getBoundingClientRect().left + initialDraggableRect.width / 2;
-              const insertionPointIndex = getInsertionPoint(draggedElementCenter);
-              const blocks = getCurrentBlocks();
-      
-              if (!placeholderEl) {
-                placeholderEl = document.createElement('div');
-                placeholderEl.className = 'block vowel-block placeholder-block'; // Add vowel-block for styling
-                placeholderEl.style.width = `${initialDraggableRect.width}px`;
-                placeholderEl.style.height = `${initialDraggableRect.height}px`;
-              }
-      
-              // Only move placeholder if it's not already in the correct place
-              const currentPlaceholderParent = placeholderEl.parentNode;
-              const currentPlaceholderNextSibling = placeholderEl.nextSibling;
-      
-              if (insertionPointIndex < blocks.length) {
-                  if (currentPlaceholderParent !== gameBoard || currentPlaceholderNextSibling !== blocks[insertionPointIndex]) {
-                      gameBoard.insertBefore(placeholderEl, blocks[insertionPointIndex]);
-                  }
-              } else {
-                  if (currentPlaceholderParent !== gameBoard || currentPlaceholderNextSibling !== null) {
-                      gameBoard.appendChild(placeholderEl);
-                  }
-              }
-            }
-      
-            document.addEventListener('pointermove', onPointerMove);
-      
-            document.addEventListener('pointerdown', function(event) {
-              const draggable = event.target.closest('.vowel-block[data-draggable="true"]');
-              if (!draggable || event.button !== 0) return; // Only left click for drag
-      
-              currentDraggable = draggable;
-              currentDraggable.classList.add('dragging');
-      
-              // Capture initial coordinates of the pointer and draggable's rect
-              dragStartX = event.clientX;
-              dragStartY = event.clientY;
-              initialDraggableRect = currentDraggable.getBoundingClientRect();
-              gameBoardRect = gameBoard.getBoundingClientRect(); // Get gameBoard bounds once at drag start
-      
-              // Calculate initial X offset relative to the gameBoard's left edge
-              initialDraggableXOffset = initialDraggableRect.left - gameBoardRect.left;
-      
-              // Temporarily change position to absolute within gameBoard for precise control via transform
-              currentDraggable.style.position = 'absolute';
-              currentDraggable.style.zIndex = 1000;
-              currentDraggable.style.left = `${initialDraggableRect.left - gameBoardRect.left}px`;
-              currentDraggable.style.top = `${initialDraggableRect.top - gameBoardRect.top}px`;
-              currentDraggable.style.margin = '0'; // Clear any margins that might interfere
-              currentDraggable.style.width = `${initialDraggableRect.width}px`; // Maintain original width
-              currentDraggable.style.height = `${initialDraggableRect.height}px`; // Maintain original height
-      
-              // Find the original index of the draggable element
-              const originalIndex = Array.from(gameBoard.children).indexOf(currentDraggable);
-      
-              // Add placeholder at the draggable's original position
-              placeholderEl = document.createElement('div');
-              placeholderEl.className = 'block vowel-block placeholder-block';
-              placeholderEl.style.width = `${initialDraggableRect.width}px`;
-              placeholderEl.style.height = `${initialDraggableRect.height}px`;
-              if (originalIndex !== -1 && originalIndex < gameBoard.children.length) {
-                gameBoard.insertBefore(placeholderEl, gameBoard.children[originalIndex]);
-              } else {
-                gameBoard.appendChild(placeholderEl); // Fallback, should not happen if originalIndex is valid
-              }
-      
-              event.preventDefault(); // Prevent default browser drag behaviors
-
-              // Show vowel picker and set callback
-              vowelPicker.setSelectedVowelCallback((vowel) => {
-                  currentDraggable.textContent = vowel;
-              });
-              vowelPicker.show(currentDraggable);
-            });
-      
-            // Clear long-press timer if pointer leaves element or window
-            document.addEventListener('pointercancel', function() {
-              if (currentDraggable) {
-                currentDraggable.classList.remove('dragging');
-                currentDraggable.style.position = '';
-                currentDraggable.style.zIndex = '';
-                currentDraggable.style.left = '';
-                currentDraggable.style.top = '';
-                currentDraggable.style.transform = '';
-                currentDraggable.style.margin = '';
-                currentDraggable.style.width = '';
-                currentDraggable.style.height = '';
-                currentDraggable = null;
-              }
-              if (placeholderEl && placeholderEl.parentNode) {
-                placeholderEl.parentNode.removeChild(placeholderEl);
-              }
-              placeholderEl = null;
-              vowelPicker.hide(); // Hide picker on cancel
-            });
-      
-            document.addEventListener('pointerup', function(event) {
-              if (!currentDraggable) return;
-      
-              const droppedElement = currentDraggable;
-              droppedElement.classList.remove('dragging');
-      
-              // Clean up placeholder if it exists
-              if (placeholderEl && placeholderEl.parentNode) {
-                placeholderEl.parentNode.removeChild(placeholderEl);
-              }
-              placeholderEl = null;
-      
-              // Determine final insertion point (same logic as onPointerMove)
-              const droppedElementCenter = droppedElement.getBoundingClientRect().left + initialDraggableRect.width / 2;
-              const finalInsertionIndex = getInsertionPoint(droppedElementCenter);
-              const blocks = getCurrentBlocks(); // Recalculate blocks after placeholder removed
-      
-              // Reset styling for insertion back into the flow
-              droppedElement.style.position = '';
-              droppedElement.style.zIndex = '';
-              droppedElement.style.left = '';
-              droppedElement.style.top = '';
-              droppedElement.style.transform = ''; // Clear transform
-              droppedElement.style.margin = '';
-              droppedElement.style.width = '';
-              droppedElement.style.height = '';
-      
-              // Insert the dropped element into the gameBoard at the final position
-              if (finalInsertionIndex < blocks.length) {
-                gameBoard.insertBefore(droppedElement, blocks[finalInsertionIndex]);
-              } else {
-                gameBoard.appendChild(droppedElement);
-              }
-              
-              vowelPicker.hide(); // Hide picker on pointer up
-              currentDraggable = null; // Clear draggable state
-            });
-            // --- End Drag and Drop Logic ---
-
       console.log('[Game] New word loaded:', word,
         '| Consonants:', gameState.consonants.join(''),
         '| Vowel count:', gameState.vowelCount);
+    }
+
+    // Start the game when the DOM is ready
+    document.addEventListener('DOMContentLoaded', initGame);
+  </script>
+
+  <script>
+    /* ============================================================
+       SECTION 7: VALIDATION & STATE MANAGEMENT
+    ============================================================ */
+    // O(1) word membership lookup — built once at startup from the WORDS array
+    const WordSet = new Set(WORDS);
+
+    /**
+     * Returns the word constructed from blocks in their current DOM order.
+     * Reads left-to-right visual order from the game board.
+     * Skips placeholder-block elements (drag artifacts).
+     * Returns uppercase string.
+     */
+    function constructedWord() {
+      const board = document.getElementById('game-board');
+      const blocks = Array.from(board.children).filter(
+        el => el.classList.contains('block') &&
+              !el.classList.contains('placeholder-block') &&
+              !el.classList.contains('vowel-picker') // Exclude vowel picker
+      );
+      return blocks.map(b => b.textContent.trim()).join('').toUpperCase();
+    }
+
+    /**
+     * Checks win condition:
+     * - Game must be in 'playing' phase (guard against re-triggering)
+     * - All vowel-blocks must be present in the DOM (count matches vowelCount)
+     * - All vowel-blocks must show a vowel letter (not '_')
+     * - The constructed word must exist in WordSet
+     * Returns true if win triggered, false otherwise.
+     */
+    function checkWinCondition() {
+      if (gameState.phase !== 'playing') return false;
+
+      const board = document.getElementById('game-board');
+      const vowelBlocks = Array.from(board.querySelectorAll('.vowel-block:not(.placeholder-block)'));
+
+      // Strict check: ensure exact number of vowel blocks are on the board
+      const allPlaced = vowelBlocks.length === gameState.vowelCount;
+      const allHaveVowels = allPlaced && vowelBlocks.every(b => b.textContent.trim() !== '_');
+
+      if (allPlaced && allHaveVowels) {
+        const word = constructedWord();
+        if (WordSet.has(word)) {
+          console.log('[Validation] Word SUCCESS:', word);
+          gameState.phase = 'won';
+          applyStateVisuals('won');
+
+          // Apply scaleIn animation to all blocks on successful word (Phase 4)
+          // For now, no specific animation here. Will be added in Phase 4.
+
+          scheduleAutoAdvance(2000); // Auto-advance after 2 seconds
+          return true;
+        } else {
+          console.log('[Validation] Word FAIL:', word);
+        }
+      }
+      return false;
+    }
+
+    /* ============================================================
+       SECTION 8: ANIMATION & TIMING
+    ============================================================ */
+
+    // Single timer reference — prevents overlapping auto-advances
+    let advanceTimer = null;
+
+    /**
+     * Applies background color for the current game phase.
+     * Uses CSS transition on body for smooth color change.
+     */
+    function applyStateVisuals(phase) {
+      const body = document.body;
+      body.style.transition = 'background-color 0.3s ease-in-out';
+      if (phase === 'won') {
+        body.style.backgroundColor = 'var(--color-win-bg)';
+      } else if (phase === 'gaveup') {
+        body.style.backgroundColor = 'var(--color-lose-bg)';
+      } else {
+        body.style.backgroundColor = 'var(--color-bg)';
+      }
+    }
+
+    /**
+     * Schedules auto-advance to next puzzle after delayMs.
+     * Clears any previously scheduled advance before setting new one.
+     */
+    function scheduleAutoAdvance(delayMs) {
+      if (advanceTimer) clearTimeout(advanceTimer);
+      advanceTimer = setTimeout(() => {
+        applyStateVisuals('playing'); // Reset background before new game loads
+        initGame();
+        advanceTimer = null;
+      }, delayMs);
     }
 
     // Start the game when the DOM is ready
