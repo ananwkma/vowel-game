@@ -216,6 +216,25 @@
     }
 
     /* ============================================================
+       SECTION: BLOCK SWIPE-IN ANIMATION (VIS-09)
+       Staggered entrance when a new word loads onto the board.
+    ============================================================ */
+    @keyframes swipeIn {
+      from {
+        opacity: 0;
+        transform: translateX(-28px) scale(0.92);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+    }
+
+    .block-swipe-in {
+      animation: swipeIn 0.32s ease-out both;
+    }
+
+    /* ============================================================
        SECTION: BLOCK SETTLE ANIMATION (VIS-08)
        Short bounce when a dragged block is dropped into place.
     ============================================================ */
@@ -759,29 +778,32 @@
 
       // Create a document fragment for efficient batch DOM update
       const fragment = document.createDocumentFragment();
+      let blockIndex = 0; // continuous index for staggered swipe-in delay
 
       // 1. Render blank vowel placeholder blocks on the LEFT
       //    (one per vowel in the original word)
       for (let i = 0; i < state.vowelCount; i++) {
         const block = document.createElement('div');
-        block.className = 'block vowel-block empty';
+        block.className = 'block vowel-block empty block-swipe-in';
         block.textContent = '_';
         block.setAttribute('data-vowel-index', i);
         block.setAttribute('aria-label', 'Vowel placeholder ' + (i + 1));
         block.setAttribute('role', 'button');
         block.setAttribute('tabindex', '0');
-        block.setAttribute('data-draggable', 'true'); // Add data-draggable attribute
+        block.setAttribute('data-draggable', 'true');
+        block.style.animationDelay = (blockIndex++ * 0.04) + 's';
         fragment.appendChild(block);
       }
 
       // 2. Render consonant blocks on the RIGHT, in original order
       state.consonants.forEach((letter, idx) => {
         const block = document.createElement('div');
-        block.className = 'block consonant-block';
+        block.className = 'block consonant-block block-swipe-in';
         block.textContent = letter;
         block.setAttribute('data-consonant-index', idx);
         block.setAttribute('aria-label', 'Consonant ' + letter);
         block.setAttribute('aria-disabled', 'true');
+        block.style.animationDelay = (blockIndex++ * 0.04) + 's';
         fragment.appendChild(block);
       });
 
