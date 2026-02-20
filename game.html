@@ -697,6 +697,7 @@
     let initialDraggableXOffset = 0;
     let gameBoardRect;
     let dragStartText = '_'; // value of the block before dragging started
+    let dragInitiated = false; // true once the pointer has actually moved after pointerdown
 
     /* ============================================================
        SECTION 4: DOM RENDERING
@@ -806,6 +807,16 @@
     function onPointerMove(event) {
       if (!currentDraggable) return;
       event.preventDefault();
+
+      // First actual movement — reset block to '_' and show guide
+      if (!dragInitiated) {
+        dragInitiated = true;
+        dragStartText = currentDraggable.textContent.trim();
+        currentDraggable.textContent = '_';
+        currentDraggable.classList.add('empty');
+        vowelPicker.show(currentDraggable);
+      }
+
       moveAt(event.pageX, event.pageY);
 
       // Keep guide aligned around the block as it moves
@@ -852,9 +863,7 @@
 
       currentDraggable = draggable;
       currentDraggable.classList.add('dragging');
-      dragStartText = draggable.textContent.trim(); // save before resetting
-      currentDraggable.textContent = '_';           // show underscore while dragging
-      currentDraggable.classList.add('empty');
+      dragInitiated = false; // will be set true on first pointermove
 
       dragStartX = event.clientX;
       dragStartY = event.clientY;
@@ -882,7 +891,6 @@
       }
 
       event.preventDefault();
-      vowelPicker.show(currentDraggable);
     });
 
     document.addEventListener('pointercancel', function() {
@@ -896,9 +904,11 @@
         currentDraggable.style.margin = '';
         currentDraggable.style.width = '';
         currentDraggable.style.height = '';
-        // Restore original value on cancel
-        currentDraggable.textContent = dragStartText;
-        if (dragStartText !== '_') currentDraggable.classList.remove('empty');
+        // Restore original value on cancel (only if drag had started)
+        if (dragInitiated) {
+          currentDraggable.textContent = dragStartText;
+          if (dragStartText !== '_') currentDraggable.classList.remove('empty');
+        }
         currentDraggable = null;
       }
       if (placeholderEl && placeholderEl.parentNode) {
@@ -938,16 +948,17 @@
         gameBoard.appendChild(droppedElement);
       }
 
-      vowelPicker.hide();
-
-      // If released without hovering a vowel, restore the block's previous value
-      if (droppedElement.textContent.trim() === '_') {
-        droppedElement.textContent = dragStartText;
-        if (dragStartText !== '_') droppedElement.classList.remove('empty');
+      if (dragInitiated) {
+        vowelPicker.hide();
+        // If released without hovering a vowel, restore the block's previous value
+        if (droppedElement.textContent.trim() === '_') {
+          droppedElement.textContent = dragStartText;
+          if (dragStartText !== '_') droppedElement.classList.remove('empty');
+        }
+        checkWinCondition();
       }
 
       currentDraggable = null;
-      checkWinCondition();
     });
 
     /* ============================================================
