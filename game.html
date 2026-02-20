@@ -939,15 +939,6 @@
       const droppedElement = currentDraggable;
       droppedElement.classList.remove('dragging');
 
-      if (placeholderEl && placeholderEl.parentNode) {
-        placeholderEl.parentNode.removeChild(placeholderEl);
-      }
-      placeholderEl = null;
-
-      const droppedElementCenter = droppedElement.getBoundingClientRect().left + initialDraggableRect.width / 2;
-      const finalInsertionIndex = getInsertionPoint(droppedElementCenter);
-      const blocks = getCurrentBlocks();
-
       droppedElement.style.position = '';
       droppedElement.style.zIndex = '';
       droppedElement.style.left = '';
@@ -957,11 +948,14 @@
       droppedElement.style.width = '';
       droppedElement.style.height = '';
 
-      if (finalInsertionIndex < blocks.length) {
-        gameBoard.insertBefore(droppedElement, blocks[finalInsertionIndex]);
+      // Replace the placeholder with the dropped element — placeholder is already
+      // in the correct position from the leading-edge logic used during drag.
+      if (placeholderEl && placeholderEl.parentNode) {
+        placeholderEl.parentNode.replaceChild(droppedElement, placeholderEl);
       } else {
         gameBoard.appendChild(droppedElement);
       }
+      placeholderEl = null;
 
       if (dragInitiated) {
         vowelPicker.hide();
