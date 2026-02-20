@@ -632,19 +632,12 @@
     const vowelPicker = (function() {
       const pickerEl = document.querySelector('.vowel-picker');
       const vowelOptions = Array.from(pickerEl.querySelectorAll('.vowel-option'));
-      let resolveSelection; // To resolve the promise with the selected vowel
-      let rejectSelection;  // To reject the promise if picker is closed without selection
       let focusedIndex = -1;
+      let selectionCallback = null; // Callback to notify about selected vowel
 
-      function show(targetElement) {
-        return new Promise((resolve, reject) => {
-          resolveSelection = resolve;
-          rejectSelection = reject;
-
-          pickerEl.classList.add('visible'); // Make visible first to get dimensions
-
+      function moveWithTarget(targetElement) {
           const targetRect = targetElement.getBoundingClientRect();
-          const pickerRect = pickerEl.getBoundingClientRect(); // Get picker dimensions after it's visible
+          const pickerRect = pickerEl.getBoundingClientRect();
 
           const centerX = targetRect.left + targetRect.width / 2;
           const centerY = targetRect.top + targetRect.height / 2;
@@ -655,21 +648,23 @@
 
           pickerEl.style.left = `${pickerLeft + window.scrollX}px`;
           pickerEl.style.top = `${pickerTop + window.scrollY}px`;
+      }
 
+      function show(targetElement) {
+          pickerEl.classList.add('visible'); // Make visible first to get dimensions
+          moveWithTarget(targetElement); // Position initially
           focusOption(0); // Focus the first option
           pickerEl.focus(); // Ensure picker container can receive keyboard events
-        });
       }
 
       function hide() {
         pickerEl.classList.remove('visible');
         focusOption(-1); // Clear focus
-        // If promise not yet resolved/rejected, reject it (e.g., if Esc pressed)
-        if (rejectSelection) {
-            rejectSelection();
-            resolveSelection = null;
-            rejectSelection = null;
-        }
+        selectionCallback = null; // Clear callback when hidden
+      }
+
+      function setSelectedVowelCallback(callback) {
+          selectionCallback = callback;
       }
 
       function focusOption(index) {
@@ -684,10 +679,8 @@
       }
 
       function selectVowel(vowel) {
-        if (resolveSelection) {
-          resolveSelection(vowel);
-          resolveSelection = null;
-          rejectSelection = null;
+        if (selectionCallback) {
+          selectionCallback(vowel);
         }
         hide();
       }
@@ -714,7 +707,7 @@
         }
       });
 
-      return { show, hide };
+      return { show, hide, moveWithTarget, setSelectedVowelCallback };
     })();
 
     /* ============================================================
@@ -805,11 +798,6 @@
             let initialDraggableXOffset = 0; // Store initial X offset of draggable relative to gameBoard's left edge
             let gameBoardRect; // Bounding rect of the gameBoard
       
-            // Long-press variables
-            let longPressTimer = null;
-            let isLongPress = false;
-            const LONG_PRESS_THRESHOLD = 500; // ms
-      
             const gameBoard = document.getElementById('game-board');
       
             // Helper to get all current block elements on the board (excluding the one being dragged or the placeholder)
@@ -835,35 +823,27 @@
       
             // Updates the position of the dragged element (horizontal only)
             function moveAt(pageX) {
-              // Calculate the horizontal translation from the initial drag start position.
-              // The translateX value is relative to the element's original position in the DOM.
-              // We need to keep it fixed in place, then apply transform for drag.
-              const currentDraggableLeft = initialDraggableRect.left + (pageX - dragStartX);
-              
-              // Ensure the draggable stays within the gameBoard's horizontal bounds
-              const minX = gameBoardRect.left - initialDraggableRect.left; // How far left can it go relative to its start
-              const maxX = gameBoardRect.right - initialDraggableRect.right; // How far right can it go relative to its start
-      
-              let constrainedTranslateX = (pageX - dragStartX);
+              const constrainedTranslateX = (pageX - dragStartX);
       
               // Calculate current position relative to gameBoard left edge
               const currentLeftRelativeToBoard = initialDraggableXOffset + constrainedTranslateX;
       
               // Apply constraints
+              // Note: The previous implementation had an issue with `minX` and `maxX` calculation
+              // The logic below ensures the block visually stays within the board
+              // It's a simplified version focusing on keeping the block within the visible game board boundaries
+              let finalTranslateX = constrainedTranslateX;
               if (currentLeftRelativeToBoard < 0) {
-                  constrainedTranslateX = -initialDraggableXOffset;
+                  finalTranslateX = -initialDraggableXOffset;
               } else if (currentLeftRelativeToBoard + initialDraggableRect.width > gameBoardRect.width) {
-                  constrainedTranslateX = gameBoardRect.width - initialDraggableRect.width - initialDraggableXOffset;
+                  finalTranslateX = gameBoardRect.width - initialDraggableRect.width - initialDraggableXOffset;
               }
-      
-              currentDraggable.style.transform = `translate(${constrainedTranslateX}px, 0px) scale(1.1)`;
+
+              currentDraggable.style.transform = `translate(${finalTranslateX}px, 0px) scale(1.1)`;
+              vowelPicker.moveWithTarget(currentDraggable); // Update picker position
             }
       
             function onPointerMove(event) {
-              if (longPressTimer) {
-                clearTimeout(longPressTimer);
-                longPressTimer = null;
-              }
               if (!currentDraggable) return;
       
               event.preventDefault(); // Prevent text selection etc.
@@ -899,57 +879,11 @@
       
             document.addEventListener('pointermove', onPointerMove);
       
-            // Handle pointerdown for both drag and long-press/right-click
-            document.addEventListener('pointerdown', async function(event) { // Made async
+            document.addEventListener('pointerdown', function(event) {
               const draggable = event.target.closest('.vowel-block[data-draggable="true"]');
-              if (!draggable) return;
+              if (!draggable || event.button !== 0) return; // Only left click for drag
       
-              // 1. Right-click / Context menu (desktop)
-              if (event.button === 2) {
-                event.preventDefault(); // Prevent default browser context menu
-                try {
-                    const selectedVowel = await vowelPicker.show(draggable); // Await the selection
-                    draggable.textContent = selectedVowel; // Update the block
-                } catch (error) {
-                    console.log('Vowel selection cancelled or failed (right-click):', error);
-                }
-                currentDraggable = null; // Clear draggable state, as drag should not start
-                if (placeholderEl && placeholderEl.parentNode) {
-                  placeholderEl.parentNode.removeChild(placeholderEl);
-                }
-                placeholderEl = null;
-                return; // Do not initiate drag
-              }
-      
-              // 2. Long-press (touch)
-              if (event.pointerType === 'touch') {
-                longPressTimer = setTimeout(async () => { // Make timeout callback async
-                  isLongPress = true;
-                  try {
-                      const selectedVowel = await vowelPicker.show(draggable); // Await the selection
-                      draggable.textContent = selectedVowel; // Update the block
-                  } catch (error) {
-                      console.log('Vowel selection cancelled or failed (long-press):', error);
-                  }
-                  // Optionally, prevent drag after long press activates picker
-                  currentDraggable = null;
-                  if (placeholderEl && placeholderEl.parentNode) {
-                    placeholderEl.parentNode.removeChild(placeholderEl);
-                  }
-                  placeholderEl = null;
-                }, LONG_PRESS_THRESHOLD);
-              }
-      
-              // Only proceed with drag logic if picker was not activated by right-click/long-press
-              if (currentDraggable === null) { // This means a long-press or right-click has potentially blocked drag.
-                currentDraggable = draggable; // Assign draggable
-              } else if (currentDraggable !== draggable) {
-                // This scenario means another draggable was being dragged while a new one was touched.
-                // This should theoretically not happen with `currentDraggable = null` checks.
-                // But as a safeguard, we reset.
-                currentDraggable = draggable;
-              }
-              
+              currentDraggable = draggable;
               currentDraggable.classList.add('dragging');
       
               // Capture initial coordinates of the pointer and draggable's rect
@@ -962,7 +896,6 @@
               initialDraggableXOffset = initialDraggableRect.left - gameBoardRect.left;
       
               // Temporarily change position to absolute within gameBoard for precise control via transform
-              // We'll calculate its initial position so it stays visually in place when 'position: absolute' is applied
               currentDraggable.style.position = 'absolute';
               currentDraggable.style.zIndex = 1000;
               currentDraggable.style.left = `${initialDraggableRect.left - gameBoardRect.left}px`;
@@ -986,15 +919,16 @@
               }
       
               event.preventDefault(); // Prevent default browser drag behaviors
+
+              // Show vowel picker and set callback
+              vowelPicker.setSelectedVowelCallback((vowel) => {
+                  currentDraggable.textContent = vowel;
+              });
+              vowelPicker.show(currentDraggable);
             });
       
             // Clear long-press timer if pointer leaves element or window
             document.addEventListener('pointercancel', function() {
-              if (longPressTimer) {
-                clearTimeout(longPressTimer);
-                longPressTimer = null;
-              }
-              isLongPress = false; // Reset long-press state
               if (currentDraggable) {
                 currentDraggable.classList.remove('dragging');
                 currentDraggable.style.position = '';
@@ -1011,18 +945,10 @@
                 placeholderEl.parentNode.removeChild(placeholderEl);
               }
               placeholderEl = null;
+              vowelPicker.hide(); // Hide picker on cancel
             });
       
-            document.addEventListener('pointerup', async function(event) {
-              if (longPressTimer) {
-                clearTimeout(longPressTimer);
-                longPressTimer = null;
-              }
-              if (isLongPress) {
-                isLongPress = false; // Reset long-press state
-                return; // Do not proceed with drag logic if long-press triggered picker
-              }
-      
+            document.addEventListener('pointerup', function(event) {
               if (!currentDraggable) return;
       
               const droppedElement = currentDraggable;
@@ -1055,36 +981,11 @@
               } else {
                 gameBoard.appendChild(droppedElement);
               }
-      
-              // New: Activate vowel picker automatically on drop if it's a vowel block
-              if (droppedElement.classList.contains('vowel-block')) {
-                  try {
-                      const selectedVowel = await vowelPicker.show(droppedElement);
-                      droppedElement.textContent = selectedVowel;
-                  } catch (error) {
-                      // Log, but do not prevent the rest of the pointerup logic
-                      console.log('Vowel selection cancelled or failed (drop):', error);
-                  }
-              }
-      
+              
+              vowelPicker.hide(); // Hide picker on pointer up
               currentDraggable = null; // Clear draggable state
-      
             });
             // --- End Drag and Drop Logic ---
-      
-            // Add contextmenu event listener for right-click on vowel blocks
-            gameBoard.addEventListener('contextmenu', async function(event) { // Make the function async
-              const draggable = event.target.closest('.vowel-block[data-draggable="true"]');
-              if (draggable) {
-                event.preventDefault(); // Prevent default browser context menu
-                try {
-                  const selectedVowel = await vowelPicker.show(draggable);
-                  draggable.textContent = selectedVowel;
-                } catch (error) {
-                  console.log('Vowel selection cancelled or failed (contextmenu):', error);
-                }
-              }
-            });
 
       console.log('[Game] New word loaded:', word,
         '| Consonants:', gameState.consonants.join(''),
