@@ -11,7 +11,7 @@
 - [x] **Phase 1: Game Foundation & Display** - Set up word engine, display puzzle structure with consonants and vowel slots
 - [x] **Phase 2: Block Manipulation & Vowel Selection** - Implement drag/click interaction and vowel picker
 - [x] **Phase 3: Game States & Win Conditions** - Validate words, handle win/lose states, auto-advance
-- [ ] **Phase 4: Animation Enhancements** - Introduce subtle animations for key interactions
+- [x] **Phase 4: Animation Enhancements** - Introduce subtle animations for key interactions (1/3 plans complete)
 
 ---
 
@@ -109,9 +109,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Vowel picker fades in/out (VIS-07)
-- [ ] 04-02-PLAN.md — Vowel blocks bounce on snap (VIS-08)
-- [ ] 04-03-PLAN.md — New words swipe in (VIS-09)
+- [x] 04-01-PLAN.md — Vowel picker fades in/out (VIS-07)
+- [x] 04-02-PLAN.md — Vowel blocks bounce on snap (VIS-08)
+- [x] 04-03-PLAN.md — New words swipe in (VIS-09)
 
 ---
 
@@ -122,7 +122,7 @@ Plans:
 | 1. Game Foundation & Display | 3/3 | Complete | 2026-02-19 |
 | 2. Block Manipulation & Vowel Selection | 8/8 | Complete | 2026-02-19 |
 | 3. Game States & Win Conditions | 2/2 | Complete | 2026-02-20 |
-| 4. Animation Enhancements | 0/3 | In progress | — |
+| 4. Animation Enhancements | 3/3 | Complete | 2026-02-20 |
 
 ---
 
@@ -149,9 +149,9 @@ Plans:
 | VIS-04 | 1 | Visuals | Implemented |
 | VIS-05 | 1 | Visuals | Implemented |
 | VIS-06 | 1 | Visuals | Implemented |
-| VIS-07 | 4 | Visuals | Planned |
-| VIS-08 | 4 | Visuals | Planned |
-| VIS-09 | 4 | Visuals | Planned |
+| VIS-07 | 4 | Visuals | Implemented |
+| VIS-08 | 4 | Visuals | Implemented |
+| VIS-09 | 4 | Visuals | Implemented |
 
 **Coverage Summary:**
 - Total v1 requirements: 22
