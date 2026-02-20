@@ -212,14 +212,12 @@
       min-width: var(--block-size); /* Match block width */
       opacity: 0; /* Initially invisible */
       pointer-events: none; /* Do not block events when hidden */
-      transition: opacity 0.2s ease, transform 0.2s ease;
-      transform: translateY(10px); /* Start slightly offset for animation */
+      transition: opacity 0.2s ease;
     }
 
     .vowel-picker.visible {
       opacity: 1;
       pointer-events: auto;
-      transform: translateY(0);
     }
 
     .vowel-option {
@@ -643,12 +641,21 @@
           resolveSelection = resolve;
           rejectSelection = reject;
 
-          // Position the picker next to the target element
-          const targetRect = targetElement.getBoundingClientRect();
-          pickerEl.style.top = `${targetRect.top + window.scrollY}px`;
-          pickerEl.style.left = `${targetRect.right + 10 + window.scrollX}px`; // 10px offset
+          pickerEl.classList.add('visible'); // Make visible first to get dimensions
 
-          pickerEl.classList.add('visible');
+          const targetRect = targetElement.getBoundingClientRect();
+          const pickerRect = pickerEl.getBoundingClientRect(); // Get picker dimensions after it's visible
+
+          const centerX = targetRect.left + targetRect.width / 2;
+          const centerY = targetRect.top + targetRect.height / 2;
+
+          // Calculate top-left for centering the picker over the target
+          const pickerLeft = centerX - pickerRect.width / 2;
+          const pickerTop = centerY - pickerRect.height / 2;
+
+          pickerEl.style.left = `${pickerLeft + window.scrollX}px`;
+          pickerEl.style.top = `${pickerTop + window.scrollY}px`;
+
           focusOption(0); // Focus the first option
           pickerEl.focus(); // Ensure picker container can receive keyboard events
         });
@@ -1047,6 +1054,17 @@
                 gameBoard.insertBefore(droppedElement, blocks[finalInsertionIndex]);
               } else {
                 gameBoard.appendChild(droppedElement);
+              }
+      
+              // New: Activate vowel picker automatically on drop if it's a vowel block
+              if (droppedElement.classList.contains('vowel-block')) {
+                  try {
+                      const selectedVowel = await vowelPicker.show(droppedElement);
+                      droppedElement.textContent = selectedVowel;
+                  } catch (error) {
+                      // Log, but do not prevent the rest of the pointerup logic
+                      console.log('Vowel selection cancelled or failed (drop):', error);
+                  }
               }
       
               currentDraggable = null; // Clear draggable state
