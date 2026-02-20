@@ -704,6 +704,7 @@
     let gameBoardRect;
     let dragStartText = '_'; // value of the block before dragging started
     let dragInitiated = false; // true once the pointer has actually moved after pointerdown
+    let prevPointerX = 0;    // tracks horizontal pointer direction for leading-edge detection
 
     /* ============================================================
        SECTION 4: DOM RENDERING
@@ -838,7 +839,13 @@
         currentDraggable.classList.remove('empty');
       }
 
-      const insertionPointIndex = getInsertionPoint(event.clientX);
+      // Use the leading edge of the dragged block (right when moving right, left when moving left)
+      // so blocks step aside the moment the orange block's edge crosses their midpoint.
+      const draggedRect = currentDraggable.getBoundingClientRect();
+      const movingRight = event.clientX >= prevPointerX;
+      const leadingEdge = movingRight ? draggedRect.right : draggedRect.left;
+      prevPointerX = event.clientX;
+      const insertionPointIndex = getInsertionPoint(leadingEdge);
       const blocks = getCurrentBlocks();
 
       if (!placeholderEl) {
@@ -874,6 +881,7 @@
 
       dragStartX = event.clientX;
       dragStartY = event.clientY;
+      prevPointerX = event.clientX;
       initialDraggableRect = currentDraggable.getBoundingClientRect();
       gameBoardRect = gameBoard.getBoundingClientRect();
       initialDraggableXOffset = initialDraggableRect.left - gameBoardRect.left;
