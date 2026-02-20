@@ -89,6 +89,7 @@
       align-items: center;
       justify-content: center;
       gap: var(--block-gap);
+      position: relative; /* ADDED for correct absolute positioning of children */
     }
 
     #game-footer {
@@ -848,7 +849,7 @@
                   constrainedTranslateX = gameBoardRect.width - initialDraggableRect.width - initialDraggableXOffset;
               }
       
-              currentDraggable.style.transform = `translate(${constrainedTranslateX}px, 0px)`;
+              currentDraggable.style.transform = `translate(${constrainedTranslateX}px, 0px) scale(1.1)`;
             }
       
             function onPointerMove(event) {
@@ -892,24 +893,39 @@
             document.addEventListener('pointermove', onPointerMove);
       
             // Handle pointerdown for both drag and long-press/right-click
-            document.addEventListener('pointerdown', function(event) {
+            document.addEventListener('pointerdown', async function(event) { // Made async
               const draggable = event.target.closest('.vowel-block[data-draggable="true"]');
               if (!draggable) return;
       
               // 1. Right-click / Context menu (desktop)
               if (event.button === 2) {
                 event.preventDefault(); // Prevent default browser context menu
-                vowelPicker.show(draggable);
+                try {
+                    const selectedVowel = await vowelPicker.show(draggable); // Await the selection
+                    draggable.textContent = selectedVowel; // Update the block
+                } catch (error) {
+                    console.log('Vowel selection cancelled or failed (right-click):', error);
+                }
+                currentDraggable = null; // Clear draggable state, as drag should not start
+                if (placeholderEl && placeholderEl.parentNode) {
+                  placeholderEl.parentNode.removeChild(placeholderEl);
+                }
+                placeholderEl = null;
                 return; // Do not initiate drag
               }
       
               // 2. Long-press (touch)
               if (event.pointerType === 'touch') {
-                longPressTimer = setTimeout(() => {
+                longPressTimer = setTimeout(async () => { // Make timeout callback async
                   isLongPress = true;
-                  vowelPicker.show(draggable);
+                  try {
+                      const selectedVowel = await vowelPicker.show(draggable); // Await the selection
+                      draggable.textContent = selectedVowel; // Update the block
+                  } catch (error) {
+                      console.log('Vowel selection cancelled or failed (long-press):', error);
+                  }
                   // Optionally, prevent drag after long press activates picker
-                  currentDraggable = null; 
+                  currentDraggable = null;
                   if (placeholderEl && placeholderEl.parentNode) {
                     placeholderEl.parentNode.removeChild(placeholderEl);
                   }
@@ -917,7 +933,16 @@
                 }, LONG_PRESS_THRESHOLD);
               }
       
-              currentDraggable = draggable;
+              // Only proceed with drag logic if picker was not activated by right-click/long-press
+              if (currentDraggable === null) { // This means a long-press or right-click has potentially blocked drag.
+                currentDraggable = draggable; // Assign draggable
+              } else if (currentDraggable !== draggable) {
+                // This scenario means another draggable was being dragged while a new one was touched.
+                // This should theoretically not happen with `currentDraggable = null` checks.
+                // But as a safeguard, we reset.
+                currentDraggable = draggable;
+              }
+              
               currentDraggable.classList.add('dragging');
       
               // Capture initial coordinates of the pointer and draggable's rect
@@ -938,7 +963,6 @@
               currentDraggable.style.margin = '0'; // Clear any margins that might interfere
               currentDraggable.style.width = `${initialDraggableRect.width}px`; // Maintain original width
               currentDraggable.style.height = `${initialDraggableRect.height}px`; // Maintain original height
-              currentDraggable.style.transform = 'translate(0, 0)'; // Ensure no prior transform
       
               // Find the original index of the draggable element
               const originalIndex = Array.from(gameBoard.children).indexOf(currentDraggable);
@@ -1031,11 +1055,16 @@
             // --- End Drag and Drop Logic ---
       
             // Add contextmenu event listener for right-click on vowel blocks
-            gameBoard.addEventListener('contextmenu', function(event) {
+            gameBoard.addEventListener('contextmenu', async function(event) { // Make the function async
               const draggable = event.target.closest('.vowel-block[data-draggable="true"]');
               if (draggable) {
                 event.preventDefault(); // Prevent default browser context menu
-                vowelPicker.show(draggable);
+                try {
+                  const selectedVowel = await vowelPicker.show(draggable);
+                  draggable.textContent = selectedVowel;
+                } catch (error) {
+                  console.log('Vowel selection cancelled or failed (contextmenu):', error);
+                }
               }
             });
 
