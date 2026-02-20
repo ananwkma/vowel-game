@@ -638,15 +638,21 @@
 
       const sepEl = pickerEl.querySelector('.vowel-guide-sep');
 
-      // Position guide so the '_' separator is vertically centred on the block.
-      // A and E float above the block; I, O, U float below.
+      // Set full position (called once on drag start).
+      // '_' separator is vertically centred on the block; A/E above, I/O/U below.
       function positionAround(element) {
         const rect = element.getBoundingClientRect();
-        const guideWidth  = pickerEl.offsetWidth;
-        // offsetTop is layout-stable even when opacity:0
-        const sepCenter = sepEl.offsetTop + sepEl.offsetHeight / 2;
+        const guideWidth = pickerEl.offsetWidth;
+        const sepCenter  = sepEl.offsetTop + sepEl.offsetHeight / 2;
         pickerEl.style.left = (rect.left + rect.width / 2 - guideWidth / 2) + 'px';
         pickerEl.style.top  = (rect.top  + rect.height / 2 - sepCenter) + 'px';
+      }
+
+      // Only update horizontal position — top stays fixed after show().
+      function trackX(element) {
+        const rect = element.getBoundingClientRect();
+        const guideWidth = pickerEl.offsetWidth;
+        pickerEl.style.left = (rect.left + rect.width / 2 - guideWidth / 2) + 'px';
       }
 
       function show(element) {
@@ -671,7 +677,7 @@
         return null;
       }
 
-      return { show, hide, positionAround, getVowelAtPoint };
+      return { show, hide, positionAround, trackX, getVowelAtPoint };
     })();
 
     /* ============================================================
@@ -819,8 +825,8 @@
 
       moveAt(event.pageX, event.pageY);
 
-      // Keep guide aligned around the block as it moves
-      vowelPicker.positionAround(currentDraggable);
+      // Track block horizontally; vertical position is fixed from drag start
+      vowelPicker.trackX(currentDraggable);
 
       // Update the dragged block's letter based on which vowel the pointer is over.
       // Once a vowel is shown, never revert to '_' — only update when hovering a vowel.
