@@ -620,6 +620,89 @@
     })();
 
     /* ============================================================
+       SECTION 2.1: VOWEL PICKER JS
+       Manages the vowel selection UI.
+    ============================================================ */
+    const vowelPicker = (function() {
+      const pickerEl = document.querySelector('.vowel-picker');
+      const vowelOptions = Array.from(pickerEl.querySelectorAll('.vowel-option'));
+      let resolveSelection; // To resolve the promise with the selected vowel
+      let rejectSelection;  // To reject the promise if picker is closed without selection
+      let focusedIndex = -1;
+
+      function show(targetElement) {
+        return new Promise((resolve, reject) => {
+          resolveSelection = resolve;
+          rejectSelection = reject;
+
+          // Position the picker next to the target element
+          const targetRect = targetElement.getBoundingClientRect();
+          pickerEl.style.top = `${targetRect.top + window.scrollY}px`;
+          pickerEl.style.left = `${targetRect.right + 10 + window.scrollX}px`; // 10px offset
+
+          pickerEl.classList.add('visible');
+          focusOption(0); // Focus the first option
+          pickerEl.focus(); // Ensure picker container can receive keyboard events
+        });
+      }
+
+      function hide() {
+        pickerEl.classList.remove('visible');
+        focusOption(-1); // Clear focus
+        // If promise not yet resolved/rejected, reject it (e.g., if Esc pressed)
+        if (rejectSelection) {
+            rejectSelection();
+            resolveSelection = null;
+            rejectSelection = null;
+        }
+      }
+
+      function focusOption(index) {
+        vowelOptions.forEach(option => option.classList.remove('focused'));
+        if (index >= 0 && index < vowelOptions.length) {
+          vowelOptions[index].classList.add('focused');
+          vowelOptions[index].focus(); // Programmatic focus
+          focusedIndex = index;
+        } else {
+          focusedIndex = -1;
+        }
+      }
+
+      function selectVowel(vowel) {
+        if (resolveSelection) {
+          resolveSelection(vowel);
+          resolveSelection = null;
+          rejectSelection = null;
+        }
+        hide();
+      }
+
+      pickerEl.addEventListener('keydown', function(e) {
+        e.preventDefault(); // Prevent page scrolling
+        if (e.key === 'ArrowDown') {
+          focusOption((focusedIndex + 1) % vowelOptions.length);
+        } else if (e.key === 'ArrowUp') {
+          focusOption((focusedIndex - 1 + vowelOptions.length) % vowelOptions.length);
+        } else if (e.key === 'Enter' || e.key === ' ') {
+          if (focusedIndex !== -1) {
+            selectVowel(vowelOptions[focusedIndex].dataset.vowel);
+          }
+        } else if (e.key === 'Escape') {
+          hide();
+        }
+      });
+
+      pickerEl.addEventListener('click', function(e) {
+        const option = e.target.closest('.vowel-option');
+        if (option) {
+          selectVowel(option.dataset.vowel);
+        }
+      });
+
+      return { show, hide };
+    })();
+
+    /* ============================================================
        SECTION 3: GAME STATE
        Single source of truth for all rendering.
        renderBoard() reads from this object exclusively.
@@ -698,6 +781,76 @@
       gameState.phase = 'playing';
 
       renderBoard(gameState);
+
+      // --- Drag and Drop Logic ---
+      let currentDraggable = null;
+      let shiftX, shiftY;
+
+      function moveAt(pageX, pageY) {
+        currentDraggable.style.left = pageX - shiftX + 'px';
+        currentDraggable.style.top = pageY - shiftY + 'px';
+      }
+
+      function onPointerMove(event) {
+        if (currentDraggable) {
+          moveAt(event.pageX, event.pageY);
+        }
+      }
+
+      document.addEventListener('pointermove', onPointerMove);
+
+      document.addEventListener('pointerdown', function(event) {
+        const draggable = event.target.closest('.vowel-block[data-draggable="true"]');
+        if (!draggable) return;
+
+        currentDraggable = draggable;
+        currentDraggable.classList.add('dragging');
+
+        // Capture initial coordinates relative to the element
+        const rect = currentDraggable.getBoundingClientRect();
+        shiftX = event.clientX - rect.left;
+        shiftY = event.clientY - rect.top;
+
+        // Position it absolutely and move to the current pointer position
+        currentDraggable.style.position = 'absolute';
+        currentDraggable.style.zIndex = 1000;
+        moveAt(event.pageX, event.pageY);
+
+        // Optional: prevent default to avoid some browser drag behaviors
+        event.preventDefault();
+      });
+
+      document.addEventListener('pointerup', async function(event) {
+        if (currentDraggable) {
+          const droppedElement = currentDraggable; // Capture the element before resetting currentDraggable
+          currentDraggable.classList.remove('dragging');
+          // For now, let's keep the block fixed at its drop position until a vowel is chosen.
+          // Later, if we need it to snap back to an empty slot, that logic would go here.
+          // But for this phase, we want it to stay where it was dropped (implicitly handled by not resetting position yet).
+
+          currentDraggable = null; // Reset currentDraggable immediately to prevent further moves
+
+          try {
+            const selectedVowel = await vowelPicker.show(droppedElement);
+            // If a vowel was selected, update the block's text
+            droppedElement.textContent = selectedVowel;
+            droppedElement.classList.remove('empty'); // Mark as no longer empty
+            // Now, reset position styles after vowel is selected and applied
+            droppedElement.style.position = '';
+            droppedElement.style.zIndex = '';
+            droppedElement.style.left = '';
+            droppedElement.style.top = '';
+          } catch (e) {
+            // Picker was closed without selection (e.g., Esc key).
+            // Reset block position as no vowel was chosen.
+            droppedElement.style.position = '';
+            droppedElement.style.zIndex = '';
+            droppedElement.style.left = '';
+            droppedElement.style.top = '';
+          }
+        }
+      });
+      // --- End Drag and Drop Logic ---
 
       console.log('[Game] New word loaded:', word,
         '| Consonants:', gameState.consonants.join(''),
