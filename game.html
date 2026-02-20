@@ -197,27 +197,26 @@
     }
 
     /* ============================================================
-       SECTION: VOWEL PICKER
+       SECTION: VOWEL GUIDE
+       Static horizontal strip — fades in on drag, fades out on release.
+       Selection feedback is shown on the dragged block, not here.
     ============================================================ */
     .vowel-picker {
       display: flex;
-      flex-direction: column;
-      position: absolute;
-      background-color: var(--color-bg); /* Use main background color */
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: var(--block-radius);
-      box-shadow: var(--shadow-block);
+      flex-direction: row;
+      position: fixed;
+      bottom: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      gap: 4px;
       z-index: 100;
-      overflow: hidden;
-      min-width: var(--block-size); /* Match block width */
-      opacity: 0; /* Initially invisible */
-      pointer-events: none; /* Do not block events when hidden */
+      opacity: 0;
+      pointer-events: none;
       transition: opacity 0.2s ease;
     }
 
     .vowel-picker.visible {
       opacity: 1;
-      pointer-events: auto;
     }
 
     .vowel-option {
@@ -231,14 +230,20 @@
       font-weight: 700;
       text-transform: uppercase;
       color: var(--color-vowel-text);
-      cursor: pointer;
-      transition: background-color 0.15s ease, color 0.15s ease;
+      opacity: 0.4;
     }
 
-    .vowel-option:hover,
-    .vowel-option.focused {
-      background-color: var(--color-vowel-bg); /* Highlight on hover/focus */
-      color: var(--color-consonant-text); /* Ensure contrast */
+    .vowel-guide-sep {
+      width: var(--block-size);
+      height: var(--block-size);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-vowel-text);
+      opacity: 0.2;
     }
   </style>
 </head>
@@ -255,12 +260,13 @@
     </footer>
   </div>
 
-  <div class="vowel-picker" role="listbox" aria-label="Select a vowel">
-    <div class="vowel-option" role="option" tabindex="-1" data-vowel="A">A</div>
-    <div class="vowel-option" role="option" tabindex="-1" data-vowel="E">E</div>
-    <div class="vowel-option" role="option" tabindex="-1" data-vowel="I">I</div>
-    <div class="vowel-option" role="option" tabindex="-1" data-vowel="O">O</div>
-    <div class="vowel-option" role="option" tabindex="-1" data-vowel="U">U</div>
+  <div class="vowel-picker" aria-hidden="true">
+    <div class="vowel-option" data-vowel="A">A</div>
+    <div class="vowel-option" data-vowel="E">E</div>
+    <div class="vowel-guide-sep">_</div>
+    <div class="vowel-option" data-vowel="I">I</div>
+    <div class="vowel-option" data-vowel="O">O</div>
+    <div class="vowel-option" data-vowel="U">U</div>
   </div>
   <script>
     /* ============================================================
@@ -632,82 +638,29 @@
     const vowelPicker = (function() {
       const pickerEl = document.querySelector('.vowel-picker');
       const vowelOptions = Array.from(pickerEl.querySelectorAll('.vowel-option'));
-      let focusedIndex = -1;
-      let selectionCallback = null; // Callback to notify about selected vowel
 
-      function moveWithTarget(targetElement) {
-          const targetRect = targetElement.getBoundingClientRect();
-          const pickerRect = pickerEl.getBoundingClientRect();
-
-          const centerX = targetRect.left + targetRect.width / 2;
-          const centerY = targetRect.top + targetRect.height / 2;
-
-          // Calculate top-left for centering the picker over the target
-          const pickerLeft = centerX - pickerRect.width / 2;
-          const pickerTop = centerY - pickerRect.height / 2;
-
-          pickerEl.style.left = `${pickerLeft + window.scrollX}px`;
-          pickerEl.style.top = `${pickerTop + window.scrollY}px`;
-      }
-
-      function show(targetElement) {
-          pickerEl.classList.add('visible'); // Make visible first to get dimensions
-          moveWithTarget(targetElement); // Position initially
-          focusOption(0); // Focus the first option
-          pickerEl.focus(); // Ensure picker container can receive keyboard events
+      function show() {
+        pickerEl.classList.add('visible');
       }
 
       function hide() {
         pickerEl.classList.remove('visible');
-        focusOption(-1); // Clear focus
-        selectionCallback = null; // Clear callback when hidden
       }
 
-      function setSelectedVowelCallback(callback) {
-          selectionCallback = callback;
-      }
-
-      function focusOption(index) {
-        vowelOptions.forEach(option => option.classList.remove('focused'));
-        if (index >= 0 && index < vowelOptions.length) {
-          vowelOptions[index].classList.add('focused');
-          vowelOptions[index].focus(); // Programmatic focus
-          focusedIndex = index;
-        } else {
-          focusedIndex = -1;
-        }
-      }
-
-      function selectVowel(vowel) {
-        if (selectionCallback) {
-          selectionCallback(vowel);
-        }
-        hide();
-      }
-
-      pickerEl.addEventListener('keydown', function(e) {
-        e.preventDefault(); // Prevent page scrolling
-        if (e.key === 'ArrowDown') {
-          focusOption((focusedIndex + 1) % vowelOptions.length);
-        } else if (e.key === 'ArrowUp') {
-          focusOption((focusedIndex - 1 + vowelOptions.length) % vowelOptions.length);
-        } else if (e.key === 'Enter' || e.key === ' ') {
-          if (focusedIndex !== -1) {
-            selectVowel(vowelOptions[focusedIndex].dataset.vowel);
+      // Returns the vowel character if (clientX, clientY) is over an option, else null.
+      // Uses manual rect hit-testing so it works even when pointer-events: none.
+      function getVowelAtPoint(clientX, clientY) {
+        for (const option of vowelOptions) {
+          const rect = option.getBoundingClientRect();
+          if (clientX >= rect.left && clientX <= rect.right &&
+              clientY >= rect.top  && clientY <= rect.bottom) {
+            return option.dataset.vowel;
           }
-        } else if (e.key === 'Escape') {
-          hide();
         }
-      });
+        return null;
+      }
 
-      pickerEl.addEventListener('click', function(e) {
-        const option = e.target.closest('.vowel-option');
-        if (option) {
-          selectVowel(option.dataset.vowel);
-        }
-      });
-
-      return { show, hide, moveWithTarget, setSelectedVowelCallback };
+      return { show, hide, getVowelAtPoint };
     })();
 
     /* ============================================================
@@ -732,6 +685,7 @@
     let initialDraggableRect;
     let initialDraggableXOffset = 0;
     let gameBoardRect;
+    let dragStartText = '_'; // value of the block before dragging started
 
     /* ============================================================
        SECTION 4: DOM RENDERING
@@ -835,13 +789,22 @@
         finalTranslateX = gameBoardRect.width - initialDraggableRect.width - initialDraggableXOffset;
       }
       currentDraggable.style.transform = `translate(${finalTranslateX}px, 0px) scale(1.1)`;
-      vowelPicker.moveWithTarget(currentDraggable);
     }
 
     function onPointerMove(event) {
       if (!currentDraggable) return;
       event.preventDefault();
       moveAt(event.pageX);
+
+      // Update the dragged block's letter based on which vowel the pointer is over
+      const hoveredVowel = vowelPicker.getVowelAtPoint(event.clientX, event.clientY);
+      if (hoveredVowel) {
+        currentDraggable.textContent = hoveredVowel;
+        currentDraggable.classList.remove('empty');
+      } else {
+        currentDraggable.textContent = '_';
+        currentDraggable.classList.add('empty');
+      }
 
       const draggedElementCenter = currentDraggable.getBoundingClientRect().left + initialDraggableRect.width / 2;
       const insertionPointIndex = getInsertionPoint(draggedElementCenter);
@@ -876,6 +839,9 @@
 
       currentDraggable = draggable;
       currentDraggable.classList.add('dragging');
+      dragStartText = draggable.textContent.trim(); // save before resetting
+      currentDraggable.textContent = '_';           // show underscore while dragging
+      currentDraggable.classList.add('empty');
 
       dragStartX = event.clientX;
       dragStartY = event.clientY;
@@ -903,15 +869,7 @@
       }
 
       event.preventDefault();
-
-      // Capture block ref in closure so it's available even after currentDraggable is cleared
-      const dragBlock = currentDraggable;
-      vowelPicker.setSelectedVowelCallback((vowel) => {
-        dragBlock.textContent = vowel;
-        dragBlock.classList.remove('empty');
-        checkWinCondition();
-      });
-      vowelPicker.show(currentDraggable);
+      vowelPicker.show();
     });
 
     document.addEventListener('pointercancel', function() {
@@ -925,6 +883,9 @@
         currentDraggable.style.margin = '';
         currentDraggable.style.width = '';
         currentDraggable.style.height = '';
+        // Restore original value on cancel
+        currentDraggable.textContent = dragStartText;
+        if (dragStartText !== '_') currentDraggable.classList.remove('empty');
         currentDraggable = null;
       }
       if (placeholderEl && placeholderEl.parentNode) {
@@ -964,9 +925,16 @@
         gameBoard.appendChild(droppedElement);
       }
 
-      // Keep picker visible so user can select a vowel after releasing
-      // (picker hides when vowel is selected or via Escape)
+      vowelPicker.hide();
+
+      // If released without hovering a vowel, restore the block's previous value
+      if (droppedElement.textContent.trim() === '_') {
+        droppedElement.textContent = dragStartText;
+        if (dragStartText !== '_') droppedElement.classList.remove('empty');
+      }
+
       currentDraggable = null;
+      checkWinCondition();
     });
 
     /* ============================================================
