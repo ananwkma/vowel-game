@@ -789,183 +789,255 @@
 
       renderBoard(gameState);
 
-      // --- Drag and Drop Logic ---
-      let currentDraggable = null;
-      let dragStartX, dragStartY; // Initial coordinates of the pointer when drag started (relative to viewport)
-      let initialDraggableRect; // Bounding rect of the draggable at drag start
-      let placeholderEl = null; // Visual placeholder for insertion
-      let initialDraggableXOffset = 0; // Store initial X offset of draggable relative to gameBoard's left edge
-      let gameBoardRect; // Bounding rect of the gameBoard
-
-      const gameBoard = document.getElementById('game-board');
-
-      // Helper to get all current block elements on the board (excluding the one being dragged or the placeholder)
-      function getCurrentBlocks() {
-        return Array.from(gameBoard.children).filter(el => el !== currentDraggable && el !== placeholderEl);
-      }
-
-      // Determines the correct insertion index for the dragged block based on its current X position
-      function getInsertionPoint(draggedX) {
-        const blocks = getCurrentBlocks();
-        let targetIndex = blocks.length; // Default to end
-
-        for (let i = 0; i < blocks.length; i++) {
-          const blockRect = blocks[i].getBoundingClientRect();
-          // If the dragged block's center is to the left of this block's center, insert before it
-          if (draggedX < blockRect.left + blockRect.width / 2) {
-            targetIndex = i;
-            break;
-          }
-        }
-        return targetIndex;
-      }
-
-      // Updates the position of the dragged element (horizontal only)
-      function moveAt(pageX) {
-        // Calculate the horizontal translation from the initial drag start position.
-        // The translateX value is relative to the element's original position in the DOM.
-        // We need to keep it fixed in place, then apply transform for drag.
-        const currentDraggableLeft = initialDraggableRect.left + (pageX - dragStartX);
-        
-        // Ensure the draggable stays within the gameBoard's horizontal bounds
-        const minX = gameBoardRect.left - initialDraggableRect.left; // How far left can it go relative to its start
-        const maxX = gameBoardRect.right - initialDraggableRect.right; // How far right can it go relative to its start
-
-        let constrainedTranslateX = (pageX - dragStartX);
-
-        // Calculate current position relative to gameBoard left edge
-        const currentLeftRelativeToBoard = initialDraggableXOffset + constrainedTranslateX;
-
-        // Apply constraints
-        if (currentLeftRelativeToBoard < 0) {
-            constrainedTranslateX = -initialDraggableXOffset;
-        } else if (currentLeftRelativeToBoard + initialDraggableRect.width > gameBoardRect.width) {
-            constrainedTranslateX = gameBoardRect.width - initialDraggableRect.width - initialDraggableXOffset;
-        }
-
-        currentDraggable.style.transform = `translate(${constrainedTranslateX}px, 0px)`;
-      }
-
-      function onPointerMove(event) {
-        if (!currentDraggable) return;
-
-        event.preventDefault(); // Prevent text selection etc.
-
-        moveAt(event.pageX); // Update visual position of dragged element
-
-        // Dynamic spacing logic: update placeholder position
-        const draggedElementCenter = currentDraggable.getBoundingClientRect().left + initialDraggableRect.width / 2;
-        const insertionPointIndex = getInsertionPoint(draggedElementCenter);
-        const blocks = getCurrentBlocks();
-
-        if (!placeholderEl) {
-          placeholderEl = document.createElement('div');
-          placeholderEl.className = 'block vowel-block placeholder-block'; // Add vowel-block for styling
-          placeholderEl.style.width = `${initialDraggableRect.width}px`;
-          placeholderEl.style.height = `${initialDraggableRect.height}px`;
-        }
-
-        // Only move placeholder if it's not already in the correct place
-        const currentPlaceholderParent = placeholderEl.parentNode;
-        const currentPlaceholderNextSibling = placeholderEl.nextSibling;
-
-        if (insertionPointIndex < blocks.length) {
-            if (currentPlaceholderParent !== gameBoard || currentPlaceholderNextSibling !== blocks[insertionPointIndex]) {
-                gameBoard.insertBefore(placeholderEl, blocks[insertionPointIndex]);
+            // --- Drag and Drop Logic ---
+            let currentDraggable = null;
+            let dragStartX, dragStartY; // Initial coordinates of the pointer when drag started (relative to viewport)
+            let initialDraggableRect; // Bounding rect of the draggable at drag start
+            let placeholderEl = null; // Visual placeholder for insertion
+            let initialDraggableXOffset = 0; // Store initial X offset of draggable relative to gameBoard's left edge
+            let gameBoardRect; // Bounding rect of the gameBoard
+      
+            // Long-press variables
+            let longPressTimer = null;
+            let isLongPress = false;
+            const LONG_PRESS_THRESHOLD = 500; // ms
+      
+            const gameBoard = document.getElementById('game-board');
+      
+            // Helper to get all current block elements on the board (excluding the one being dragged or the placeholder)
+            function getCurrentBlocks() {
+              return Array.from(gameBoard.children).filter(el => el !== currentDraggable && el !== placeholderEl);
             }
-        } else {
-            if (currentPlaceholderParent !== gameBoard || currentPlaceholderNextSibling !== null) {
-                gameBoard.appendChild(placeholderEl);
+      
+            // Determines the correct insertion index for the dragged block based on its current X position
+            function getInsertionPoint(draggedX) {
+              const blocks = getCurrentBlocks();
+              let targetIndex = blocks.length; // Default to end
+      
+              for (let i = 0; i < blocks.length; i++) {
+                const blockRect = blocks[i].getBoundingClientRect();
+                // If the dragged block's center is to the left of this block's center, insert before it
+                if (draggedX < blockRect.left + blockRect.width / 2) {
+                  targetIndex = i;
+                  break;
+                }
+              }
+              return targetIndex;
             }
-        }
-      }
-
-      document.addEventListener('pointermove', onPointerMove);
-
-      document.addEventListener('pointerdown', function(event) {
-        const draggable = event.target.closest('.vowel-block[data-draggable="true"]');
-        if (!draggable) return;
-
-        currentDraggable = draggable;
-        currentDraggable.classList.add('dragging');
-
-        // Capture initial coordinates of the pointer and draggable's rect
-        dragStartX = event.clientX;
-        dragStartY = event.clientY;
-        initialDraggableRect = currentDraggable.getBoundingClientRect();
-        gameBoardRect = gameBoard.getBoundingClientRect(); // Get gameBoard bounds once at drag start
-
-        // Calculate initial X offset relative to the gameBoard's left edge
-        initialDraggableXOffset = initialDraggableRect.left - gameBoardRect.left;
-
-
-        // Temporarily change position to absolute within gameBoard for precise control via transform
-        // We'll calculate its initial position so it stays visually in place when 'position: absolute' is applied
-        currentDraggable.style.position = 'absolute';
-        currentDraggable.style.zIndex = 1000;
-        currentDraggable.style.left = `${initialDraggableRect.left - gameBoardRect.left}px`;
-        currentDraggable.style.top = `${initialDraggableRect.top - gameBoardRect.top}px`;
-        currentDraggable.style.margin = '0'; // Clear any margins that might interfere
-        currentDraggable.style.width = `${initialDraggableRect.width}px`; // Maintain original width
-        currentDraggable.style.height = `${initialDraggableRect.height}px`; // Maintain original height
-        currentDraggable.style.transform = 'translate(0, 0)'; // Ensure no prior transform
-
-        // Find the original index of the draggable element
-        const originalIndex = Array.from(gameBoard.children).indexOf(currentDraggable);
-
-        // Add placeholder at the draggable's original position
-        placeholderEl = document.createElement('div');
-        placeholderEl.className = 'block vowel-block placeholder-block';
-        placeholderEl.style.width = `${initialDraggableRect.width}px`;
-        placeholderEl.style.height = `${initialDraggableRect.height}px`;
-        if (originalIndex !== -1 && originalIndex < gameBoard.children.length) {
-          gameBoard.insertBefore(placeholderEl, gameBoard.children[originalIndex]);
-        } else {
-          gameBoard.appendChild(placeholderEl); // Fallback, should not happen if originalIndex is valid
-        }
-
-
-        event.preventDefault(); // Prevent default browser drag behaviors
-      });
-
-      document.addEventListener('pointerup', async function(event) {
-        if (!currentDraggable) return;
-
-        const droppedElement = currentDraggable;
-        droppedElement.classList.remove('dragging');
-
-        // Clean up placeholder if it exists
-        if (placeholderEl && placeholderEl.parentNode) {
-          placeholderEl.parentNode.removeChild(placeholderEl);
-        }
-        placeholderEl = null;
-
-        // Determine final insertion point (same logic as onPointerMove)
-        const droppedElementCenter = droppedElement.getBoundingClientRect().left + initialDraggableRect.width / 2;
-        const finalInsertionIndex = getInsertionPoint(droppedElementCenter);
-        const blocks = getCurrentBlocks(); // Recalculate blocks after placeholder removed
-
-        // Reset styling for insertion back into the flow
-        droppedElement.style.position = '';
-        droppedElement.style.zIndex = '';
-        droppedElement.style.left = '';
-        droppedElement.style.top = '';
-        droppedElement.style.transform = ''; // Clear transform
-        droppedElement.style.margin = '';
-        droppedElement.style.width = '';
-        droppedElement.style.height = '';
-
-        // Insert the dropped element into the gameBoard at the final position
-        if (finalInsertionIndex < blocks.length) {
-          gameBoard.insertBefore(droppedElement, blocks[finalInsertionIndex]);
-        } else {
-          gameBoard.appendChild(droppedElement);
-        }
-
-        currentDraggable = null; // Clear draggable state
-
-      });
-      // --- End Drag and Drop Logic ---
+      
+            // Updates the position of the dragged element (horizontal only)
+            function moveAt(pageX) {
+              // Calculate the horizontal translation from the initial drag start position.
+              // The translateX value is relative to the element's original position in the DOM.
+              // We need to keep it fixed in place, then apply transform for drag.
+              const currentDraggableLeft = initialDraggableRect.left + (pageX - dragStartX);
+              
+              // Ensure the draggable stays within the gameBoard's horizontal bounds
+              const minX = gameBoardRect.left - initialDraggableRect.left; // How far left can it go relative to its start
+              const maxX = gameBoardRect.right - initialDraggableRect.right; // How far right can it go relative to its start
+      
+              let constrainedTranslateX = (pageX - dragStartX);
+      
+              // Calculate current position relative to gameBoard left edge
+              const currentLeftRelativeToBoard = initialDraggableXOffset + constrainedTranslateX;
+      
+              // Apply constraints
+              if (currentLeftRelativeToBoard < 0) {
+                  constrainedTranslateX = -initialDraggableXOffset;
+              } else if (currentLeftRelativeToBoard + initialDraggableRect.width > gameBoardRect.width) {
+                  constrainedTranslateX = gameBoardRect.width - initialDraggableRect.width - initialDraggableXOffset;
+              }
+      
+              currentDraggable.style.transform = `translate(${constrainedTranslateX}px, 0px)`;
+            }
+      
+            function onPointerMove(event) {
+              if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+              }
+              if (!currentDraggable) return;
+      
+              event.preventDefault(); // Prevent text selection etc.
+      
+              moveAt(event.pageX); // Update visual position of dragged element
+      
+              // Dynamic spacing logic: update placeholder position
+              const draggedElementCenter = currentDraggable.getBoundingClientRect().left + initialDraggableRect.width / 2;
+              const insertionPointIndex = getInsertionPoint(draggedElementCenter);
+              const blocks = getCurrentBlocks();
+      
+              if (!placeholderEl) {
+                placeholderEl = document.createElement('div');
+                placeholderEl.className = 'block vowel-block placeholder-block'; // Add vowel-block for styling
+                placeholderEl.style.width = `${initialDraggableRect.width}px`;
+                placeholderEl.style.height = `${initialDraggableRect.height}px`;
+              }
+      
+              // Only move placeholder if it's not already in the correct place
+              const currentPlaceholderParent = placeholderEl.parentNode;
+              const currentPlaceholderNextSibling = placeholderEl.nextSibling;
+      
+              if (insertionPointIndex < blocks.length) {
+                  if (currentPlaceholderParent !== gameBoard || currentPlaceholderNextSibling !== blocks[insertionPointIndex]) {
+                      gameBoard.insertBefore(placeholderEl, blocks[insertionPointIndex]);
+                  }
+              } else {
+                  if (currentPlaceholderParent !== gameBoard || currentPlaceholderNextSibling !== null) {
+                      gameBoard.appendChild(placeholderEl);
+                  }
+              }
+            }
+      
+            document.addEventListener('pointermove', onPointerMove);
+      
+            // Handle pointerdown for both drag and long-press/right-click
+            document.addEventListener('pointerdown', function(event) {
+              const draggable = event.target.closest('.vowel-block[data-draggable="true"]');
+              if (!draggable) return;
+      
+              // 1. Right-click / Context menu (desktop)
+              if (event.button === 2) {
+                event.preventDefault(); // Prevent default browser context menu
+                vowelPicker.show(draggable);
+                return; // Do not initiate drag
+              }
+      
+              // 2. Long-press (touch)
+              if (event.pointerType === 'touch') {
+                longPressTimer = setTimeout(() => {
+                  isLongPress = true;
+                  vowelPicker.show(draggable);
+                  // Optionally, prevent drag after long press activates picker
+                  currentDraggable = null; 
+                  if (placeholderEl && placeholderEl.parentNode) {
+                    placeholderEl.parentNode.removeChild(placeholderEl);
+                  }
+                  placeholderEl = null;
+                }, LONG_PRESS_THRESHOLD);
+              }
+      
+              currentDraggable = draggable;
+              currentDraggable.classList.add('dragging');
+      
+              // Capture initial coordinates of the pointer and draggable's rect
+              dragStartX = event.clientX;
+              dragStartY = event.clientY;
+              initialDraggableRect = currentDraggable.getBoundingClientRect();
+              gameBoardRect = gameBoard.getBoundingClientRect(); // Get gameBoard bounds once at drag start
+      
+              // Calculate initial X offset relative to the gameBoard's left edge
+              initialDraggableXOffset = initialDraggableRect.left - gameBoardRect.left;
+      
+              // Temporarily change position to absolute within gameBoard for precise control via transform
+              // We'll calculate its initial position so it stays visually in place when 'position: absolute' is applied
+              currentDraggable.style.position = 'absolute';
+              currentDraggable.style.zIndex = 1000;
+              currentDraggable.style.left = `${initialDraggableRect.left - gameBoardRect.left}px`;
+              currentDraggable.style.top = `${initialDraggableRect.top - gameBoardRect.top}px`;
+              currentDraggable.style.margin = '0'; // Clear any margins that might interfere
+              currentDraggable.style.width = `${initialDraggableRect.width}px`; // Maintain original width
+              currentDraggable.style.height = `${initialDraggableRect.height}px`; // Maintain original height
+              currentDraggable.style.transform = 'translate(0, 0)'; // Ensure no prior transform
+      
+              // Find the original index of the draggable element
+              const originalIndex = Array.from(gameBoard.children).indexOf(currentDraggable);
+      
+              // Add placeholder at the draggable's original position
+              placeholderEl = document.createElement('div');
+              placeholderEl.className = 'block vowel-block placeholder-block';
+              placeholderEl.style.width = `${initialDraggableRect.width}px`;
+              placeholderEl.style.height = `${initialDraggableRect.height}px`;
+              if (originalIndex !== -1 && originalIndex < gameBoard.children.length) {
+                gameBoard.insertBefore(placeholderEl, gameBoard.children[originalIndex]);
+              } else {
+                gameBoard.appendChild(placeholderEl); // Fallback, should not happen if originalIndex is valid
+              }
+      
+              event.preventDefault(); // Prevent default browser drag behaviors
+            });
+      
+            // Clear long-press timer if pointer leaves element or window
+            document.addEventListener('pointercancel', function() {
+              if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+              }
+              isLongPress = false; // Reset long-press state
+              if (currentDraggable) {
+                currentDraggable.classList.remove('dragging');
+                currentDraggable.style.position = '';
+                currentDraggable.style.zIndex = '';
+                currentDraggable.style.left = '';
+                currentDraggable.style.top = '';
+                currentDraggable.style.transform = '';
+                currentDraggable.style.margin = '';
+                currentDraggable.style.width = '';
+                currentDraggable.style.height = '';
+                currentDraggable = null;
+              }
+              if (placeholderEl && placeholderEl.parentNode) {
+                placeholderEl.parentNode.removeChild(placeholderEl);
+              }
+              placeholderEl = null;
+            });
+      
+            document.addEventListener('pointerup', async function(event) {
+              if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+              }
+              if (isLongPress) {
+                isLongPress = false; // Reset long-press state
+                return; // Do not proceed with drag logic if long-press triggered picker
+              }
+      
+              if (!currentDraggable) return;
+      
+              const droppedElement = currentDraggable;
+              droppedElement.classList.remove('dragging');
+      
+              // Clean up placeholder if it exists
+              if (placeholderEl && placeholderEl.parentNode) {
+                placeholderEl.parentNode.removeChild(placeholderEl);
+              }
+              placeholderEl = null;
+      
+              // Determine final insertion point (same logic as onPointerMove)
+              const droppedElementCenter = droppedElement.getBoundingClientRect().left + initialDraggableRect.width / 2;
+              const finalInsertionIndex = getInsertionPoint(droppedElementCenter);
+              const blocks = getCurrentBlocks(); // Recalculate blocks after placeholder removed
+      
+              // Reset styling for insertion back into the flow
+              droppedElement.style.position = '';
+              droppedElement.style.zIndex = '';
+              droppedElement.style.left = '';
+              droppedElement.style.top = '';
+              droppedElement.style.transform = ''; // Clear transform
+              droppedElement.style.margin = '';
+              droppedElement.style.width = '';
+              droppedElement.style.height = '';
+      
+              // Insert the dropped element into the gameBoard at the final position
+              if (finalInsertionIndex < blocks.length) {
+                gameBoard.insertBefore(droppedElement, blocks[finalInsertionIndex]);
+              } else {
+                gameBoard.appendChild(droppedElement);
+              }
+      
+              currentDraggable = null; // Clear draggable state
+      
+            });
+            // --- End Drag and Drop Logic ---
+      
+            // Add contextmenu event listener for right-click on vowel blocks
+            gameBoard.addEventListener('contextmenu', function(event) {
+              const draggable = event.target.closest('.vowel-block[data-draggable="true"]');
+              if (draggable) {
+                event.preventDefault(); // Prevent default browser context menu
+                vowelPicker.show(draggable);
+              }
+            });
 
       console.log('[Game] New word loaded:', word,
         '| Consonants:', gameState.consonants.join(''),
