@@ -18,20 +18,25 @@
 
 ### Phase 1: Game Foundation & Display
 
-**Goal:** Players see a playable puzzle with the correct word structure displayed (consonants locked as gray blocks, vowel count as yellow blocks).
+**Goal:** Players see an elegant puzzle display — title "Vowel" in serif, warm off-white background, amber vowel placeholder blocks on the left, charcoal consonant blocks on the right, dusty rose Give Up button at bottom.
 
 **Depends on:** None (foundation)
 
 **Requirements:** CORE-01, CORE-02, WORD-01, WORD-02, WORD-03, VIS-01, VIS-04, VIS-05, VIS-06
 
 **Success Criteria** (observable user behaviors):
-1. Random English word loads with consonants shown as gray blocks in order, vowel count as yellow blocks lined up (e.g., "_ _ C R W D")
-2. Title "Move the Yellow Blocks to Form Words" displays top-left in bold black text
-3. New word automatically loads when user completes previous puzzle (after win/give up state clears)
-4. Only words with at least one A/E/I/O/U vowel appear in the rotation (no consonant-only words)
-5. Teal/mint background (#4DC5C5 or similar) displays during active play (non-win, non-give-up states)
+1. Random English word loads with consonants shown as charcoal blocks in order, vowel count as amber placeholder blocks on the left (e.g., "_ _ C R W D")
+2. Title "VOWEL" displays in elegant Playfair Display serif font
+3. Only words with at least one A/E/I/O/U vowel appear in the rotation (no consonant-only words)
+4. Warm off-white background (#F8F7F4 or similar) displays during active play
+5. All color combinations meet WCAG AA contrast standards (4.5:1 minimum for text)
 
-**Plans:** TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Word engine: HTML skeleton, 1000+ word list, WordEngine module (WORD-01, WORD-02, WORD-03)
+- [ ] 01-02-PLAN.md — Visual display: CSS design system, game state, board rendering, init (CORE-01, CORE-02, VIS-01, VIS-04, VIS-05, VIS-06)
+- [ ] 01-03-PLAN.md — Human verification: confirm elegant display before Phase 2
 
 ---
 
@@ -77,7 +82,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Game Foundation & Display | 0/? | Not started | — |
+| 1. Game Foundation & Display | 0/3 | Not started | — |
 | 2. Block Manipulation & Vowel Selection | 0/? | Not started | — |
 | 3. Game States & Win Conditions | 0/? | Not started | — |
 
@@ -116,3 +121,4 @@
 ---
 
 *Roadmap created: 2026-02-19*
+*Updated: 2026-02-19 — Phase 1 plans created (01-01, 01-02, 01-03)*
