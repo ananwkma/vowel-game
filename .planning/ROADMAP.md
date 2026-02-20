@@ -106,7 +106,7 @@ Plans:
 2. Dropped vowel blocks subtly "bounce" or settle into place instead of snapping rigidly.
 3. New game words "swipe" or transition in smoothly instead of an instant appearance.
 
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 04-01-PLAN.md — Vowel picker fades in/out (VIS-07)
@@ -122,7 +122,7 @@ Plans:
 | 1. Game Foundation & Display | 3/3 | Complete | 2026-02-19 |
 | 2. Block Manipulation & Vowel Selection | 8/8 | Complete | 2026-02-19 |
 | 3. Game States & Win Conditions | 2/2 | Complete   | 2026-02-20 |
-| 4. Animation Enhancements | 3/3 | Complete | 2026-02-20 |
+| 4. Animation Enhancements | 3/3 | Complete   | 2026-02-20 |
 
 ---
 

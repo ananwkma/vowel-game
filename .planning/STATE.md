@@ -19,9 +19,9 @@
 ## Current Position
 
 **Phase:** 4 / 4
-**Plan:** 04-03 (New Word Swipe)
-**Status:** Ready to plan
-**Progress:** [█████████░] 88%
+**Plan:** 04-01 complete; 04-02 and 04-03 previously completed
+**Status:** In Progress (04-01 executed)
+**Progress:** [█████████░] 94%
 
 ```
 [==================================] 22/22 v1.1 requirements
@@ -77,6 +77,8 @@
 | Staggered swipe-in for new words | Dynamic, polished appearance | Gemini | Locked |
 | 0.3s flash / 0.5s return transition timing | Snappy feedback flash, gentle return to neutral | Claude | Locked |
 | Phase guard on all interaction handlers | Prevents input during 2-second feedback window | Claude | Locked |
+| requestAnimationFrame in vowelPicker.show() | Guarantees CSS opacity transition fires from opacity:0 start state before first paint | Claude | Locked |
+| Picker stays in DOM at opacity:0 | Simpler than dynamic insertion/removal; avoids layout thrash and timing complexity | Claude | Locked |
 
 ---
 
@@ -115,6 +117,11 @@
 - Fixed duplicate DOMContentLoaded listener (double initGame bug).
 - Refined applyStateVisuals() transition timing (0.3s flash / 0.5s return).
 
+**Session 4 (2026-02-20) - Phase 4 Plan 01 Execution**
+- Implemented vowel picker fade: CSS opacity transition (0.2s ease-in-out) via .visible class toggle.
+- Added requestAnimationFrame deferral in show() to guarantee transition fires.
+- Fixed removeGuideColumn() bug: was using wrong 'is-visible' class and stale guideEl reference.
+
 ---
 
 ## Todos & Blockers
@@ -143,4 +150,4 @@
 
 ---
 
-*Last updated: 2026-02-20 — 03-01-PLAN.md complete*
+*Last updated: 2026-02-20 — 04-01-PLAN.md complete*
