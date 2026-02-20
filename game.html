@@ -205,9 +205,6 @@
       display: flex;
       flex-direction: row;
       position: fixed;
-      bottom: 120px;
-      left: 50%;
-      transform: translateX(-50%);
       gap: 4px;
       z-index: 100;
       opacity: 0;
@@ -639,8 +636,17 @@
       const pickerEl = document.querySelector('.vowel-picker');
       const vowelOptions = Array.from(pickerEl.querySelectorAll('.vowel-option'));
 
-      function show() {
+      // Position the guide centered horizontally below the given element
+      function positionBelow(element) {
+        const rect = element.getBoundingClientRect();
+        const guideWidth = pickerEl.offsetWidth;
+        pickerEl.style.left = (rect.left + rect.width / 2 - guideWidth / 2) + 'px';
+        pickerEl.style.top  = (rect.bottom + 8) + 'px';
+      }
+
+      function show(element) {
         pickerEl.classList.add('visible');
+        positionBelow(element);
       }
 
       function hide() {
@@ -660,7 +666,7 @@
         return null;
       }
 
-      return { show, hide, getVowelAtPoint };
+      return { show, hide, positionBelow, getVowelAtPoint };
     })();
 
     /* ============================================================
@@ -796,6 +802,9 @@
       event.preventDefault();
       moveAt(event.pageX);
 
+      // Keep guide centered below the block as it moves
+      vowelPicker.positionBelow(currentDraggable);
+
       // Update the dragged block's letter based on which vowel the pointer is over
       const hoveredVowel = vowelPicker.getVowelAtPoint(event.clientX, event.clientY);
       if (hoveredVowel) {
@@ -869,7 +878,7 @@
       }
 
       event.preventDefault();
-      vowelPicker.show();
+      vowelPicker.show(currentDraggable);
     });
 
     document.addEventListener('pointercancel', function() {
