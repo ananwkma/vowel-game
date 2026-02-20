@@ -26,12 +26,12 @@
 
 ### Visuals
 
-- [ ] **VIS-01**: Teal/mint background (#4DC5C5 range) during active play
-- [ ] **VIS-02**: Bright green background on win state
-- [ ] **VIS-03**: Salmon/red background on give up state
-- [ ] **VIS-04**: Gray square blocks for consonants (white text); yellow square blocks for vowel slots (black text)
-- [ ] **VIS-05**: Title "Move the Yellow Blocks to Form Words" — top-left, bold black
-- [ ] **VIS-06**: "Give Up" button — bottom-center, salmon/red colored
+- [ ] **VIS-01**: Elegant modern design — a cohesive color palette (not necessarily teal/salmon from screenshots); beautiful, clean aesthetic
+- [ ] **VIS-02**: Distinct win state background color (e.g. soft green or equivalent celebratory tone)
+- [ ] **VIS-03**: Distinct give up state background color (e.g. warm red/rose tone)
+- [ ] **VIS-04**: Letter blocks styled with modern design — consonants and vowel slots visually distinct; smooth rounded corners, subtle shadows
+- [ ] **VIS-05**: Title "Move the Yellow Blocks to Form Words" — top-left, bold, typography consistent with modern design language
+- [ ] **VIS-06**: "Give Up" button — bottom-center, styled consistently with give up state color
 
 ## v2 Requirements
 
@@ -54,27 +54,27 @@
 
 ## Traceability
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| CORE-01 | Phase 1 | Pending |
-| CORE-02 | Phase 1 | Pending |
-| CORE-03 | Phase 2 | Pending |
-| CORE-04 | Phase 2 | Pending |
-| CORE-05 | Phase 2 | Pending |
-| CORE-06 | Phase 2 | Pending |
-| CORE-07 | Phase 3 | Pending |
-| CORE-08 | Phase 3 | Pending |
-| CORE-09 | Phase 3 | Pending |
-| WORD-01 | Phase 1 | Pending |
-| WORD-02 | Phase 1 | Pending |
-| WORD-03 | Phase 1 | Pending |
-| WORD-04 | Phase 3 | Pending |
-| VIS-01 | Phase 1 | Pending |
-| VIS-02 | Phase 3 | Pending |
-| VIS-03 | Phase 3 | Pending |
-| VIS-04 | Phase 1 | Pending |
-| VIS-05 | Phase 1 | Pending |
-| VIS-06 | Phase 1 | Pending |
+| Requirement | Phase | Category | Status |
+|-------------|-------|----------|--------|
+| CORE-01 | 1 | Core Gameplay | Pending |
+| CORE-02 | 1 | Core Gameplay | Pending |
+| CORE-03 | 2 | Core Gameplay | Pending |
+| CORE-04 | 2 | Core Gameplay | Pending |
+| CORE-05 | 2 | Core Gameplay | Pending |
+| CORE-06 | 2 | Core Gameplay | Pending |
+| CORE-07 | 3 | Core Gameplay | Pending |
+| CORE-08 | 3 | Core Gameplay | Pending |
+| CORE-09 | 3 | Core Gameplay | Pending |
+| WORD-01 | 1 | Word Engine | Pending |
+| WORD-02 | 1 | Word Engine | Pending |
+| WORD-03 | 1 | Word Engine | Pending |
+| WORD-04 | 3 | Word Engine | Pending |
+| VIS-01 | 1 | Visuals | Pending |
+| VIS-02 | 3 | Visuals | Pending |
+| VIS-03 | 3 | Visuals | Pending |
+| VIS-04 | 1 | Visuals | Pending |
+| VIS-05 | 1 | Visuals | Pending |
+| VIS-06 | 1 | Visuals | Pending |
 
 **Coverage:**
 - v1 requirements: 15 total
@@ -82,5 +82,6 @@
 - Unmapped: 0 ✓
 
 ---
+
 *Requirements defined: 2026-02-19*
-*Last updated: 2026-02-19 after initial definition*
+*Last updated: 2026-02-19 after roadmap creation*
