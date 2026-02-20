@@ -910,12 +910,20 @@
         currentDraggable.style.height = `${initialDraggableRect.height}px`; // Maintain original height
         currentDraggable.style.transform = 'translate(0, 0)'; // Ensure no prior transform
 
+        // Find the original index of the draggable element
+        const originalIndex = Array.from(gameBoard.children).indexOf(currentDraggable);
+
         // Add placeholder at the draggable's original position
         placeholderEl = document.createElement('div');
         placeholderEl.className = 'block vowel-block placeholder-block';
         placeholderEl.style.width = `${initialDraggableRect.width}px`;
         placeholderEl.style.height = `${initialDraggableRect.height}px`;
-        gameBoard.insertBefore(placeholderEl, currentDraggable.nextSibling); // Insert placeholder where draggable *was*
+        if (originalIndex !== -1 && originalIndex < gameBoard.children.length) {
+          gameBoard.insertBefore(placeholderEl, gameBoard.children[originalIndex]);
+        } else {
+          gameBoard.appendChild(placeholderEl); // Fallback, should not happen if originalIndex is valid
+        }
+
 
         event.preventDefault(); // Prevent default browser drag behaviors
       });
@@ -956,15 +964,6 @@
 
         currentDraggable = null; // Clear draggable state
 
-        try {
-          const selectedVowel = await vowelPicker.show(droppedElement);
-          droppedElement.textContent = selectedVowel;
-          droppedElement.classList.remove('empty');
-        } catch (e) {
-          // Picker was closed without selection.
-          // If the user didn't select a vowel, the block remains in its new position.
-          // The visual representation (empty block with '_') will persist.
-        }
       });
       // --- End Drag and Drop Logic ---
 
