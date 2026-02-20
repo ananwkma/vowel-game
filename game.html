@@ -183,6 +183,57 @@
       transform: translateY(0);
       opacity: 1;
     }
+    #give-up-btn:active {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* ============================================================
+       SECTION: VOWEL PICKER
+    ============================================================ */
+    .vowel-picker {
+      display: flex;
+      flex-direction: column;
+      position: absolute;
+      background-color: var(--color-bg); /* Use main background color */
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: var(--block-radius);
+      box-shadow: var(--shadow-block);
+      z-index: 100;
+      overflow: hidden;
+      min-width: var(--block-size); /* Match block width */
+      opacity: 0; /* Initially invisible */
+      pointer-events: none; /* Do not block events when hidden */
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      transform: translateY(10px); /* Start slightly offset for animation */
+    }
+
+    .vowel-picker.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .vowel-option {
+      width: var(--block-size);
+      height: var(--block-size);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--color-vowel-text);
+      cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .vowel-option:hover,
+    .vowel-option.focused {
+      background-color: var(--color-vowel-bg); /* Highlight on hover/focus */
+      color: var(--color-consonant-text); /* Ensure contrast */
+    }
   </style>
 </head>
 <body>
@@ -198,6 +249,13 @@
     </footer>
   </div>
 
+  <div class="vowel-picker" role="listbox" aria-label="Select a vowel">
+    <div class="vowel-option" role="option" tabindex="-1" data-vowel="A">A</div>
+    <div class="vowel-option" role="option" tabindex="-1" data-vowel="E">E</div>
+    <div class="vowel-option" role="option" tabindex="-1" data-vowel="I">I</div>
+    <div class="vowel-option" role="option" tabindex="-1" data-vowel="O">O</div>
+    <div class="vowel-option" role="option" tabindex="-1" data-vowel="U">U</div>
+  </div>
   <script>
     /* ============================================================
        SECTION 1: WORD LIST
