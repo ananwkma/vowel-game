@@ -85,7 +85,7 @@ Plans:
 4. "Give Up" button is visible at bottom-center, styled with salmon/red color matching the give-up feedback state
 5. Invalid word combinations (consonants in wrong order or no vowel selected) prevent auto-check and require player to rearrange blocks or press Give Up
 
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 03-01-PLAN.md — Implement word validation, win/lose states, Give Up button, and auto-advance (CORE-07, CORE-08, CORE-09, WORD-04, VIS-02, VIS-03)
@@ -121,7 +121,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Game Foundation & Display | 3/3 | Complete | 2026-02-19 |
 | 2. Block Manipulation & Vowel Selection | 8/8 | Complete | 2026-02-19 |
-| 3. Game States & Win Conditions | 2/2 | Complete | 2026-02-20 |
+| 3. Game States & Win Conditions | 2/2 | Complete   | 2026-02-20 |
 | 4. Animation Enhancements | 3/3 | Complete | 2026-02-20 |
 
 ---
