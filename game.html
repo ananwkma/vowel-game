@@ -792,6 +792,7 @@
         block.setAttribute('tabindex', '0');
         block.setAttribute('data-draggable', 'true');
         block.style.animationDelay = (blockIndex++ * 0.04) + 's';
+        block.addEventListener('animationend', () => block.classList.remove('block-swipe-in'), { once: true });
         fragment.appendChild(block);
       }
 
@@ -804,6 +805,7 @@
         block.setAttribute('aria-label', 'Consonant ' + letter);
         block.setAttribute('aria-disabled', 'true');
         block.style.animationDelay = (blockIndex++ * 0.04) + 's';
+        block.addEventListener('animationend', () => block.classList.remove('block-swipe-in'), { once: true });
         fragment.appendChild(block);
       });
 
@@ -941,6 +943,7 @@
       if (!draggable || event.button !== 0) return;
 
       currentDraggable = draggable;
+      currentDraggable.classList.remove('block-swipe-in'); // stop animation so inline transform takes over
       currentDraggable.classList.add('dragging');
       dragInitiated = false; // will be set true on first pointermove
 
