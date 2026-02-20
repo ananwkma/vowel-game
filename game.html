@@ -197,6 +197,25 @@
     }
 
     /* ============================================================
+       SECTION: GIVE UP REVEAL ANIMATION
+       Scale-in animation for revealed blocks after "Give Up".
+    ============================================================ */
+    @keyframes revealScaleIn {
+      from {
+        transform: scale(0.5);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .reveal-scale-in {
+      animation: revealScaleIn 0.25s ease-out both;
+    }
+
+    /* ============================================================
        SECTION: VOWEL GUIDE
        Static horizontal strip — fades in on drag, fades out on release.
        Selection feedback is shown on the dragged block, not here.
@@ -752,9 +771,14 @@
        Drag events handled in Phase 2.
     ============================================================ */
     document.getElementById('give-up-btn').addEventListener('click', function() {
-      // Phase 2/3 will implement full give up logic
-      // For now, log to confirm event wiring works
-      console.log('[GiveUp] Button clicked — logic implemented in Phase 3');
+      // Block clicks during feedback window (won / gaveup phases)
+      if (gameState.phase !== 'playing') return;
+
+      console.log('[GiveUp] Revealing target word:', gameState.currentWord);
+      gameState.phase = 'gaveup';
+      applyStateVisuals('gaveup');
+      revealTargetWord();
+      scheduleAutoAdvance(2000);
     });
 
     /**
@@ -872,6 +896,9 @@
     document.addEventListener('pointermove', onPointerMove);
 
     document.addEventListener('pointerdown', function(event) {
+      // Block all interaction during feedback window (won / gaveup phases)
+      if (gameState.phase !== 'playing') return;
+
       const draggable = event.target.closest('.vowel-block[data-draggable="true"]');
       if (!draggable || event.button !== 0) return;
 
@@ -1005,8 +1032,6 @@
         '| Vowel count:', gameState.vowelCount);
     }
 
-    // Start the game when the DOM is ready
-    document.addEventListener('DOMContentLoaded', initGame);
   </script>
 
   <script>
@@ -1082,12 +1107,17 @@
      */
     function applyStateVisuals(phase) {
       const body = document.body;
-      body.style.transition = 'background-color 0.3s ease-in-out';
       if (phase === 'won') {
+        // 0.3s flash into win state
+        body.style.transition = 'background-color 0.3s ease-in-out';
         body.style.backgroundColor = 'var(--color-win-bg)';
       } else if (phase === 'gaveup') {
+        // 0.3s flash into give-up state
+        body.style.transition = 'background-color 0.3s ease-in-out';
         body.style.backgroundColor = 'var(--color-lose-bg)';
       } else {
+        // 0.5s gentle return to neutral play state
+        body.style.transition = 'background-color 0.5s ease-in-out';
         body.style.backgroundColor = 'var(--color-bg)';
       }
     }
@@ -1103,6 +1133,51 @@
         initGame();
         advanceTimer = null;
       }, delayMs);
+    }
+
+    /* ============================================================
+       SECTION 8.1: GIVE UP REVEAL
+       Re-renders the board to show the target word in its correct
+       structure: vowels (amber) interleaved with consonants (charcoal)
+       exactly as the word was intended.
+    ============================================================ */
+
+    /**
+     * Reveals the target word by completely re-rendering the board.
+     * Vowels are shown as amber vowel-block elements with the correct letter.
+     * Consonants are shown as charcoal consonant-block elements.
+     * Blocks animate in with a scale-in CSS class for visual polish.
+     */
+    function revealTargetWord() {
+      const board = document.getElementById('game-board');
+      board.innerHTML = ''; // Clear current state entirely
+
+      const word = gameState.currentWord.toUpperCase();
+      const fragment = document.createDocumentFragment();
+
+      for (let i = 0; i < word.length; i++) {
+        const letter = word[i];
+        const block = document.createElement('div');
+
+        if (/[AEIOU]/.test(letter)) {
+          // Vowel: render as amber block
+          block.className = 'block vowel-block reveal-scale-in';
+          block.setAttribute('aria-label', 'Vowel ' + letter);
+        } else {
+          // Consonant: render as charcoal block
+          block.className = 'block consonant-block reveal-scale-in';
+          block.setAttribute('aria-label', 'Consonant ' + letter);
+          block.setAttribute('aria-disabled', 'true');
+        }
+
+        block.textContent = letter;
+        // Stagger animation delay per block for a cascading effect
+        block.style.animationDelay = (i * 0.05) + 's';
+        fragment.appendChild(block);
+      }
+
+      board.appendChild(fragment);
+      console.log('[GiveUp] Board revealed as:', word);
     }
 
     // Start the game when the DOM is ready
