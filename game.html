@@ -216,6 +216,21 @@
     }
 
     /* ============================================================
+       SECTION: BLOCK SETTLE ANIMATION (VIS-08)
+       Short bounce when a dragged block is dropped into place.
+    ============================================================ */
+    @keyframes blockSettle {
+      0%   { transform: scale(1.1); }
+      45%  { transform: scale(0.93); }
+      75%  { transform: scale(1.04); }
+      100% { transform: scale(1); }
+    }
+
+    .block-settle {
+      animation: blockSettle 0.25s ease-out both;
+    }
+
+    /* ============================================================
        SECTION: VOWEL GUIDE
        Static vertical strip — fades in on drag start, fades out on release.
        opacity starts at 0; adding .visible triggers the CSS transition.
@@ -984,6 +999,10 @@
         gameBoard.appendChild(droppedElement);
       }
       placeholderEl = null;
+
+      // Settle bounce — remove class after animation so it can re-trigger next drag
+      droppedElement.classList.add('block-settle');
+      droppedElement.addEventListener('animationend', () => droppedElement.classList.remove('block-settle'), { once: true });
 
       if (dragInitiated) {
         vowelPicker.hide();
