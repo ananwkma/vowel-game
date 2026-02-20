@@ -814,12 +814,14 @@
       if (!currentDraggable) return;
       event.preventDefault();
 
-      // First actual movement — reset block to '_' and show guide
+      // First actual movement — show guide; only reset to '_' if block was empty
       if (!dragInitiated) {
         dragInitiated = true;
         dragStartText = currentDraggable.textContent.trim();
-        currentDraggable.textContent = '_';
-        currentDraggable.classList.add('empty');
+        if (dragStartText === '_') {
+          currentDraggable.textContent = '_';
+          currentDraggable.classList.add('empty');
+        }
         vowelPicker.show(currentDraggable);
       }
 
