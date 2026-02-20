@@ -203,7 +203,7 @@
     ============================================================ */
     .vowel-picker {
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
       position: fixed;
       gap: 4px;
       z-index: 100;
@@ -805,14 +805,12 @@
       // Keep guide centered below the block as it moves
       vowelPicker.positionBelow(currentDraggable);
 
-      // Update the dragged block's letter based on which vowel the pointer is over
+      // Update the dragged block's letter based on which vowel the pointer is over.
+      // Once a vowel is shown, never revert to '_' — only update when hovering a vowel.
       const hoveredVowel = vowelPicker.getVowelAtPoint(event.clientX, event.clientY);
       if (hoveredVowel) {
         currentDraggable.textContent = hoveredVowel;
         currentDraggable.classList.remove('empty');
-      } else {
-        currentDraggable.textContent = '_';
-        currentDraggable.classList.add('empty');
       }
 
       const draggedElementCenter = currentDraggable.getBoundingClientRect().left + initialDraggableRect.width / 2;
