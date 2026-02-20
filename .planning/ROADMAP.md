@@ -8,8 +8,8 @@
 
 ## Phases
 
-- [ ] **Phase 1: Game Foundation & Display** - Set up word engine, display puzzle structure with consonants and vowel slots
-- [ ] **Phase 2: Block Manipulation & Vowel Selection** - Implement drag/click interaction and vowel picker
+- [x] **Phase 1: Game Foundation & Display** - Set up word engine, display puzzle structure with consonants and vowel slots
+- [x] **Phase 2: Block Manipulation & Vowel Selection** - Implement drag/click interaction and vowel picker
 - [ ] **Phase 3: Game States & Win Conditions** - Validate words, handle win/lose states, auto-advance
 
 ---
@@ -34,9 +34,9 @@
 **Plans:** 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Word engine: HTML skeleton, 1000+ word list, WordEngine module (WORD-01, WORD-02, WORD-03)
-- [ ] 01-02-PLAN.md — Visual display: CSS design system, game state, board rendering, init (CORE-01, CORE-02, VIS-01, VIS-04, VIS-05, VIS-06)
-- [ ] 01-03-PLAN.md — Human verification: confirm elegant display before Phase 2
+- [x] 01-01-PLAN.md — Word engine: HTML skeleton, 1000+ word list, WordEngine module (WORD-01, WORD-02, WORD-03)
+- [x] 01-02-PLAN.md — Visual display: CSS design system, game state, board rendering, init (CORE-01, CORE-02, VIS-01, VIS-04, VIS-05, VIS-06)
+- [x] 01-03-PLAN.md — Human verification: confirm elegant display before Phase 2
 
 ---
 
@@ -55,7 +55,16 @@ Plans:
 4. When a vowel is selected, the bar fades out and the chosen letter appears in the yellow block (e.g., block shows "E")
 5. Player can manipulate each yellow block independently (placing and selecting vowels in any order)
 
-**Plans:** TBD
+**Plans:** 7 plans
+
+Plans:
+- [x] 02-01-PLAN.md — Core drag-and-drop mechanics using Pointer Events (CORE-03)
+- [x] 02-02-PLAN.md — Accessible Vowel Picker UI component (CORE-05)
+- [x] 02-03-PLAN.md — Integrate Drag-and-Drop with Vowel Picker (CORE-04, CORE-06)
+- [x] 02-04-PLAN.md — Human verification of the complete interaction flow
+- [x] 02-05-PLAN.md — Refine drag movement and picker activation (CORE-03, CORE-04, CORE-05)
+- [x] 02-06-PLAN.md — Fix block snapping, vertical movement, and vowel display (CORE-03, CORE-04, CORE-05)
+- [x] 02-07-PLAN.md — Activate picker on drop & overlay (CORE-04, CORE-05)
 
 ---
 
@@ -74,7 +83,11 @@ Plans:
 4. "Give Up" button is visible at bottom-center, styled with salmon/red color matching the give-up feedback state
 5. Invalid word combinations (consonants in wrong order or no vowel selected) prevent auto-check and require player to rearrange blocks or press Give Up
 
-**Plans:** TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Word validation + state machine + visual feedback + Give Up handler + auto-advance (CORE-07, CORE-08, CORE-09, WORD-04, VIS-02, VIS-03)
+- [ ] 03-02-PLAN.md — Human verification of complete Phase 3 game loop
 
 ---
 
@@ -82,9 +95,9 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Game Foundation & Display | 0/3 | Not started | — |
-| 2. Block Manipulation & Vowel Selection | 0/? | Not started | — |
-| 3. Game States & Win Conditions | 0/? | Not started | — |
+| 1. Game Foundation & Display | 3/3 | Complete | 2026-02-19 |
+| 2. Block Manipulation & Vowel Selection | 7/7 | Complete | 2026-02-19 |
+| 3. Game States & Win Conditions | 0/2 | In progress | — |
 
 ---
 
@@ -92,25 +105,25 @@ Plans:
 
 | Requirement | Phase | Category | Status |
 |-------------|-------|----------|--------|
-| CORE-01 | 1 | Core Gameplay | Pending |
-| CORE-02 | 1 | Core Gameplay | Pending |
-| CORE-03 | 2 | Core Gameplay | Pending |
-| CORE-04 | 2 | Core Gameplay | Pending |
-| CORE-05 | 2 | Core Gameplay | Pending |
-| CORE-06 | 2 | Core Gameplay | Pending |
+| CORE-01 | 1 | Core Gameplay | Implemented |
+| CORE-02 | 1 | Core Gameplay | Implemented |
+| CORE-03 | 2 | Core Gameplay | Implemented |
+| CORE-04 | 2 | Core Gameplay | Implemented |
+| CORE-05 | 2 | Core Gameplay | Implemented |
+| CORE-06 | 2 | Core Gameplay | Implemented |
 | CORE-07 | 3 | Core Gameplay | Pending |
 | CORE-08 | 3 | Core Gameplay | Pending |
 | CORE-09 | 3 | Core Gameplay | Pending |
-| WORD-01 | 1 | Word Engine | Pending |
-| WORD-02 | 1 | Word Engine | Pending |
-| WORD-03 | 1 | Word Engine | Pending |
+| WORD-01 | 1 | Word Engine | Implemented |
+| WORD-02 | 1 | Word Engine | Implemented |
+| WORD-03 | 1 | Word Engine | Implemented |
 | WORD-04 | 3 | Word Engine | Pending |
-| VIS-01 | 1 | Visuals | Pending |
+| VIS-01 | 1 | Visuals | Implemented |
 | VIS-02 | 3 | Visuals | Pending |
 | VIS-03 | 3 | Visuals | Pending |
-| VIS-04 | 1 | Visuals | Pending |
-| VIS-05 | 1 | Visuals | Pending |
-| VIS-06 | 1 | Visuals | Pending |
+| VIS-04 | 1 | Visuals | Implemented |
+| VIS-05 | 1 | Visuals | Implemented |
+| VIS-06 | 1 | Visuals | Implemented |
 
 **Coverage Summary:**
 - Total v1 requirements: 15
@@ -121,4 +134,4 @@ Plans:
 ---
 
 *Roadmap created: 2026-02-19*
-*Updated: 2026-02-19 — Phase 1 plans created (01-01, 01-02, 01-03)*
+*Updated: 2026-02-20 — Phase 3 plans created*
