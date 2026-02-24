@@ -1003,9 +1003,21 @@
       // Block clicks during feedback window (won / gaveup phases)
       if (gameState.phase !== 'playing') return;
 
-      console.log('[GiveUp] Revealing target word:', gameState.currentWord);
+      const penalty = giveUpCountdown.getPenalty(); // read before stop clears the value
+      giveUpCountdown.stop();
+
+      console.log('[GiveUp] Penalty:', penalty, '| Revealing target word:', gameState.currentWord);
       gameState.phase = 'gaveup';
       applyStateVisuals('gaveup');
+
+      // Apply penalty to elapsed timer
+      if (penalty > 0) {
+        puzzleState.timerElapsed += penalty;
+        // Also update the elapsedTimer's internal base so the display jumps immediately.
+        // elapsedTimer.setBase re-anchors the base without restarting the interval.
+        elapsedTimer.setBase(puzzleState.timerElapsed);
+      }
+
       puzzleState.outcomes.push('gaveup');
       savePuzzleState();
       revealTargetWord();
@@ -1291,13 +1303,73 @@
         if (el) el.textContent = formatTime(puzzleState.timerElapsed);
       }
 
-      // Called after loadPuzzleState() to restore base from persisted timerElapsed
+      // Called after loadPuzzleState() to restore base from persisted timerElapsed.
+      // Also re-anchors startTime so the running offset calculation stays accurate
+      // after a base jump (e.g. penalty applied while timer is still running).
       function setBase(seconds) {
         baseSeconds = typeof seconds === 'number' ? seconds : 0;
+        startTime = Date.now(); // re-anchor so elapsed seconds after base update are counted correctly
         if (el) el.textContent = formatTime(baseSeconds);
       }
 
       return { start, stop, setBase };
+    })();
+
+    /* ============================================================
+       SECTION 5.9: GIVE UP COUNTDOWN
+       Per-word penalty countdown: starts at 60, counts down to 0 each second.
+       When > 0: Give Up button shows "Give Up (N)".
+       When 0: number disappears, Give Up is free (no penalty).
+       Resets to 60 on each new word (called from initGame()).
+       Penalty is read at the moment Give Up is pressed.
+    ============================================================ */
+    const giveUpCountdown = (function() {
+      const COUNTDOWN_START = 60;
+      let current = COUNTDOWN_START;
+      let intervalId = null;
+      const btn = document.getElementById('give-up-btn');
+
+      function updateButtonText() {
+        if (!btn) return;
+        if (current > 0) {
+          btn.textContent = 'Give Up (' + current + ')';
+        } else {
+          btn.textContent = 'Give Up';
+        }
+      }
+
+      function tick() {
+        if (current > 0) {
+          current -= 1;
+          updateButtonText();
+        } else {
+          // Countdown finished — stop the interval, button stays as "Give Up"
+          stop();
+        }
+      }
+
+      function reset() {
+        // Stop any existing countdown before starting a new one
+        stop();
+        current = COUNTDOWN_START;
+        updateButtonText();
+        intervalId = setInterval(tick, 1000);
+      }
+
+      function stop() {
+        if (intervalId !== null) {
+          clearInterval(intervalId);
+          intervalId = null;
+        }
+      }
+
+      // Returns the penalty value at the moment Give Up is pressed.
+      // If countdown has reached 0, penalty is 0 (free Give Up).
+      function getPenalty() {
+        return current;
+      }
+
+      return { reset, stop, getPenalty };
     })();
 
     /* ============================================================
@@ -1336,6 +1408,7 @@
         '| Vowel count:', gameState.vowelCount);
 
       elapsedTimer.start();
+      giveUpCountdown.reset();
     }
 
   </script>
@@ -1506,6 +1579,7 @@
      * Phase 8 will replace this with the full results/share screen.
      */
     function showPuzzleComplete() {
+      giveUpCountdown.stop();
       elapsedTimer.stop();
       // Phase 8 will replace this with the full results screen.
       // For now: display a minimal "Puzzle complete!" message.
