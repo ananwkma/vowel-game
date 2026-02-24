@@ -714,6 +714,57 @@
     })();
 
     /* ============================================================
+       SECTION 2.5: DAILY ENGINE
+       Deterministic daily word selection seeded from the local date.
+       getDailyWords() returns 5 unique words that are the same for all
+       players on a given calendar day and change the next day.
+    ============================================================ */
+    const DATE_SEED = (function() {
+      const params = new URLSearchParams(location.search);
+      const dateParam = params.get('date');
+      if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
+        return dateParam;
+      }
+      return new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+    })();
+
+    const IS_DEBUG = new URLSearchParams(location.search).has('debug');
+
+    function seededRandom(seedStr) {
+      let h = 0;
+      for (let i = 0; i < seedStr.length; i++) {
+        h = Math.imul(31, h) + seedStr.charCodeAt(i) | 0;
+      }
+      let s = h >>> 0;
+      return function() {
+        s += 0x6D2B79F5;
+        let t = Math.imul(s ^ s >>> 15, 1 | s);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+
+    function getDailyWords() {
+      const rng = seededRandom(DATE_SEED);
+      const shuffled = [...WordEngine.wordList];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(rng() * (i + 1));
+        const temp = shuffled[i];
+        shuffled[i] = shuffled[j];
+        shuffled[j] = temp;
+      }
+      return shuffled.slice(0, 5);
+    }
+
+    const DailyEngine = {
+      dateSeed: DATE_SEED,
+      isDebug: IS_DEBUG,
+      dailyWords: getDailyWords(),
+    };
+
+    console.log('[DailyEngine] Date seed:', DATE_SEED, '| Words:', DailyEngine.dailyWords.join(', '), '| Debug:', IS_DEBUG);
+
+    /* ============================================================
        SECTION 2.1: VOWEL PICKER JS
        Manages the vowel selection UI.
     ============================================================ */
