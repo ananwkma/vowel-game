@@ -37,6 +37,12 @@ Timer and penalty mechanics (TIM-01 through TIM-05) and the results screen (RES-
 - Select 5 unique words from the filtered word list (no duplicates within a day)
 - Same date = same 5 words, regardless of how many times the page is reloaded
 
+### Debug Mode
+- A `?debug` URL flag bypasses the "already played" check and allows replaying the current day's puzzle
+- An optional `?debug&date=YYYY-MM-DD` flag overrides the date seed so specific days can be tested
+- Debug mode does NOT show any visible indicator in the UI — it's purely a developer convenience
+- Hard refresh (Ctrl+Shift+R) alone does NOT reset the puzzle — localStorage persists through cache clears
+
 </decisions>
 
 <specifics>
