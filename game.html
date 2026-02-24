@@ -649,8 +649,9 @@
        SECTION 2: WORD ENGINE
     ============================================================ */
     const WordEngine = {
-      // Reference the pre-curated word list
-      wordList: WORDS,
+      // Filter to max 7 letters — ensures 7 blocks fit on a single line on mobile (375px screen).
+      // User may reduce to 6 after mobile testing if 7 feels tight (see 05-CONTEXT.md).
+      wordList: WORDS.filter(w => w.length <= 7),
 
       // Track recently used words to prevent immediate repeats
       // Keep last 20 to ensure good variety across sessions
@@ -708,12 +709,12 @@
 
       /**
        * Returns true if word qualifies as a puzzle word:
-       * - 4-10 letters long
+       * - 4-7 letters long
        * - Contains at least one A/E/I/O/U vowel
        */
       isValidGameWord(word) {
         const upper = word.toUpperCase();
-        return upper.length >= 4 && upper.length <= 10 && /[AEIOU]/.test(upper);
+        return upper.length >= 4 && upper.length <= 7 && /[AEIOU]/.test(upper);
       },
     };
 
