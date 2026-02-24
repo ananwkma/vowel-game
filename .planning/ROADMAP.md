@@ -159,6 +159,15 @@ Plans:
 - Unmapped: 0 ✓
 - Orphaned requirements: 0 ✓
 
+### Phase 5: mobile optimization
+
+**Goal:** [To be planned]
+**Depends on:** Phase 4
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 5 to break down)
+
 ---
 
 *Roadmap created: 2026-02-19*
