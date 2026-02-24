@@ -56,15 +56,15 @@
 
 | Requirement | Phase | Plan |
 |-------------|-------|------|
-| DP-01       | TBD   | TBD  |
-| DP-02       | TBD   | TBD  |
-| DP-03       | TBD   | TBD  |
-| TIM-01      | TBD   | TBD  |
-| TIM-02      | TBD   | TBD  |
-| TIM-03      | TBD   | TBD  |
-| TIM-04      | TBD   | TBD  |
-| TIM-05      | TBD   | TBD  |
-| RES-01      | TBD   | TBD  |
-| RES-02      | TBD   | TBD  |
-| FIX-01      | TBD   | TBD  |
-| FIX-02      | TBD   | TBD  |
+| DP-01       | Phase 6   | TBD  |
+| DP-02       | Phase 6   | TBD  |
+| DP-03       | Phase 6   | TBD  |
+| TIM-01      | Phase 7   | TBD  |
+| TIM-02      | Phase 7   | TBD  |
+| TIM-03      | Phase 7   | TBD  |
+| TIM-04      | Phase 7   | TBD  |
+| TIM-05      | Phase 7   | TBD  |
+| RES-01      | Phase 8   | TBD  |
+| RES-02      | Phase 8   | TBD  |
+| FIX-01      | Phase 9   | TBD  |
+| FIX-02      | Phase 9   | TBD  |
