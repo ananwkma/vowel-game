@@ -1501,6 +1501,15 @@
         return;
       }
 
+      // Debug mode: reset completed state so replay starts from word 0
+      if (DailyEngine.isDebug && puzzleState.complete) {
+        puzzleState.wordIndex = 0;
+        puzzleState.outcomes = [];
+        puzzleState.complete = false;
+        puzzleState.timerElapsed = 0;
+        console.log('[Debug] Puzzle was complete — resetting for replay');
+      }
+
       initGame();
     });
   </script>
