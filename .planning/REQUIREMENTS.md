@@ -10,7 +10,7 @@
 
 ### Daily Puzzle
 
-- [ ] **DP-01**: Each calendar day provides exactly 5 puzzle words, deterministically chosen using the local date (YYYY-MM-DD) as a seed — the same 5 words appear all day on reload
+- [x] **DP-01**: Each calendar day provides exactly 5 puzzle words, deterministically chosen using the local date (YYYY-MM-DD) as a seed — the same 5 words appear all day on reload
 - [ ] **DP-02**: After the 5th word is completed (solved or given up), the game ends and the results screen is shown
 - [ ] **DP-03**: Today's completed result is saved to localStorage — revisiting after completing goes straight to the results screen
 
