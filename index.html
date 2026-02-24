@@ -1006,17 +1006,20 @@
       const penalty = giveUpCountdown.getPenalty(); // read before stop clears the value
       giveUpCountdown.stop();
 
-      console.log('[GiveUp] Penalty:', penalty, '| Revealing target word:', gameState.currentWord);
       gameState.phase = 'gaveup';
       applyStateVisuals('gaveup');
 
       // Freeze the timer first (captures exact elapsed without double-counting),
       // then add penalty and update display
       elapsedTimer.pause();
+      const frozenElapsed = puzzleState.timerElapsed;
       puzzleState.timerElapsed += penalty;
       if (penalty > 0) {
         elapsedTimer.setBase(puzzleState.timerElapsed);
       }
+
+      console.log('[GiveUp] word=%s penalty=%d frozen=%d new_total=%d',
+        gameState.currentWord, penalty, frozenElapsed, puzzleState.timerElapsed);
 
       puzzleState.outcomes.push('gaveup');
       savePuzzleState();
