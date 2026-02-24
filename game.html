@@ -54,6 +54,31 @@
       touch-action: manipulation;            /* Disable double-tap zoom on all elements */
     }
 
+    /* Responsive block sizing — shrinks on mobile, full size on desktop.
+       Picker scales proportionally via the same --block-size variable.
+       Mobile breakpoint: max-width 425px covers iPhone 6-15 and SE. */
+    @media (max-width: 425px) {
+      :root {
+        --block-size: 42px;  /* 7 blocks × 42px + 6 gaps × 9px = 348px; fits 351px available (375px - 24px padding) */
+        --block-gap: 7px;    /* Slightly tighter gap on mobile for breathing room */
+      }
+
+      #app {
+        padding: 24px 12px;  /* Reduce horizontal padding on mobile to maximize block space */
+      }
+    }
+
+    @media (max-width: 360px) {
+      :root {
+        --block-size: 38px;  /* Smallest phones (Galaxy A, older iPhones) */
+        --block-gap: 6px;
+      }
+
+      #app {
+        padding: 20px 8px;
+      }
+    }
+
     /* ============================================================
        SECTION: GLOBAL RESET & BASE
     ============================================================ */
@@ -96,6 +121,8 @@
       align-items: center;
       justify-content: center;
       padding-bottom: 48px;
+      overflow: auto;   /* allow container to scroll if content overflows, not the body */
+      min-height: 0;    /* required for flex children with overflow to work correctly */
     }
 
     #game-board {
