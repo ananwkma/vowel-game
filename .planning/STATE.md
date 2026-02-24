@@ -1,8 +1,8 @@
 # Project State: Yellow Blocks Word Game
 
 **Session started:** 2026-02-19
-**Current milestone:** v1.2 Development (Mobile Optimization)
-**Current phase:** Phase 5 - Mobile Optimization
+**Current milestone:** v1.0 — SHIPPED 2026-02-23
+**Current phase:** Between milestones — planning next
 
 ---
 
@@ -20,7 +20,7 @@
 
 **Phase:** 5 / 5
 **Plan:** 05-02 complete
-**Status:** Milestone complete
+**Status:** v1.0 milestone complete
 **Progress:** [██████████] 100%
 
 ```
