@@ -1187,6 +1187,53 @@
 
   <script>
     /* ============================================================
+       SECTION 3.5: PUZZLE STATE
+       Daily puzzle bookkeeping — tracks which word we're on,
+       per-word outcomes, and completion. Persisted to localStorage
+       keyed by today's date so mid-puzzle reloads resume correctly.
+    ============================================================ */
+    let puzzleState = {
+      dateKey: DailyEngine.dateSeed,    // YYYY-MM-DD string
+      wordIndex: 0,                      // 0-4, current word position
+      outcomes: [],                      // Array of 'solved'|'gaveup' for completed words
+      timerElapsed: 0,                   // ms elapsed before current word (for Phase 7)
+      complete: false,                   // true after 5th word finishes
+    };
+
+    function savePuzzleState() {
+      try {
+        const key = 'vowel_puzzle_' + puzzleState.dateKey;
+        localStorage.setItem(key, JSON.stringify(puzzleState));
+      } catch (e) {
+        console.warn('[PuzzleState] Failed to save:', e);
+      }
+    }
+
+    function loadPuzzleState() {
+      try {
+        const key = 'vowel_puzzle_' + DailyEngine.dateSeed;
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.dateKey === DailyEngine.dateSeed) {
+            puzzleState.dateKey = parsed.dateKey;
+            puzzleState.wordIndex = typeof parsed.wordIndex === 'number' ? parsed.wordIndex : 0;
+            puzzleState.outcomes = Array.isArray(parsed.outcomes) ? parsed.outcomes : [];
+            puzzleState.timerElapsed = typeof parsed.timerElapsed === 'number' ? parsed.timerElapsed : 0;
+            puzzleState.complete = parsed.complete === true;
+            // Guard: if already complete and not in debug mode, keep complete flag
+            if (parsed.complete === true && DailyEngine.isDebug === false) {
+              puzzleState.complete = true;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('[PuzzleState] Failed to load:', e);
+      }
+      console.log('[PuzzleState] Loaded:', JSON.stringify(puzzleState));
+    }
+
+    /* ============================================================
        SECTION 7: VALIDATION & STATE MANAGEMENT
     ============================================================ */
     // O(1) word membership lookup — built once at startup from the WORDS array
@@ -1332,7 +1379,10 @@
     }
 
     // Start the game when the DOM is ready
-    document.addEventListener('DOMContentLoaded', initGame);
+    document.addEventListener('DOMContentLoaded', function() {
+      loadPuzzleState();
+      initGame();
+    });
   </script>
 </body>
 </html>
