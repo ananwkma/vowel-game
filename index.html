@@ -1010,10 +1010,13 @@
       gameState.phase = 'gaveup';
       applyStateVisuals('gaveup');
 
-      // Apply penalty then freeze the timer (timer must not run during feedback window)
-      puzzleState.timerElapsed += penalty;
-      elapsedTimer.setBase(puzzleState.timerElapsed);
+      // Freeze the timer first (captures exact elapsed without double-counting),
+      // then add penalty and update display
       elapsedTimer.pause();
+      puzzleState.timerElapsed += penalty;
+      if (penalty > 0) {
+        elapsedTimer.setBase(puzzleState.timerElapsed);
+      }
 
       puzzleState.outcomes.push('gaveup');
       savePuzzleState();
