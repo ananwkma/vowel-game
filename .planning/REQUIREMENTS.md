@@ -33,6 +33,24 @@
 - [x] **VIS-05**: Title "Move the Yellow Blocks to Form Words" — top-left, bold, typography consistent with modern design language
 - [x] **VIS-06**: "Give Up" button — bottom-center, styled consistently with give up state color
 
+## v1.1 Requirements (Animation Enhancements)
+
+### Animation
+
+- [x] **VIS-07**: Vowel picker fades in smoothly when block is lifted, fades out on release
+- [x] **VIS-08**: Block settles with a subtle bounce animation when dropped into place
+- [x] **VIS-09**: New word loads with a staggered swipe-in animation across all blocks
+
+## v1.2 Requirements (Mobile Optimization)
+
+### Mobile
+
+- [x] **MOB-01**: Touch suppression applied globally — no iOS long-press loupe, no text selection highlight, no tap callout, no double-tap zoom
+- [x] **MOB-02**: Words always render on a single horizontal line — no wrapping to two lines, 7-letter words fit on 375px screen
+- [x] **MOB-03**: Blocks are 42px on mobile (375px viewport) — comfortably tappable touch targets; vowel picker scales proportionally
+- [x] **MOB-04**: Page does not scroll while dragging a block on mobile — scroll locked at all times
+- [x] **MOB-05**: Word list filtered to max 7 letters so no word exceeds the single-line layout constraint
+
 ## v2 Requirements
 
 ### Enhancements
@@ -75,13 +93,22 @@
 | VIS-04 | 1 | Visuals | Pending |
 | VIS-05 | 1 | Visuals | Pending |
 | VIS-06 | 1 | Visuals | Pending |
+| VIS-07 | 4 | Animation | Complete |
+| VIS-08 | 4 | Animation | Complete |
+| VIS-09 | 4 | Animation | Complete |
+| MOB-01 | 5 | Mobile | Complete |
+| MOB-02 | 5 | Mobile | Complete |
+| MOB-03 | 5 | Mobile | Complete |
+| MOB-04 | 5 | Mobile | Complete |
+| MOB-05 | 5 | Mobile | Complete |
 
 **Coverage:**
-- v1 requirements: 15 total
-- Mapped to phases: 15
+- v1 requirements: 15 total (mapped to phases 1-3)
+- v1.1 requirements: 3 total (VIS-07, VIS-08, VIS-09 — Phase 4)
+- v1.2 requirements: 5 total (MOB-01..MOB-05 — Phase 5 Plan 01)
 - Unmapped: 0 ✓
 
 ---
 
 *Requirements defined: 2026-02-19*
-*Last updated: 2026-02-19 after roadmap creation*
+*Last updated: 2026-02-23 after Phase 5 Plan 01 execution (MOB-01..MOB-05 complete)*

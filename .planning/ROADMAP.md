@@ -176,7 +176,7 @@ Plans:
 6. Give Up button is always visible at the bottom of the screen
 7. No word with more than 7 letters appears as a puzzle
 
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 05-01-PLAN.md — Touch suppression, viewport lock, scroll lock, single-line layout, responsive block sizing, word filter

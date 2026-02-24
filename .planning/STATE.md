@@ -1,8 +1,8 @@
 # Project State: Yellow Blocks Word Game
 
 **Session started:** 2026-02-19
-**Current milestone:** v1.1 Development (Animation Enhancements)
-**Current phase:** Phase 4 - Animation Enhancements
+**Current milestone:** v1.2 Development (Mobile Optimization)
+**Current phase:** Phase 5 - Mobile Optimization
 
 ---
 
@@ -12,19 +12,20 @@
 
 **One-liner:** A browser-based word puzzle where players drag yellow vowel blocks to fill in missing letters in consonant sequences.
 
-**Current Focus:** Implementing subtle visual animations to enhance user feedback and polish the overall gameplay experience. Vowel picker fade-in/out animation implemented. Block bounce animation implemented. New word swipe-in animation implemented.
+**Current Focus:** Mobile optimization — touch suppression, viewport lock, scroll lock, responsive block sizing, and word list filtering for clean gameplay on 375px iPhone screens. Plan 05-01 complete.
 
 ---
 
 ## Current Position
 
-**Phase:** 4 / 4
-**Plan:** 04-01 complete; 04-02 and 04-03 previously completed
-**Status:** Ready to plan
-**Progress:** [██████████] 100%
+**Phase:** 5 / 5
+**Plan:** 05-01 complete
+**Status:** In progress (Plan 05-02 pending)
+**Progress:** [█████████░] 94%
 
 ```
 [==================================] 22/22 v1.1 requirements
+[=====     ] 5/5 MOB requirements complete (05-01)
 ```
 
 ---
@@ -36,8 +37,9 @@
 - Phase 2 (Interaction): 4 requirements (CORE-03, CORE-04, CORE-05, CORE-06) - COMPLETE
 - Phase 3 (Game Logic): 6 requirements (CORE-07, CORE-08, CORE-09, WORD-04, VIS-02, VIS-03) - COMPLETE
 - Phase 4 (Animation Enhancements): 3 requirements (VIS-07, VIS-08, VIS-09) - COMPLETE
+- Phase 5 (Mobile Optimization): 5 requirements (MOB-01, MOB-02, MOB-03, MOB-04, MOB-05) - Plan 05-01 complete
 
-**Coverage:** 22/22 ✓ (no orphans)
+**Coverage:** 22/22 v1.1 ✓ + 5/5 MOB ✓
 
 ---
 
@@ -61,6 +63,11 @@
 - Success: Vowel picker fades, blocks bounce, new words swipe in smoothly.
 - Status: Complete
 
+**Phase 5: Mobile Optimization**
+- Goal: Touch suppression, viewport lock, scroll lock, responsive sizing, word list filter for mobile gameplay.
+- Key requirement categories: Touch behavior, layout, sizing, scroll, word length.
+- Status: Plan 05-01 complete (all 5 MOB requirements satisfied)
+
 ---
 
 ## Key Decisions
@@ -81,6 +88,10 @@
 | Picker stays in DOM at opacity:0 | Simpler than dynamic insertion/removal; avoids layout thrash and timing complexity | Claude | Locked |
 | Vowel picker triggered on pointerdown not first pointermove | Prevents picker appearing mid-drag; shows on drop not during lift | Claude | Locked |
 | Keyboard lift and Escape-cancel deferred | Never implemented in Plans 01-03; accepted known limitation, not blocking | User | Locked |
+| 100dvh used for mobile viewport height | Accounts for browser address bar on iOS Safari and mobile Chrome | Claude | Locked |
+| Touch suppression applied globally on html/body | Game has no selectable text — global suppression simpler than per-element | Claude | Locked |
+| CSS variable --block-size drives responsive block and picker scaling | Media query overrides :root, picker gets correct size for free | Claude | Locked |
+| Word list filtered to max 7 letters at declaration | Filter runs once at startup; WordSet kept unfiltered for win validation | Claude | Locked |
 
 ---
 
@@ -124,6 +135,13 @@
 - Added requestAnimationFrame deferral in show() to guarantee transition fires.
 - Fixed removeGuideColumn() bug: was using wrong 'is-visible' class and stale guideEl reference.
 
+**Session 5 (2026-02-23) - Phase 5 Plan 01 Execution**
+- Added global touch suppression CSS (user-select, -webkit-touch-callout, tap highlight, touch-action: manipulation).
+- Updated viewport meta with user-scalable=no; locked page scroll with overflow: hidden and 100dvh.
+- Changed #game-board to flex-wrap: nowrap with max-width: 100% for single-line word constraint.
+- Added responsive media queries: 42px blocks at 425px, 38px at 360px; shared --block-size drives picker scaling.
+- Filtered WordEngine.wordList to WORDS.filter(w => w.length <= 7); updated isValidGameWord upper bound to 7.
+
 ---
 
 ## Todos & Blockers
@@ -136,6 +154,7 @@
 - [x] Implement Phase 4 (animation enhancements) - Plan 04-01 (Vowel Picker Fade)
 - [x] Implement Phase 4 (animation enhancements) - Plan 04-02 (Block Bounce)
 - [x] Implement Phase 4 (animation enhancements) - Plan 04-03 (New Word Swipe)
+- [x] Implement Phase 5 (mobile optimization) - Plan 05-01 (Touch, Viewport, Sizing, Word Filter)
 
 **Blockers:** None
 
@@ -144,15 +163,16 @@
 ## Session Continuity
 
 **What's ready:**
-- All v1.1 requirements (22/22) are implemented and verified.
-- The game is visually polished with fade-in picker, bounce effects, and swipe transitions.
+- All v1.1 requirements (22/22) implemented and verified.
+- All MOB requirements (5/5) implemented in Plan 05-01.
+- Game is mobile-optimized: touch suppression, locked viewport, scroll lock, responsive 42px/52px blocks, 7-letter word filter.
 
 **What's next:**
-- Milestone v1.1 is complete. Ready for user final review.
+- Phase 5 Plan 05-02 (if it exists) or mobile testing review.
 
 ---
 
 ### Roadmap Evolution
 - Phase 5 added: mobile optimization
 
-*Last updated: 2026-02-23 — Phase 5 (mobile optimization) added to roadmap*
+*Last updated: 2026-02-23 — Phase 5 Plan 01 complete: mobile optimization (touch, viewport, sizing, word filter)*
