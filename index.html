@@ -880,15 +880,13 @@
       if (!currentDraggable) return;
       event.preventDefault();
 
-      // First actual movement — show guide; only reset to '_' if block was empty
+      // First actual movement — only reset to '_' if block was empty
       if (!dragInitiated) {
         dragInitiated = true;
-        dragStartText = currentDraggable.textContent.trim();
         if (dragStartText === '_') {
           currentDraggable.textContent = '_';
           currentDraggable.classList.add('empty');
         }
-        vowelPicker.show(currentDraggable);
       }
 
       moveAt(event.pageX, event.pageY);
@@ -973,6 +971,10 @@
       } else {
         gameBoard.appendChild(placeholderEl);
       }
+
+      // Capture text and show picker immediately on lift — before any movement
+      dragStartText = currentDraggable.textContent.trim();
+      vowelPicker.show(currentDraggable);
 
       event.preventDefault();
     });
