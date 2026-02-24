@@ -198,6 +198,7 @@
                   0 4px 8px -2px rgba(0, 0, 0, 0.15);
       transform: scale(1.1); /* Slightly enlarge the block */
       z-index: 1000; /* Ensure it stays on top during drag */
+      will-change: transform; /* Promote to compositor layer — avoids repaints during drag */
     }
 
     .placeholder-block {
@@ -756,6 +757,12 @@
         pickerEl.style.left = (rect.left + rect.width / 2 - guideWidth / 2) + 'px';
       }
 
+      // Same as trackX but accepts a precomputed client-space center X — avoids a layout read.
+      function trackXAt(centerClientX) {
+        const guideWidth = pickerEl.offsetWidth;
+        pickerEl.style.left = (centerClientX - guideWidth / 2) + 'px';
+      }
+
       function show(element) {
         // Position first so the picker is in the right place before it becomes visible.
         // requestAnimationFrame defers adding 'visible' to the next paint, ensuring
@@ -783,7 +790,7 @@
         return null;
       }
 
-      return { show, hide, positionAround, trackX, getVowelAtPoint };
+      return { show, hide, positionAround, trackX, trackXAt, getVowelAtPoint };
     })();
 
     /* ============================================================
@@ -906,7 +913,9 @@
       return targetIndex;
     }
 
-    // Updates the dragged element's horizontal position (clamped to board bounds)
+    // Updates the dragged element's horizontal position (clamped to board bounds).
+    // Returns finalTranslateX so callers can compute leading-edge and picker position
+    // without a second getBoundingClientRect() call.
     function moveAt(pageX, pageY) {
       const constrainedTranslateX = pageX - dragStartX;
       const currentLeftRelativeToBoard = initialDraggableXOffset + constrainedTranslateX;
@@ -918,63 +927,87 @@
       }
       const translateY = pageY - dragStartY;
       currentDraggable.style.transform = `translate(${finalTranslateX}px, ${translateY}px) scale(1.1)`;
+      return finalTranslateX;
     }
+
+    // RAF handle for pointermove throttling — ensures move work runs at most once per frame.
+    let rafPending = false;
+    let latestPointerEvent = null;
 
     function onPointerMove(event) {
       if (!currentDraggable) return;
+      // preventDefault must be called synchronously in the event handler — not inside rAF.
       event.preventDefault();
 
-      // First actual movement — mark drag as initiated
-      if (!dragInitiated) {
-        dragInitiated = true;
-        // dragStartText was already captured in pointerdown; apply empty styling if needed
-        if (dragStartText === '_') {
-          currentDraggable.textContent = '_';
-          currentDraggable.classList.add('empty');
+      latestPointerEvent = event;
+      if (rafPending) return;
+      rafPending = true;
+
+      requestAnimationFrame(function processDragFrame() {
+        rafPending = false;
+        const ev = latestPointerEvent;
+        if (!currentDraggable || !ev) return;
+
+        // First actual movement — mark drag as initiated
+        if (!dragInitiated) {
+          dragInitiated = true;
+          // dragStartText was already captured in pointerdown; apply empty styling if needed
+          if (dragStartText === '_') {
+            currentDraggable.textContent = '_';
+            currentDraggable.classList.add('empty');
+          }
         }
-      }
 
-      moveAt(event.pageX, event.pageY);
+        // moveAt() returns the clamped horizontal translation so we can compute
+        // the block's client-space position without a second getBoundingClientRect().
+        const finalTranslateX = moveAt(ev.pageX, ev.pageY);
 
-      // Track block horizontally; vertical position is fixed from drag start
-      vowelPicker.trackX(currentDraggable);
+        // Compute the block's current client-space left edge and center X from known values.
+        // initialDraggableRect.left is the block's left edge before any translation (captured at pointerdown).
+        const blockClientLeft   = initialDraggableRect.left + finalTranslateX;
+        const blockClientRight  = blockClientLeft + initialDraggableRect.width;
+        const blockClientCenterX = blockClientLeft + initialDraggableRect.width / 2;
 
-      // Update the dragged block's letter based on which vowel the pointer is over.
-      // Once a vowel is shown, never revert to '_' — only update when hovering a vowel.
-      const hoveredVowel = vowelPicker.getVowelAtPoint(event.clientX, event.clientY);
-      if (hoveredVowel) {
-        currentDraggable.textContent = hoveredVowel;
-        currentDraggable.classList.remove('empty');
-      }
+        // Track picker horizontally using the computed center — no layout read needed.
+        vowelPicker.trackXAt(blockClientCenterX);
 
-      // Use the leading edge of the dragged block (right when moving right, left when moving left)
-      // so blocks step aside the moment the orange block's edge crosses their midpoint.
-      const draggedRect = currentDraggable.getBoundingClientRect();
-      const movingRight = event.clientX >= prevPointerX;
-      const leadingEdge = movingRight ? draggedRect.right : draggedRect.left;
-      prevPointerX = event.clientX;
-      const insertionPointIndex = getInsertionPoint(leadingEdge);
-      const blocks = getCurrentBlocks();
-
-      if (!placeholderEl) {
-        placeholderEl = document.createElement('div');
-        placeholderEl.className = 'block vowel-block placeholder-block';
-        placeholderEl.style.width = `${initialDraggableRect.width}px`;
-        placeholderEl.style.height = `${initialDraggableRect.height}px`;
-      }
-
-      const currentPlaceholderParent = placeholderEl.parentNode;
-      const currentPlaceholderNextSibling = placeholderEl.nextSibling;
-
-      if (insertionPointIndex < blocks.length) {
-        if (currentPlaceholderParent !== gameBoard || currentPlaceholderNextSibling !== blocks[insertionPointIndex]) {
-          gameBoard.insertBefore(placeholderEl, blocks[insertionPointIndex]);
+        // Update the dragged block's letter based on which vowel the pointer is over.
+        // Once a vowel is shown, never revert to '_' — only update when hovering a vowel.
+        const hoveredVowel = vowelPicker.getVowelAtPoint(ev.clientX, ev.clientY);
+        if (hoveredVowel) {
+          currentDraggable.textContent = hoveredVowel;
+          currentDraggable.classList.remove('empty');
         }
-      } else {
-        if (currentPlaceholderParent !== gameBoard || currentPlaceholderNextSibling !== null) {
-          gameBoard.appendChild(placeholderEl);
+
+        // Use the leading edge of the dragged block (right when moving right, left when moving left)
+        // so blocks step aside the moment the orange block's edge crosses their midpoint.
+        // Computed from known position — no getBoundingClientRect() on the dragged element.
+        const movingRight = ev.clientX >= prevPointerX;
+        const leadingEdge = movingRight ? blockClientRight : blockClientLeft;
+        prevPointerX = ev.clientX;
+        const insertionPointIndex = getInsertionPoint(leadingEdge);
+        const blocks = getCurrentBlocks();
+
+        if (!placeholderEl) {
+          placeholderEl = document.createElement('div');
+          placeholderEl.className = 'block vowel-block placeholder-block';
+          placeholderEl.style.width = `${initialDraggableRect.width}px`;
+          placeholderEl.style.height = `${initialDraggableRect.height}px`;
         }
-      }
+
+        const currentPlaceholderParent = placeholderEl.parentNode;
+        const currentPlaceholderNextSibling = placeholderEl.nextSibling;
+
+        if (insertionPointIndex < blocks.length) {
+          if (currentPlaceholderParent !== gameBoard || currentPlaceholderNextSibling !== blocks[insertionPointIndex]) {
+            gameBoard.insertBefore(placeholderEl, blocks[insertionPointIndex]);
+          }
+        } else {
+          if (currentPlaceholderParent !== gameBoard || currentPlaceholderNextSibling !== null) {
+            gameBoard.appendChild(placeholderEl);
+          }
+        }
+      });
     }
 
     document.addEventListener('pointermove', onPointerMove);
@@ -1027,6 +1060,8 @@
     });
 
     document.addEventListener('pointercancel', function() {
+      rafPending = false;
+      latestPointerEvent = null;
       if (currentDraggable) {
         currentDraggable.classList.remove('dragging');
         currentDraggable.style.position = '';
@@ -1052,6 +1087,8 @@
     });
 
     document.addEventListener('pointerup', function(event) {
+      rafPending = false;
+      latestPointerEvent = null;
       if (!currentDraggable) return;
 
       const droppedElement = currentDraggable;
