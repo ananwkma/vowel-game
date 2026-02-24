@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 7 of 9 (Timer & Penalty System)
-Plan: 1 of 3 in current phase
-Status: Phase 7 Plan 1 complete
-Last activity: 2026-02-24 — 07-01 elapsed timer UI + JS module + lifecycle wiring complete
+Plan: 2 of 3 in current phase
+Status: Phase 7 Plan 2 complete
+Last activity: 2026-02-24 — 07-02 Give Up countdown + penalty system complete
 
-Progress: [█████████████░░░░░░░] 65% (6/9 phases complete — Phase 7 in progress, Plan 1 done)
+Progress: [█████████████░░░░░░░] 65% (6/9 phases complete — Phase 7 in progress, Plan 2 done)
 
 ## Performance Metrics
 
@@ -37,6 +37,7 @@ Progress: [█████████████░░░░░░░] 65% (6/
 | Phase 06-daily-puzzle-engine P02 | 3 | 2 tasks | 1 files |
 | Phase 06-daily-puzzle-engine P03 | ~30min | 2 tasks + 1 fix + human-verify | 1 files |
 | Phase 07-timer-penalty-system P01 | ~2min | 2 tasks | 1 files |
+| Phase 07-timer-penalty-system P02 | 2min | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -55,6 +56,8 @@ Recent decisions affecting current work:
 - [Phase 06-02]: puzzleState declared as let for safe field-merge in loadPuzzleState; DOMContentLoaded complete-guard added to prevent undefined word on completed-puzzle reload
 - [Phase 06-03]: renderProgress() called at end of both initGame() and showPuzzleComplete() to keep pips in sync; neutral pip state uses no CSS class (absence = neutral); debug mode resets puzzleState to defaults so initGame() gets a clean state
 - [Phase 07-01]: elapsedTimer uses Date.now() arithmetic (drift-free); start() no-op guard enables unconditional call in initGame(); timerElapsed stored as integer seconds; setBase() called in both DOMContentLoaded paths
+- [Phase 07-02]: Read penalty before stop() to capture countdown value atomically at press time
+- [Phase 07-02]: elapsedTimer.setBase() re-anchors startTime so drift-free arithmetic stays accurate after base jump from penalty
 
 ### Pending Todos
 
@@ -67,5 +70,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 07-01-PLAN.md — elapsed timer (#elapsed-timer element, elapsedTimer JS module, full lifecycle wiring)
+Stopped at: Completed 07-02-PLAN.md — giveUpCountdown module, penalty accumulation, elapsedTimer setBase re-anchor
 Resume file: None

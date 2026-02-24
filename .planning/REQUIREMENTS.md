@@ -17,10 +17,10 @@
 ### Timer & Scoring
 
 - [x] **TIM-01**: A visible elapsed timer runs from 0:00 when the first word appears, stopping when the puzzle is complete
-- [ ] **TIM-02**: The Give Up button displays a per-word penalty countdown starting at 60, decrementing by 1 per second
-- [ ] **TIM-03**: When the countdown reaches 0, the number disappears and Give Up is "free" (no penalty)
-- [ ] **TIM-04**: Pressing Give Up adds the currently displayed countdown value to the elapsed timer as a penalty, then advances to the next word
-- [ ] **TIM-05**: The Give Up countdown resets to 60 and restarts when each new word appears
+- [x] **TIM-02**: The Give Up button displays a per-word penalty countdown starting at 60, decrementing by 1 per second
+- [x] **TIM-03**: When the countdown reaches 0, the number disappears and Give Up is "free" (no penalty)
+- [x] **TIM-04**: Pressing Give Up adds the currently displayed countdown value to the elapsed timer as a penalty, then advances to the next word
+- [x] **TIM-05**: The Give Up countdown resets to 60 and restarts when each new word appears
 
 ### Results Screen
 
