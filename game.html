@@ -880,15 +880,14 @@
       if (!currentDraggable) return;
       event.preventDefault();
 
-      // First actual movement — show guide; only reset to '_' if block was empty
+      // First actual movement — mark drag as initiated
       if (!dragInitiated) {
         dragInitiated = true;
-        dragStartText = currentDraggable.textContent.trim();
+        // dragStartText was already captured in pointerdown; apply empty styling if needed
         if (dragStartText === '_') {
           currentDraggable.textContent = '_';
           currentDraggable.classList.add('empty');
         }
-        vowelPicker.show(currentDraggable);
       }
 
       moveAt(event.pageX, event.pageY);
@@ -948,6 +947,9 @@
       currentDraggable.classList.add('dragging');
       dragInitiated = false; // will be set true on first pointermove
 
+      // Capture the block's current text immediately on lift, before any movement
+      dragStartText = currentDraggable.textContent.trim();
+
       dragStartX = event.clientX;
       dragStartY = event.clientY;
       prevPointerX = event.clientX;
@@ -973,6 +975,9 @@
       } else {
         gameBoard.appendChild(placeholderEl);
       }
+
+      // Show the vowel picker immediately on lift — before any movement occurs
+      vowelPicker.show(currentDraggable);
 
       event.preventDefault();
     });
@@ -1030,8 +1035,10 @@
       droppedElement.classList.add('block-settle');
       droppedElement.addEventListener('animationend', () => droppedElement.classList.remove('block-settle'), { once: true });
 
+      // Always hide the picker on release — it shows on pointerdown regardless of movement
+      vowelPicker.hide();
+
       if (dragInitiated) {
-        vowelPicker.hide();
         // If released without hovering a vowel, restore the block's previous value
         if (droppedElement.textContent.trim() === '_') {
           droppedElement.textContent = dragStartText;
