@@ -21,7 +21,7 @@
 **Phase:** 4 / 4
 **Plan:** 04-01 complete; 04-02 and 04-03 previously completed
 **Status:** In Progress (04-01 executed)
-**Progress:** [█████████░] 94%
+**Progress:** [██████████] 100%
 
 ```
 [==================================] 22/22 v1.1 requirements
@@ -79,6 +79,8 @@
 | Phase guard on all interaction handlers | Prevents input during 2-second feedback window | Claude | Locked |
 | requestAnimationFrame in vowelPicker.show() | Guarantees CSS opacity transition fires from opacity:0 start state before first paint | Claude | Locked |
 | Picker stays in DOM at opacity:0 | Simpler than dynamic insertion/removal; avoids layout thrash and timing complexity | Claude | Locked |
+| Vowel picker triggered on pointerdown not first pointermove | Prevents picker appearing mid-drag; shows on drop not during lift | Claude | Locked |
+| Keyboard lift and Escape-cancel deferred | Never implemented in Plans 01-03; accepted known limitation, not blocking | User | Locked |
 
 ---
 
@@ -150,4 +152,4 @@
 
 ---
 
-*Last updated: 2026-02-20 — 04-01-PLAN.md complete*
+*Last updated: 2026-02-23 — 02-04-PLAN.md complete (human verification approved)*

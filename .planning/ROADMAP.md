@@ -56,7 +56,7 @@ Plans:
 4. When a vowel is selected, the bar fades out and the chosen letter appears in the yellow block (e.g., block shows "E")
 5. Player can manipulate each yellow block independently (placing and selecting vowels in any order)
 
-**Plans:** 8 plans
+**Plans:** 8/8 plans complete
 
 Plans:
 - [x] 02-01-PLAN.md — Core drag-and-drop mechanics using Pointer Events (CORE-03)
@@ -120,7 +120,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Game Foundation & Display | 3/3 | Complete | 2026-02-19 |
-| 2. Block Manipulation & Vowel Selection | 8/8 | Complete | 2026-02-19 |
+| 2. Block Manipulation & Vowel Selection | 8/8 | Complete   | 2026-02-24 |
 | 3. Game States & Win Conditions | 2/2 | Complete   | 2026-02-20 |
 | 4. Animation Enhancements | 3/3 | Complete   | 2026-02-20 |
 
