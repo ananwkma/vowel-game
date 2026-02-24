@@ -40,7 +40,12 @@ Full archive: `.planning/milestones/v1.0-ROADMAP.md`
   2. After completing the 5th word (win or give up), the game stops and does not advance to a 6th word
   3. Reloading the page mid-puzzle resumes at the correct word position with prior state intact
   4. Completing the puzzle and then reopening the page goes directly to the results screen without replaying
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — DailyEngine: deterministic PRNG + 5-word daily selection + debug URL flags
+- [ ] 06-02-PLAN.md — puzzleState persistence + game-end condition + initGame() wired to daily words
+- [ ] 06-03-PLAN.md — Progress indicator UI (Word X of 5 + pip dots) + already-played redirect + human verify
 
 ### Phase 7: Timer & Penalty System
 **Goal**: Players can track their total solve time, and pressing Give Up costs them a penalty based on how long they waited
