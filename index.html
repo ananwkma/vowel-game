@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
   <title>Vowel</title>
   <style>
     /* ============================================================
@@ -49,7 +49,14 @@
     }
 
     html, body {
-      height: 100%;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      height: 100dvh;
+      overflow: hidden;
     }
 
     body {
@@ -299,6 +306,26 @@
       font-weight: 700;
       color: var(--color-vowel-text);
       opacity: 0.2;
+    }
+
+    @media (max-width: 425px) {
+      :root {
+        --block-size: 42px;
+        --block-gap: 7px;
+      }
+      #app {
+        padding: 24px 12px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      :root {
+        --block-size: 38px;
+        --block-gap: 6px;
+      }
+      #app {
+        padding: 20px 8px;
+      }
     }
   </style>
 </head>
