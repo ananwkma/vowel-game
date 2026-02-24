@@ -12,20 +12,20 @@
 
 **One-liner:** A browser-based word puzzle where players drag yellow vowel blocks to fill in missing letters in consonant sequences.
 
-**Current Focus:** Mobile optimization — touch suppression, viewport lock, scroll lock, responsive block sizing, and word list filtering for clean gameplay on 375px iPhone screens. Plan 05-01 complete.
+**Current Focus:** All phases complete. Game is mobile-optimized and human-verified on 375px simulated iPhone SE. v1.2 development complete.
 
 ---
 
 ## Current Position
 
 **Phase:** 5 / 5
-**Plan:** 05-01 complete
-**Status:** In progress (Plan 05-02 pending)
-**Progress:** [█████████░] 94%
+**Plan:** 05-02 complete
+**Status:** Complete (all plans done)
+**Progress:** [██████████] 100%
 
 ```
 [==================================] 22/22 v1.1 requirements
-[=====     ] 5/5 MOB requirements complete (05-01)
+[==========] 5/5 MOB requirements complete (05-01 implemented, 05-02 verified)
 ```
 
 ---
@@ -92,6 +92,9 @@
 | Touch suppression applied globally on html/body | Game has no selectable text — global suppression simpler than per-element | Claude | Locked |
 | CSS variable --block-size drives responsive block and picker scaling | Media query overrides :root, picker gets correct size for free | Claude | Locked |
 | Word list filtered to max 7 letters at declaration | Filter runs once at startup; WordSet kept unfiltered for win validation | Claude | Locked |
+| RAF throttling via latestPointerEvent pattern in onPointerMove | Coalesces 120Hz+ pointermove events to one DOM update per display frame; simpler than cancelAnimationFrame approach | Claude | Locked |
+| moveAt() returns finalTranslateX | Enables computing dragged-element client-space position without getBoundingClientRect(); minimal change, callers use return value | Claude | Locked |
+| will-change: transform on .dragging | Promotes dragged block to GPU compositor layer before drag begins; avoids main-thread repaints during move | Claude | Locked |
 
 ---
 
@@ -142,6 +145,11 @@
 - Added responsive media queries: 42px blocks at 425px, 38px at 360px; shared --block-size drives picker scaling.
 - Filtered WordEngine.wordList to WORDS.filter(w => w.length <= 7); updated isValidGameWord upper bound to 7.
 
+**Session 6 (2026-02-23) - Phase 5 Plan 02 Human Verification + Drag Performance Fix**
+- Human verified all 7 mobile checks on simulated 375px iPhone SE — all passed.
+- User reported drag lag (block and vowel picker lagged a few seconds behind pointer on mobile).
+- Fixed drag lag: added RAF throttling to onPointerMove (latestPointerEvent pattern), added will-change: transform to .dragging, eliminated getBoundingClientRect() calls on dragged element by computing position from cached initialDraggableRect + moveAt() return value, added vowelPicker.trackXAt(centerClientX) for layout-read-free picker tracking.
+
 ---
 
 ## Todos & Blockers
@@ -164,15 +172,15 @@
 
 **What's ready:**
 - All v1.1 requirements (22/22) implemented and verified.
-- All MOB requirements (5/5) implemented in Plan 05-01.
-- Game is mobile-optimized: touch suppression, locked viewport, scroll lock, responsive 42px/52px blocks, 7-letter word filter.
+- All MOB requirements (5/5) implemented (05-01) and human-verified (05-02).
+- Game is mobile-optimized: touch suppression, locked viewport, scroll lock, responsive 42px/52px blocks, 7-letter word filter, smooth drag on mobile (RAF throttling + GPU compositor promotion).
 
 **What's next:**
-- Phase 5 Plan 05-02 (if it exists) or mobile testing review.
+- All phases complete. v1.2 mobile-optimized game shipped.
 
 ---
 
 ### Roadmap Evolution
 - Phase 5 added: mobile optimization
 
-*Last updated: 2026-02-23 — Phase 5 Plan 01 complete: mobile optimization (touch, viewport, sizing, word filter)*
+*Last updated: 2026-02-23 — Phase 5 Plan 02 complete: human verification passed + drag performance fix (RAF throttling, will-change, layout-read elimination)*
