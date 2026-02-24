@@ -24,7 +24,7 @@ Full archive: `.planning/milestones/v1.0-ROADMAP.md`
 
 **Milestone Goal:** Replace infinite random mode with a daily 5-word puzzle, add a timer with penalty scoring, show a results screen on completion, and fix two mobile UX regressions.
 
-- [ ] **Phase 6: Daily Puzzle Engine** - Replace infinite mode with deterministic daily 5-word structure and localStorage persistence
+- [x] **Phase 6: Daily Puzzle Engine** - Replace infinite mode with deterministic daily 5-word structure and localStorage persistence — completed 2026-02-24
 - [ ] **Phase 7: Timer & Penalty System** - Add elapsed timer, Give Up penalty countdown, and penalty accumulation
 - [ ] **Phase 8: Results Screen** - Show final time and return-tomorrow prompt after puzzle completion
 - [ ] **Phase 9: Mobile Fixes** - Fix Dynamic Island title spacing and dragged-block vertical offset
@@ -43,9 +43,9 @@ Full archive: `.planning/milestones/v1.0-ROADMAP.md`
 **Plans**: 3 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — DailyEngine: deterministic PRNG + 5-word daily selection + debug URL flags
-- [ ] 06-02-PLAN.md — puzzleState persistence + game-end condition + initGame() wired to daily words
-- [ ] 06-03-PLAN.md — Progress indicator UI (Word X of 5 + pip dots) + already-played redirect + human verify
+- [x] 06-01-PLAN.md — DailyEngine: deterministic PRNG + 5-word daily selection + debug URL flags
+- [x] 06-02-PLAN.md — puzzleState persistence + game-end condition + initGame() wired to daily words
+- [x] 06-03-PLAN.md — Progress indicator UI (Word X of 5 + pip dots) + already-played redirect + human verify
 
 ### Phase 7: Timer & Penalty System
 **Goal**: Players can track their total solve time, and pressing Give Up costs them a penalty based on how long they waited
@@ -86,7 +86,7 @@ Plans:
 | 3. Game States & Win Conditions | v1.0 | 2/2 | Complete | 2026-02-20 |
 | 4. Animation Enhancements | v1.0 | 3/3 | Complete | 2026-02-23 |
 | 5. Mobile Optimization | v1.0 | 2/2 | Complete | 2026-02-23 |
-| 6. Daily Puzzle Engine | 2/3 | In Progress|  | - |
+| 6. Daily Puzzle Engine | v1.1 | 3/3 | Complete | 2026-02-24 |
 | 7. Timer & Penalty System | v1.1 | 0/TBD | Not started | - |
 | 8. Results Screen | v1.1 | 0/TBD | Not started | - |
 | 9. Mobile Fixes | v1.1 | 0/TBD | Not started | - |

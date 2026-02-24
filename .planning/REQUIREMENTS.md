@@ -56,9 +56,9 @@
 
 | Requirement | Phase | Plan |
 |-------------|-------|------|
-| DP-01       | Phase 6   | TBD  |
-| DP-02       | Phase 6   | TBD  |
-| DP-03       | Phase 6   | TBD  |
+| DP-01       | Phase 6   | 06-01  |
+| DP-02       | Phase 6   | 06-02  |
+| DP-03       | Phase 6   | 06-03  |
 | TIM-01      | Phase 7   | TBD  |
 | TIM-02      | Phase 7   | TBD  |
 | TIM-03      | Phase 7   | TBD  |
