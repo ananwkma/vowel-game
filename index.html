@@ -1010,13 +1010,10 @@
       gameState.phase = 'gaveup';
       applyStateVisuals('gaveup');
 
-      // Apply penalty to elapsed timer
-      if (penalty > 0) {
-        puzzleState.timerElapsed += penalty;
-        // Also update the elapsedTimer's internal base so the display jumps immediately.
-        // elapsedTimer.setBase re-anchors the base without restarting the interval.
-        elapsedTimer.setBase(puzzleState.timerElapsed);
-      }
+      // Apply penalty then freeze the timer (timer must not run during feedback window)
+      puzzleState.timerElapsed += penalty;
+      elapsedTimer.setBase(puzzleState.timerElapsed);
+      elapsedTimer.pause();
 
       puzzleState.outcomes.push('gaveup');
       savePuzzleState();
@@ -1279,8 +1276,9 @@
       function tick() {
         const elapsed = baseSeconds + Math.floor((Date.now() - startTime) / 1000);
         if (el) el.textContent = formatTime(elapsed);
-        // Sync puzzleState so savePuzzleState() always has the latest value
+        // Sync puzzleState and persist so refresh restores the current second
         puzzleState.timerElapsed = elapsed;
+        savePuzzleState();
       }
 
       function start() {
@@ -1291,28 +1289,33 @@
         intervalId = setInterval(tick, 1000);
       }
 
-      function stop() {
+      // Freezes the timer at the current elapsed value. Safe to call when already stopped.
+      // Used at word end (win/give-up) so the timer doesn't run during the feedback window.
+      function pause() {
         if (intervalId !== null) {
           clearInterval(intervalId);
           intervalId = null;
         }
-        // Capture final value into puzzleState
         if (startTime !== null) {
-          puzzleState.timerElapsed = baseSeconds + Math.floor((Date.now() - startTime) / 1000);
+          baseSeconds = baseSeconds + Math.floor((Date.now() - startTime) / 1000);
+          startTime = null;
         }
-        if (el) el.textContent = formatTime(puzzleState.timerElapsed);
+        puzzleState.timerElapsed = baseSeconds;
+        if (el) el.textContent = formatTime(baseSeconds);
+        savePuzzleState();
       }
 
-      // Called after loadPuzzleState() to restore base from persisted timerElapsed.
-      // Also re-anchors startTime so the running offset calculation stays accurate
-      // after a base jump (e.g. penalty applied while timer is still running).
+      function stop() {
+        pause();
+      }
+
+      // Sets the accumulated base (e.g. after restore or penalty). Does not start/stop the timer.
       function setBase(seconds) {
         baseSeconds = typeof seconds === 'number' ? seconds : 0;
-        startTime = Date.now(); // re-anchor so elapsed seconds after base update are counted correctly
         if (el) el.textContent = formatTime(baseSeconds);
       }
 
-      return { start, stop, setBase };
+      return { start, pause, stop, setBase };
     })();
 
     /* ============================================================
@@ -1407,6 +1410,7 @@
         '| Consonants:', gameState.consonants.join(''),
         '| Vowel count:', gameState.vowelCount);
 
+      elapsedTimer.setBase(puzzleState.timerElapsed);
       elapsedTimer.start();
       giveUpCountdown.reset();
     }
@@ -1507,6 +1511,8 @@
           console.log('[Validation] Word SUCCESS:', word);
           gameState.phase = 'won';
           applyStateVisuals('won');
+          elapsedTimer.pause();
+          giveUpCountdown.stop();
           puzzleState.outcomes.push('solved');
           savePuzzleState();
 
