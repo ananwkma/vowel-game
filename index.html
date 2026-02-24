@@ -85,7 +85,7 @@
 
     #game-board {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       align-items: center;
       justify-content: center;
       gap: var(--block-gap);
@@ -607,7 +607,7 @@
     ============================================================ */
     const WordEngine = {
       // Reference the pre-curated word list
-      wordList: WORDS,
+      wordList: WORDS.filter(w => w.length <= 7),
 
       // Track recently used words to prevent immediate repeats
       // Keep last 20 to ensure good variety across sessions
@@ -670,7 +670,7 @@
        */
       isValidGameWord(word) {
         const upper = word.toUpperCase();
-        return upper.length >= 4 && upper.length <= 10 && /[AEIOU]/.test(upper);
+        return upper.length >= 4 && upper.length <= 7 && /[AEIOU]/.test(upper);
       },
     };
 
