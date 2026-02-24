@@ -10,6 +10,16 @@ Shipped v1.0 on 2026-02-23 with 1,321 lines of HTML/CSS/JS in a single file.
 
 Players can instantly understand and interact with any puzzle — the drag mechanic is intuitive, the win/lose feedback is immediate and satisfying.
 
+## Current Milestone: v1.1 Score, Streaks & Mobile Polish
+
+**Goal:** Add session score and win streak display, and fix two mobile UX regressions — Dynamic Island title crowding and drag block offset.
+
+**Target features:**
+- Score counter (words solved vs. given up), persisted in localStorage
+- Streak counter (consecutive wins, resets on give up), persisted in localStorage
+- VOWEL title safe-area padding on Dynamic Island / notch devices
+- Dragged block center aligns with finger (fix ~21px vertical offset on mobile)
+
 ## Requirements
 
 ### Validated
@@ -27,10 +37,16 @@ Players can instantly understand and interact with any puzzle — the drag mecha
 - ✓ Responsive block sizing (52px desktop → 42px mobile); picker scales with blocks — v1.0 (mobile)
 - ✓ Smooth drag on mobile via RAF throttling + GPU compositor layer — v1.0 (mobile)
 
-### Active
+### Active (v1.1)
 
-- [ ] **ENH-01**: Score tracking (words solved vs. given up)
-- [ ] **ENH-02**: Streak counter (consecutive wins)
+- [ ] **SCO-01**: User sees a count of words solved correctly this session, displayed below the title
+- [ ] **SCO-02**: User sees a consecutive win streak counter that resets to 0 on Give Up, displayed alongside the score
+- [ ] **SCO-03**: Score and streak persist across page reloads via localStorage
+- [ ] **FIX-01**: "VOWEL" title has sufficient top spacing on devices with Dynamic Island or notch (safe-area-inset-top)
+- [ ] **FIX-02**: Dragged block center aligns with finger during drag — no vertical offset on mobile
+
+### Deferred
+
 - [ ] **ENH-03**: Difficulty filter (short words vs. long words)
 - [ ] **ENH-04**: Hint system (reveal one vowel)
 - [ ] **ACC-01**: Allow user scaling (pinch-zoom) for visually impaired users — deferred from mobile phase
@@ -47,7 +63,7 @@ Players can instantly understand and interact with any puzzle — the drag mecha
 
 ## Context
 
-**Codebase:** Single file — `game.html` (1,321 lines, vanilla HTML/CSS/JS, no dependencies)
+**Codebase:** Single file — `index.html` (vanilla HTML/CSS/JS, no dependencies)
 **Word list:** 2,710 common English words embedded in JS array, filtered to ≤7 letters for puzzle selection (full list kept for win validation)
 **Design:** Warm off-white background (#f5f0e8), amber/tan vowel blocks, charcoal consonant blocks, dusty rose Give Up button, "VOWEL" title in Playfair Display serif
 **Mobile:** Tested on 375px iPhone SE simulation — touch suppression, single-line layout, RAF-throttled drag
@@ -74,4 +90,4 @@ Players can instantly understand and interact with any puzzle — the drag mecha
 | user-scalable=no viewport | Prevents pinch-zoom during gameplay | ⚠️ Revisit — blocks accessibility for visually impaired |
 
 ---
-*Last updated: 2026-02-23 after v1.0 milestone*
+*Last updated: 2026-02-24 — v1.1 milestone started*

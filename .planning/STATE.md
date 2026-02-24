@@ -1,8 +1,8 @@
 # Project State: Yellow Blocks Word Game
 
 **Session started:** 2026-02-19
-**Current milestone:** v1.0 — SHIPPED 2026-02-23
-**Current phase:** Between milestones — planning next
+**Current milestone:** v1.1 — Score, Streaks & Mobile Polish
+**Current phase:** Not started (defining requirements)
 
 ---
 
@@ -18,15 +18,11 @@
 
 ## Current Position
 
-**Phase:** 5 / 5
-**Plan:** 05-02 complete
-**Status:** v1.0 milestone complete
-**Progress:** [██████████] 100%
-
-```
-[==================================] 22/22 v1.1 requirements
-[==========] 5/5 MOB requirements complete (05-01 implemented, 05-02 verified)
-```
+**Phase:** Not started
+**Plan:** —
+**Status:** Defining requirements
+**Last activity:** 2026-02-24 — Milestone v1.1 started
+**Progress:** [----------] 0%
 
 ---
 
