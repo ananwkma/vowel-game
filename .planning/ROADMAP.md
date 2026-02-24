@@ -60,7 +60,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — Elapsed timer UI + JS module (elapsedTimer) + lifecycle wiring (TIM-01)
+- [x] 07-01-PLAN.md — Elapsed timer UI + JS module (elapsedTimer) + lifecycle wiring (TIM-01)
 - [ ] 07-02-PLAN.md — Give Up countdown + penalty accumulation (TIM-02, TIM-03, TIM-04, TIM-05)
 - [ ] 07-03-PLAN.md — Human verification of complete timer/penalty system
 
@@ -92,7 +92,7 @@ Plans:
 | 4. Animation Enhancements | v1.0 | 3/3 | Complete | 2026-02-23 |
 | 5. Mobile Optimization | v1.0 | 2/2 | Complete | 2026-02-23 |
 | 6. Daily Puzzle Engine | v1.1 | Complete    | 2026-02-24 | 2026-02-24 |
-| 7. Timer & Penalty System | v1.1 | 0/3 | Not started | - |
+| 7. Timer & Penalty System | v1.1 | 1/3 | In progress | - |
 | 8. Results Screen | v1.1 | 0/TBD | Not started | - |
 | 9. Mobile Fixes | v1.1 | 0/TBD | Not started | - |
 

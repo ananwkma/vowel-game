@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Players can instantly understand and interact with any puzzle — the drag mechanic is intuitive, the win/lose feedback is immediate and satisfying.
-**Current focus:** Phase 6 — Daily Puzzle Engine (v1.1 start)
+**Current focus:** Phase 7 — Timer & Penalty System
 
 ## Current Position
 
-Phase: 6 of 9 (Daily Puzzle Engine)
-Plan: 3 of 3 in current phase
-Status: Phase 6 complete
-Last activity: 2026-02-24 — 06-03 progress indicator UI + already-played redirect + human verify (Phase 6 complete)
+Phase: 7 of 9 (Timer & Penalty System)
+Plan: 1 of 3 in current phase
+Status: Phase 7 Plan 1 complete
+Last activity: 2026-02-24 — 07-01 elapsed timer UI + JS module + lifecycle wiring complete
 
-Progress: [████████████░░░░░░░░] 60% (6/9 phases complete — Phase 6 Daily Puzzle Engine complete)
+Progress: [█████████████░░░░░░░] 65% (6/9 phases complete — Phase 7 in progress, Plan 1 done)
 
 ## Performance Metrics
 
@@ -36,6 +36,7 @@ Progress: [████████████░░░░░░░░] 60% (6/
 *Updated after each plan completion*
 | Phase 06-daily-puzzle-engine P02 | 3 | 2 tasks | 1 files |
 | Phase 06-daily-puzzle-engine P03 | ~30min | 2 tasks + 1 fix + human-verify | 1 files |
+| Phase 07-timer-penalty-system P01 | ~2min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -53,6 +54,7 @@ Recent decisions affecting current work:
 - [Phase 6 Plan 01]: DailyEngine additive — WordEngine.getRandomWord() preserved until Plan 02 rewiring
 - [Phase 06-02]: puzzleState declared as let for safe field-merge in loadPuzzleState; DOMContentLoaded complete-guard added to prevent undefined word on completed-puzzle reload
 - [Phase 06-03]: renderProgress() called at end of both initGame() and showPuzzleComplete() to keep pips in sync; neutral pip state uses no CSS class (absence = neutral); debug mode resets puzzleState to defaults so initGame() gets a clean state
+- [Phase 07-01]: elapsedTimer uses Date.now() arithmetic (drift-free); start() no-op guard enables unconditional call in initGame(); timerElapsed stored as integer seconds; setBase() called in both DOMContentLoaded paths
 
 ### Pending Todos
 
@@ -65,5 +67,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 06-03-PLAN.md — Phase 6 Daily Puzzle Engine fully complete (progress indicator, already-played redirect, human verify passed)
+Stopped at: Completed 07-01-PLAN.md — elapsed timer (#elapsed-timer element, elapsedTimer JS module, full lifecycle wiring)
 Resume file: None

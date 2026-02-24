@@ -16,7 +16,7 @@
 
 ### Timer & Scoring
 
-- [ ] **TIM-01**: A visible elapsed timer runs from 0:00 when the first word appears, stopping when the puzzle is complete
+- [x] **TIM-01**: A visible elapsed timer runs from 0:00 when the first word appears, stopping when the puzzle is complete
 - [ ] **TIM-02**: The Give Up button displays a per-word penalty countdown starting at 60, decrementing by 1 per second
 - [ ] **TIM-03**: When the countdown reaches 0, the number disappears and Give Up is "free" (no penalty)
 - [ ] **TIM-04**: Pressing Give Up adds the currently displayed countdown value to the elapsed timer as a penalty, then advances to the next word
@@ -59,7 +59,7 @@
 | DP-01       | Phase 6   | 06-01  |
 | DP-02       | Phase 6   | 06-02  |
 | DP-03       | Phase 6   | 06-03  |
-| TIM-01      | Phase 7   | TBD  |
+| TIM-01      | Phase 7   | 07-01  |
 | TIM-02      | Phase 7   | TBD  |
 | TIM-03      | Phase 7   | TBD  |
 | TIM-04      | Phase 7   | TBD  |
