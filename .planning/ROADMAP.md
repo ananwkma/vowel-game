@@ -159,14 +159,28 @@ Plans:
 - Unmapped: 0 ✓
 - Orphaned requirements: 0 ✓
 
-### Phase 5: mobile optimization
+### Phase 5: Mobile Optimization
 
-**Goal:** [To be planned]
+**Goal:** The game works cleanly on a 375px iPhone screen — no unwanted touch behaviors, blocks fit on a single line, responsive sizing scales with viewport, and the Give Up button is always accessible.
+
 **Depends on:** Phase 4
-**Plans:** 0 plans
+
+**Requirements:** MOB-01-touch-suppression, MOB-02-single-line-layout, MOB-03-responsive-sizing, MOB-04-scroll-lock, MOB-05-word-length-filter
+
+**Success Criteria** (observable user behaviors):
+1. On iOS Safari, long-pressing anywhere shows no text selection, loupe, or callout menu
+2. Double-tapping a block does not trigger browser zoom
+3. A 7-letter word appears as a single horizontal row of blocks on a 375px screen — never wraps
+4. Blocks scale responsively: 42px on mobile (≤425px), 52px on desktop — vowel picker matches
+5. Page does not scroll while dragging a block on mobile
+6. Give Up button is always visible at the bottom of the screen
+7. No word with more than 7 letters appears as a puzzle
+
+**Plans:** 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 5 to break down)
+- [ ] 05-01-PLAN.md — Touch suppression, viewport lock, scroll lock, single-line layout, responsive block sizing, word filter
+- [ ] 05-02-PLAN.md — Human verification of complete mobile experience
 
 ---
 
