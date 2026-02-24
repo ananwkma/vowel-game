@@ -120,6 +120,50 @@
     }
 
     /* ============================================================
+       SECTION: PROGRESS INDICATOR
+       Word counter + 5 pip dots below the VOWEL title.
+    ============================================================ */
+    #progress-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    #word-counter {
+      font-family: var(--font-serif);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-vowel-text);
+      opacity: 0.55;
+    }
+
+    #pip-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .pip {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: rgba(28, 27, 24, 0.18);  /* neutral: faint dot */
+      transition: background-color 0.3s ease;
+    }
+
+    .pip.solved {
+      background-color: var(--color-win-bg);    /* sage green */
+    }
+
+    .pip.gaveup {
+      background-color: var(--color-lose-bg);   /* dusty rose / salmon */
+    }
+
+    /* ============================================================
        SECTION: BLOCKS (base + variants)
     ============================================================ */
     .block {
@@ -333,6 +377,16 @@
   <div id="app">
     <header id="game-header">
       <h1 id="game-title">Vowel</h1>
+      <div id="progress-bar">
+        <span id="word-counter">Word 1 of 5</span>
+        <div id="pip-row" aria-hidden="true">
+          <span class="pip" data-pip="0"></span>
+          <span class="pip" data-pip="1"></span>
+          <span class="pip" data-pip="2"></span>
+          <span class="pip" data-pip="3"></span>
+          <span class="pip" data-pip="4"></span>
+        </div>
+      </div>
     </header>
     <main id="game-board-container">
       <div id="game-board"></div>
@@ -899,6 +953,29 @@
       board.appendChild(fragment);
     }
 
+    /**
+     * Updates the Word X of 5 counter and pip dot colors from puzzleState.
+     * Called by initGame() and showPuzzleComplete().
+     * Pip outcomes: 'solved' → green, 'gaveup' → salmon, no outcome → neutral.
+     * The current word's pip (puzzleState.wordIndex) is always neutral until completed.
+     */
+    function renderProgress() {
+      const counter = document.getElementById('word-counter');
+      const pips = document.querySelectorAll('.pip');
+
+      // wordIndex is 0-based; display as 1-based, capped at 5
+      const displayIndex = Math.min(puzzleState.wordIndex + 1, 5);
+      if (counter) counter.textContent = 'Word ' + displayIndex + ' of 5';
+
+      pips.forEach((pip, i) => {
+        pip.classList.remove('solved', 'gaveup');
+        const outcome = puzzleState.outcomes[i];
+        if (outcome === 'solved') pip.classList.add('solved');
+        else if (outcome === 'gaveup') pip.classList.add('gaveup');
+        // else: neutral (no class added)
+      });
+    }
+
     /* ============================================================
        SECTION 5: EVENT LISTENERS
        Give Up handler — no-op shell for Phase 2 wiring.
@@ -1179,6 +1256,7 @@
       gameState.phase = 'playing';
 
       renderBoard(gameState);
+      renderProgress();
 
       console.log('[Game] New word loaded:', word,
         '| Consonants:', gameState.consonants.join(''),
@@ -1362,6 +1440,7 @@
       msg.textContent = 'Puzzle complete!';
       board.appendChild(msg);
       document.getElementById('give-up-btn').style.display = 'none';
+      renderProgress();
       console.log('[Puzzle] Complete! Outcomes:', puzzleState.outcomes.join(', '));
     }
 
