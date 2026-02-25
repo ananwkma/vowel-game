@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Vowel</title>
   <style>
     /* ============================================================
@@ -76,6 +76,8 @@
       flex-direction: column;
       min-height: 100vh;
       padding: 32px 24px;
+      padding-top: max(32px, env(safe-area-inset-top));
+      padding-bottom: max(32px, env(safe-area-inset-bottom));
     }
 
     #game-header {
@@ -369,6 +371,55 @@
       margin-top: 4px;
     }
 
+    /* ============================================================
+       SECTION: RESULTS SCREEN
+       Full-puzzle completion card shown after the 5th word.
+    ============================================================ */
+    #results-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 32px 24px;
+      text-align: center;
+    }
+
+    #results-screen .results-label {
+      font-family: var(--font-serif);
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--color-vowel-text);
+      opacity: 0.65;
+    }
+
+    #results-screen .results-time {
+      font-family: var(--font-serif);
+      font-size: 3rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--color-vowel-text);
+      line-height: 1;
+    }
+
+    #results-screen .results-divider {
+      width: 48px;
+      height: 3px;
+      background-color: var(--color-vowel-bg);
+      border-radius: 2px;
+    }
+
+    #results-screen .results-tomorrow {
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--color-vowel-text);
+      opacity: 0.8;
+      line-height: 1.5;
+    }
+
     @media (max-width: 425px) {
       :root {
         --block-size: 42px;
@@ -376,6 +427,8 @@
       }
       #app {
         padding: 24px 12px;
+        padding-top: max(24px, env(safe-area-inset-top));
+        padding-bottom: max(24px, env(safe-area-inset-bottom));
       }
     }
 
@@ -386,6 +439,8 @@
       }
       #app {
         padding: 20px 8px;
+        padding-top: max(20px, env(safe-area-inset-top));
+        padding-bottom: max(20px, env(safe-area-inset-bottom));
       }
     }
   </style>
@@ -1061,8 +1116,8 @@
     }
 
     // Updates the dragged element's horizontal position (clamped to board bounds)
-    function moveAt(pageX, pageY) {
-      const constrainedTranslateX = pageX - dragStartX;
+    function moveAt(clientX, clientY) {
+      const constrainedTranslateX = clientX - dragStartX;
       const currentLeftRelativeToBoard = initialDraggableXOffset + constrainedTranslateX;
       let finalTranslateX = constrainedTranslateX;
       if (currentLeftRelativeToBoard < 0) {
@@ -1070,7 +1125,7 @@
       } else if (currentLeftRelativeToBoard + initialDraggableRect.width > gameBoardRect.width) {
         finalTranslateX = gameBoardRect.width - initialDraggableRect.width - initialDraggableXOffset;
       }
-      const translateY = pageY - dragStartY;
+      const translateY = clientY - dragStartY;
       currentDraggable.style.transform = `translate(${finalTranslateX}px, ${translateY}px) scale(1.1)`;
       return finalTranslateX;
     }
@@ -1100,7 +1155,7 @@
 
         // moveAt() returns the clamped translation so we can compute the
         // block's client-space position without a second getBoundingClientRect().
-        const finalTranslateX = moveAt(ev.pageX, ev.pageY);
+        const finalTranslateX = moveAt(ev.clientX, ev.clientY);
         const blockCenterX = initialDraggableRect.left + finalTranslateX + initialDraggableRect.width / 2;
         vowelPicker.trackXAt(blockCenterX);
 
@@ -1593,23 +1648,50 @@
     }
 
     /**
-     * Stub results screen shown after the 5th word completes.
-     * Phase 8 will replace this with the full results/share screen.
+     * Renders the final results screen after the 5th word completes.
+     * Displays the total elapsed time (including penalties) and a return prompt.
      */
     function showPuzzleComplete() {
       giveUpCountdown.stop();
       elapsedTimer.stop();
-      // Phase 8 will replace this with the full results screen.
-      // For now: display a minimal "Puzzle complete!" message.
+
+      // Format final time as M:SS (puzzleState.timerElapsed is integer seconds)
+      const totalSeconds = puzzleState.timerElapsed;
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      const timeString = minutes + ':' + String(seconds).padStart(2, '0');
+
+      // Build results screen card inside #game-board
       const board = document.getElementById('game-board');
       board.innerHTML = '';
-      const msg = document.createElement('div');
-      msg.style.cssText = 'font-family: var(--font-serif); font-size: 1.4rem; font-weight: 700; letter-spacing: 0.1em; text-align: center; color: var(--color-vowel-text); padding: 24px;';
-      msg.textContent = 'Puzzle complete!';
-      board.appendChild(msg);
+
+      const screen = document.createElement('div');
+      screen.id = 'results-screen';
+
+      const label = document.createElement('div');
+      label.className = 'results-label';
+      label.textContent = 'Your time';
+
+      const time = document.createElement('div');
+      time.className = 'results-time';
+      time.textContent = timeString;
+
+      const divider = document.createElement('div');
+      divider.className = 'results-divider';
+
+      const tomorrow = document.createElement('div');
+      tomorrow.className = 'results-tomorrow';
+      tomorrow.textContent = 'Come back tomorrow for a new puzzle';
+
+      screen.appendChild(label);
+      screen.appendChild(time);
+      screen.appendChild(divider);
+      screen.appendChild(tomorrow);
+      board.appendChild(screen);
+
       document.getElementById('give-up-btn').style.display = 'none';
       renderProgress();
-      console.log('[Puzzle] Complete! Outcomes:', puzzleState.outcomes.join(', '));
+      console.log('[Puzzle] Complete! Time:', timeString, '— Outcomes:', puzzleState.outcomes.join(', '));
     }
 
     /* ============================================================

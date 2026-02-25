@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** — Phases 1–5 (shipped 2026-02-23)
-- 🚧 **v1.1 Score, Streaks & Mobile Polish** — Phases 6–9 (in progress)
+- ✅ **v1.1 Score, Streaks & Mobile Polish** — Phases 6–9 (completed 2026-02-24)
 
 ## Phases
 
@@ -25,9 +25,9 @@ Full archive: `.planning/milestones/v1.0-ROADMAP.md`
 **Milestone Goal:** Replace infinite random mode with a daily 5-word puzzle, add a timer with penalty scoring, show a results screen on completion, and fix two mobile UX regressions.
 
 - [x] **Phase 6: Daily Puzzle Engine** - Replace infinite mode with deterministic daily 5-word structure and localStorage persistence — completed 2026-02-24
-- [ ] **Phase 7: Timer & Penalty System** - Add elapsed timer, Give Up penalty countdown, and penalty accumulation
-- [ ] **Phase 8: Results Screen** - Show final time and return-tomorrow prompt after puzzle completion
-- [ ] **Phase 9: Mobile Fixes** - Fix Dynamic Island title spacing and dragged-block vertical offset
+- [x] **Phase 7: Timer & Penalty System** - Add elapsed timer, Give Up penalty countdown, and penalty accumulation — completed 2026-02-24
+- [x] **Phase 8: Results Screen** - Show final time and return-tomorrow prompt after puzzle completion — completed 2026-02-24
+- [x] **Phase 9: Mobile Fixes** - Fix Dynamic Island title spacing and dragged-block vertical offset — completed 2026-02-24
 
 ## Phase Details
 
@@ -74,7 +74,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 08-01-PLAN.md — Results screen CSS + showPuzzleComplete() implementation + human verify
+- [x] 08-01-PLAN.md — Results screen CSS + showPuzzleComplete() implementation + human verify
 
 ### Phase 9: Mobile Fixes
 **Goal**: The game title is fully visible on notch/Dynamic Island devices, and dragged blocks track the finger center precisely
@@ -83,7 +83,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. On a device with a Dynamic Island or notch, the "VOWEL" title is not obscured and has visible space above it
   2. When dragging a block on mobile, the block center aligns with the finger — no upward or downward offset
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [x] 09-01-PLAN.md — Viewport/CSS fixes (FIX-01) + coordinate standardization in moveAt() (FIX-02)
 
 ## Progress
 
@@ -96,8 +99,8 @@ Plans:
 | 5. Mobile Optimization | v1.0 | 2/2 | Complete | 2026-02-23 |
 | 6. Daily Puzzle Engine | v1.1 | Complete    | 2026-02-24 | 2026-02-24 |
 | 7. Timer & Penalty System | v1.1 | Complete    | 2026-02-24 | 2026-02-24 |
-| 8. Results Screen | v1.1 | 0/TBD | Not started | - |
-| 9. Mobile Fixes | v1.1 | 0/TBD | Not started | - |
+| 8. Results Screen | v1.1 | Complete | 2026-02-24 | 2026-02-24 |
+| 9. Mobile Fixes | v1.1 | Complete | 2026-02-24 | 2026-02-24 |
 
 ---
 
