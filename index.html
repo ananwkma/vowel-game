@@ -939,6 +939,10 @@
       // Reference the pre-curated word list
       wordList: WORDS.filter(w => w.length <= 7),
 
+      // Difficulty-based pools
+      words1: WORDS.filter(w => (w.match(/[AEIOU]/g) || []).length === 1),
+      words2: WORDS.filter(w => (w.match(/[AEIOU]/g) || []).length === 2),
+
       // Track recently used words to prevent immediate repeats
       // Keep last 20 to ensure good variety across sessions
       recentWords: new Set(),
@@ -1048,14 +1052,27 @@
 
     function getDailyWords() {
       const rng = seededRandom(DATE_SEED);
-      const shuffled = [...WordEngine.wordList];
-      for (let i = shuffled.length - 1; i > 0; i--) {
+      
+      // Select 1 warm-up word (1 vowel)
+      const pool1 = [...WordEngine.words1];
+      const word1Idx = Math.floor(rng() * pool1.length);
+      const word1 = pool1[word1Idx];
+
+      // Select 4 game words (2 vowels)
+      // Remove word1 if it happened to be in pool2 (unlikely but safe)
+      const pool2 = WordEngine.words2.filter(w => w !== word1);
+      
+      // Shuffle pool2
+      const shuffled2 = [...pool2];
+      for (let i = shuffled2.length - 1; i > 0; i--) {
         const j = Math.floor(rng() * (i + 1));
-        const temp = shuffled[i];
-        shuffled[i] = shuffled[j];
-        shuffled[j] = temp;
+        const temp = shuffled2[i];
+        shuffled2[i] = shuffled2[j];
+        shuffled2[j] = temp;
       }
-      return shuffled.slice(0, 5);
+
+      // Return [1-vowel word, 2-vowel, 2-vowel, 2-vowel, 2-vowel]
+      return [word1, ...shuffled2.slice(0, 4)];
     }
 
     const DailyEngine = {
