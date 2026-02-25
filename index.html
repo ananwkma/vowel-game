@@ -309,6 +309,26 @@
     }
 
     /* ============================================================
+       SECTION: CONFETTI ANIMATION
+       Personal best celebration — particles fall and fade out.
+    ============================================================ */
+    @keyframes confettiFall {
+      0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(var(--fall-y)) translateX(var(--drift-x)) rotate(var(--spin)); opacity: 0; }
+    }
+
+    @keyframes bestTextPop {
+      0%   { transform: scale(0.6); opacity: 0; }
+      60%  { transform: scale(1.12); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .results-rank--new-best {
+      animation: bestTextPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      opacity: 1 !important;
+    }
+
+    /* ============================================================
        SECTION: VOWEL GUIDE
        Static vertical strip — fades in on drag start, fades out on release.
        opacity starts at 0; adding .visible triggers the CSS transition.
@@ -2064,6 +2084,46 @@
     }
 
     /**
+     * Launches confetti particles from the center of the screen.
+     * Uses the game's amber/warm palette. Particles self-remove after animating.
+     */
+    function triggerConfetti() {
+      const colors = ['#D4A574', '#E8C99A', '#C49060', '#F5F0E8', '#1C1B18'];
+      const count = 48;
+      const originX = window.innerWidth / 2;
+      const originY = window.innerHeight * 0.38;
+
+      for (let i = 0; i < count; i++) {
+        const el = document.createElement('div');
+        const size = 5 + Math.random() * 7;
+        const fallY = 180 + Math.random() * 260;
+        const driftX = (Math.random() - 0.5) * 260;
+        const spin = (Math.random() - 0.5) * 600;
+        const duration = 0.9 + Math.random() * 0.7;
+        const delay = Math.random() * 0.25;
+
+        el.style.cssText = [
+          'position:fixed',
+          `left:${originX + (Math.random() - 0.5) * 40}px`,
+          `top:${originY}px`,
+          `width:${size}px`,
+          `height:${size * (0.35 + Math.random() * 0.55)}px`,
+          `background:${colors[Math.floor(Math.random() * colors.length)]}`,
+          'border-radius:2px',
+          'pointer-events:none',
+          'z-index:9999',
+          `--fall-y:${fallY}px`,
+          `--drift-x:${driftX}px`,
+          `--spin:${spin}deg`,
+          `animation:confettiFall ${duration}s ease-in ${delay}s both`
+        ].join(';');
+
+        document.body.appendChild(el);
+        el.addEventListener('animationend', () => el.remove(), { once: true });
+      }
+    }
+
+    /**
      * Renders the final results screen after the 5th word completes.
      * Displays the total elapsed time (including penalties) and a real-time
      * percentile rank from the backend, with graceful fallback to simulated stats.
@@ -2102,10 +2162,11 @@
       rank.className = 'results-rank';
       if (prevBest === null) {
         rank.textContent = 'First run!';
-        rank.style.opacity = '1';
+        rank.classList.add('results-rank--new-best');
       } else if (isNewBest) {
         rank.textContent = 'New personal best!';
-        rank.style.opacity = '1';
+        rank.classList.add('results-rank--new-best');
+        triggerConfetti();
       } else {
         rank.textContent = 'Personal best: ' + PersonalBest.format(prevBest);
       }
