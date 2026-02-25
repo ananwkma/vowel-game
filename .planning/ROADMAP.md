@@ -65,6 +65,10 @@ See .planning/milestones/v1.1-ROADMAP.md (to be archived)
 **Goal**: Confirm the entire system works as expected in a local dev environment
 **Depends on**: Phase 12
 **Requirements**: VER-01
+**Plans**: 2 plans
+- [ ] 13-01-PLAN.md — Seed test data into SQLite and verify all API endpoints automated
+- [ ] 13-02-PLAN.md — Human gameplay verification: full end-to-end flow with real percentile
+
 **Success Criteria** (what must be TRUE):
   1. User can play through the daily puzzle
   2. Score is accurately recorded in backend
@@ -78,7 +82,7 @@ See .planning/milestones/v1.1-ROADMAP.md (to be archived)
 | 10. Research & Architecture | v1.2 | 1/1 | Completed | 2026-02-24 |
 | 11. Backend Implementation | v1.2 | 3/3 | Completed | 2026-02-24 |
 | 12. Frontend Integration | v1.2 | Complete    | 2026-02-25 | 2026-02-25 |
-| 13. Local Verification | v1.2 | 0/1 | Not Started | - |
+| 13. Local Verification | v1.2 | 0/2 | Not Started | - |
 
 ---
 *Roadmap created: 2026-02-19*
