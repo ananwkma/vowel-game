@@ -2,23 +2,24 @@
 
 ## What This Is
 
-A browser-based word puzzle where the player sees a consonant sequence and must drag yellow vowel blocks into the correct positions to form a valid English word. The title reads "VOWEL" in large serif type. The game runs as a single HTML file — no build step, no server. Words play infinitely, auto-advancing after each win or give-up.
+A browser-based word puzzle where the player sees a consonant sequence and must drag yellow vowel blocks into the correct positions to form a valid English word. The title reads "VOWEL" in large serif type.
 
-Shipped v1.0 on 2026-02-23 with 1,321 lines of HTML/CSS/JS in a single file.
+Shipped v1.0 on 2026-02-23 (Single HTML file).
+Shipped v1.1 on 2026-02-24 (Daily puzzles, Score, Streaks).
 
 ## Core Value
 
 Players can instantly understand and interact with any puzzle — the drag mechanic is intuitive, the win/lose feedback is immediate and satisfying.
 
-## Current Milestone: v1.1 Score, Streaks & Mobile Polish
+## Current Milestone: v1.2 Daily Leaderboard & Backend Stats
 
-**Goal:** Add session score and win streak display, and fix two mobile UX regressions — Dynamic Island title crowding and drag block offset.
+**Goal:** Implement a real backend (Node.js/Express) to store daily puzzle completion times and provide real-time percentile rankings and averages to users.
 
 **Target features:**
-- Score counter (words solved vs. given up), persisted in localStorage
-- Streak counter (consecutive wins, resets on give up), persisted in localStorage
-- VOWEL title safe-area padding on Dynamic Island / notch devices
-- Dragged block center aligns with finger (fix ~21px vertical offset on mobile)
+- Node.js/Express server serving the game and API
+- SQLite database for persisting daily scores
+- API to submit scores and retrieve daily statistics
+- Frontend displaying real percentile/average data instead of mock data
 
 ## Requirements
 
@@ -36,58 +37,54 @@ Players can instantly understand and interact with any puzzle — the drag mecha
 - ✓ Single-line layout on 375px screen; max 7-letter words — v1.0 (mobile)
 - ✓ Responsive block sizing (52px desktop → 42px mobile); picker scales with blocks — v1.0 (mobile)
 - ✓ Smooth drag on mobile via RAF throttling + GPU compositor layer — v1.0 (mobile)
+- ✓ Daily 5-word puzzle with deterministic PRNG — v1.1
+- ✓ Timer and Give Up penalty system — v1.1
+- ✓ Session score and streak persistence — v1.1
+- ✓ Results screen with return-tomorrow prompt — v1.1
 
-### Active (v1.1)
+### Active (v1.2)
 
-- [ ] **SCO-01**: User sees a count of words solved correctly this session, displayed below the title
-- [ ] **SCO-02**: User sees a consecutive win streak counter that resets to 0 on Give Up, displayed alongside the score
-- [ ] **SCO-03**: Score and streak persist across page reloads via localStorage
-- [ ] **FIX-01**: "VOWEL" title has sufficient top spacing on devices with Dynamic Island or notch (safe-area-inset-top)
-- [ ] **FIX-02**: Dragged block center aligns with finger during drag — no vertical offset on mobile
+- [ ] **BE-01**: Node.js/Express server configured to serve static assets and API routes
+- [ ] **BE-02**: SQLite database schema designed to store daily scores (date, time, userId/deviceId)
+- [ ] **API-01**: `POST /api/scores` accepts daily completion time
+- [ ] **API-02**: `GET /api/stats` returns average time and user's percentile for the current day
+- [ ] **FE-01**: Frontend submits score to backend upon completing the daily puzzle
+- [ ] **FE-02**: Frontend fetches and displays real stats (avg, percentile) on results screen
 
 ### Deferred
 
 - [ ] **ENH-03**: Difficulty filter (short words vs. long words)
 - [ ] **ENH-04**: Hint system (reveal one vowel)
-- [ ] **ACC-01**: Allow user scaling (pinch-zoom) for visually impaired users — deferred from mobile phase
+- [ ] **ACC-01**: Allow user scaling (pinch-zoom) for visually impaired users
 
 ### Out of Scope
 
-- Scoring/points system beyond simple ENH-01 tracking — not in original design
-- Timer/countdown — adds stress without value
-- Multiplayer — single-player only
-- Mobile native app — web browser with PWA is sufficient
-- External dictionary API — word list embedded for offline-first simplicity
-- Word category hints — user explicitly chose minimal UI
-- Keyboard block lift / Escape-cancel drag — deferred known limitation from Phase 2
+- User authentication/login (scores linked to anonymous device ID or just aggregate for now)
+- Multiplayer/Social sharing (v2)
+- Cloud deployment (v1.2 is local-only verification)
 
 ## Context
 
-**Codebase:** Single file — `index.html` (vanilla HTML/CSS/JS, no dependencies)
-**Word list:** 2,710 common English words embedded in JS array, filtered to ≤7 letters for puzzle selection (full list kept for win validation)
-**Design:** Warm off-white background (#f5f0e8), amber/tan vowel blocks, charcoal consonant blocks, dusty rose Give Up button, "VOWEL" title in Playfair Display serif
-**Mobile:** Tested on 375px iPhone SE simulation — touch suppression, single-line layout, RAF-throttled drag
+**Codebase:**
+- Frontend: Single file `index.html` (vanilla HTML/CSS/JS)
+- Backend: New `server/` directory (Node.js/Express)
+
+**Word list:** 2,710 common English words embedded in JS array.
+
+**Design:** Warm off-white background (#f5f0e8), amber/tan vowel blocks, charcoal consonant blocks.
 
 ## Constraints
 
-- **Tech**: Single HTML file — no framework, no build step, open in browser
-- **Word source**: Built-in JS word list (no external API, offline-first)
-- **Words must have vowels**: Only words containing at least one A/E/I/O/U qualify
+- **Tech**: Vanilla frontend, Node/Express/SQLite backend.
+- **Local First**: v1.2 focuses on local environment; deployment to cloud is a future step.
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Single HTML file | No setup friction, works by double-clicking | ✓ Good — trivial deployment to GitHub Pages |
-| Vowel picker as vertical drag column | Matches user's design specification | ✓ Good — natural drag-to-select feel |
-| Auto-advance after win (2s) | Keeps game flowing without manual trigger | ✓ Good — satisfying rhythm |
-| Embedded word list | Offline-first, no network dependency | ✓ Good — fast and self-contained |
-| Any valid word wins (not target-specific) | Allows multiple solutions, increases replayability | ✓ Good — players surprised by alternatives |
-| Picker triggered on pointerdown (not pointermove) | Shows picker on lift, not after drag begins | ✓ Good — fixed UX regression discovered in UAT |
-| RAF throttling for drag | Eliminates 120Hz+ mobile pointermove lag | ✓ Good — eliminated drag lag reported in mobile UAT |
-| Max 7-letter word filter | Single-line constraint on 375px screen | ✓ Good — visually clean on mobile |
-| Keyboard lift / Escape-cancel deferred | Never implemented; accepted known limitation | ⚠️ Revisit — accessibility concern for keyboard-only users |
-| user-scalable=no viewport | Prevents pinch-zoom during gameplay | ⚠️ Revisit — blocks accessibility for visually impaired |
+| Single HTML file (v1.0) | No setup friction, works by double-clicking | ✓ Good — trivial deployment |
+| SQLite for v1.2 | Simple, file-based, relational power for analytics | TBD |
+| Local-only v1.2 | Validate backend logic without deployment complexity | TBD |
 
 ---
-*Last updated: 2026-02-24 — v1.1 milestone started*
+*Last updated: 2026-02-24 — v1.2 milestone started*

@@ -4,106 +4,82 @@
 
 - ✅ **v1.0 MVP** — Phases 1–5 (shipped 2026-02-23)
 - ✅ **v1.1 Score, Streaks & Mobile Polish** — Phases 6–9 (completed 2026-02-24)
+- 🚧 **v1.2 Daily Leaderboard** — Phases 10–13 (active)
 
 ## Phases
 
 <details>
-<summary>✅ v1.0 MVP (Phases 1–5) — SHIPPED 2026-02-23</summary>
-
-- [x] **Phase 1: Game Foundation & Display** — completed 2026-02-20
-- [x] **Phase 2: Block Manipulation & Vowel Selection** — completed 2026-02-23
-- [x] **Phase 3: Game States & Win Conditions** — completed 2026-02-20
-- [x] **Phase 4: Animation Enhancements** — completed 2026-02-23
-- [x] **Phase 5: Mobile Optimization** — completed 2026-02-23
-
-Full archive: `.planning/milestones/v1.0-ROADMAP.md`
-
+<summary>✅ v1.0 MVP (Phases 1–5)</summary>
+See .planning/milestones/v1.0-ROADMAP.md
 </details>
 
-### 🚧 v1.1 Score, Streaks & Mobile Polish (In Progress)
+<details>
+<summary>✅ v1.1 Score, Streaks & Mobile Polish (Phases 6–9)</summary>
+See .planning/milestones/v1.1-ROADMAP.md (to be archived)
+</details>
 
-**Milestone Goal:** Replace infinite random mode with a daily 5-word puzzle, add a timer with penalty scoring, show a results screen on completion, and fix two mobile UX regressions.
+### 🚧 v1.2 Daily Leaderboard & Backend Stats (In Progress)
 
-- [x] **Phase 6: Daily Puzzle Engine** - Replace infinite mode with deterministic daily 5-word structure and localStorage persistence — completed 2026-02-24
-- [x] **Phase 7: Timer & Penalty System** - Add elapsed timer, Give Up penalty countdown, and penalty accumulation — completed 2026-02-24
-- [x] **Phase 8: Results Screen** - Show final time and return-tomorrow prompt after puzzle completion — completed 2026-02-24
-- [x] **Phase 9: Mobile Fixes** - Fix Dynamic Island title spacing and dragged-block vertical offset — completed 2026-02-24
+**Milestone Goal:** Implement a real backend (Node.js/Express) to store daily puzzle completion times and provide real-time percentile rankings and averages.
+
+- [x] **Phase 10: Research & Architecture** - Setup project structure for backend and define API spec
+- [x] **Phase 11: Backend Implementation** - Build Express server, SQLite DB, and Score/Stats APIs
+- [ ] **Phase 12: Frontend Integration** - Connect game client to backend APIs and display real stats
+- [ ] **Phase 13: Local Verification** - Validate end-to-end flow in local environment
 
 ## Phase Details
 
-### Phase 6: Daily Puzzle Engine
-**Goal**: Players get exactly 5 deterministic puzzle words per day, with completed state persisted so revisiting shows the results screen
-**Depends on**: Phase 5 (v1.0 complete)
-**Requirements**: DP-01, DP-02, DP-03
+### Phase 10: Research & Architecture
+**Goal**: Define the technical foundation for the backend and API contracts
+**Depends on**: v1.1 Complete
+**Requirements**: BE-01 (Partial)
 **Success Criteria** (what must be TRUE):
-  1. Opening the game on any given day always shows the same 5 words in the same order
-  2. After completing the 5th word (win or give up), the game stops and does not advance to a 6th word
-  3. Reloading the page mid-puzzle resumes at the correct word position with prior state intact
-  4. Completing the puzzle and then reopening the page goes directly to the results screen without replaying
-**Plans**: 3 plans
+  1. A clear file structure is defined (separating frontend/backend)
+  2. `package.json` dependencies are selected (express, sqlite3, etc.)
+  3. API Specification is documented (endpoints, payloads, error codes)
+  4. Migration strategy from single-file HTML to served static file is planned
 
-Plans:
-- [x] 06-01-PLAN.md — DailyEngine: deterministic PRNG + 5-word daily selection + debug URL flags
-- [x] 06-02-PLAN.md — puzzleState persistence + game-end condition + initGame() wired to daily words
-- [x] 06-03-PLAN.md — Progress indicator UI (Word X of 5 + pip dots) + already-played redirect + human verify
-
-### Phase 7: Timer & Penalty System
-**Goal**: Players can track their total solve time, and pressing Give Up costs them a penalty based on how long they waited
-**Depends on**: Phase 6
-**Requirements**: TIM-01, TIM-02, TIM-03, TIM-04, TIM-05
+### Phase 11: Backend Implementation
+**Goal**: Functional API that persists data to SQLite and calculates stats
+**Depends on**: Phase 10
+**Requirements**: BE-01, BE-02, API-01, API-02
 **Success Criteria** (what must be TRUE):
-  1. A timer is visible and counting up from 0:00 when the first word appears
-  2. The Give Up button shows a number counting down from 60 while it decrements each second
-  3. When the countdown reaches 0, the number disappears and pressing Give Up adds no penalty
-  4. Pressing Give Up while the countdown shows a number adds that number to the elapsed timer
-  5. Each new word resets the Give Up countdown to 60 and starts it again
-**Plans**: 3 plans
+  1. Server starts and connects to SQLite database
+  2. `POST /api/scores` successfully saves a record to the DB
+  3. `GET /api/stats` returns correct average and count based on DB records
+  4. Server serves the `index.html` static file correctly
 
-Plans:
-- [x] 07-01-PLAN.md — Elapsed timer UI + JS module (elapsedTimer) + lifecycle wiring (TIM-01)
-- [x] 07-02-PLAN.md — Give Up countdown + penalty accumulation (TIM-02, TIM-03, TIM-04, TIM-05)
-- [x] 07-03-PLAN.md — Human verification of complete timer/penalty system
-
-### Phase 8: Results Screen
-**Goal**: Players see their final total time and a prompt to return tomorrow after completing all 5 puzzles
-**Depends on**: Phase 7
-**Requirements**: RES-01, RES-02
-**Success Criteria** (what must be TRUE):
-  1. After the 5th word completes, a results screen displays the total elapsed time including all penalties
-  2. The results screen shows a message indicating the next puzzle is available tomorrow
+### Phase 12: Frontend Integration
+**Goal**: Game client communicates with the server to submit and fetch data
+**Depends on**: Phase 11
+**Requirements**: FE-01, FE-02, FE-03
 **Plans**: 1 plan
+- [ ] 12-01-PLAN.md — Connect game client to backend APIs and display real stats
 
-Plans:
-- [x] 08-01-PLAN.md — Results screen CSS + showPuzzleComplete() implementation + human verify
-
-### Phase 9: Mobile Fixes
-**Goal**: The game title is fully visible on notch/Dynamic Island devices, and dragged blocks track the finger center precisely
-**Depends on**: Phase 5 (independent of Phases 6–8, but executed last to avoid disrupting game loop work)
-**Requirements**: FIX-01, FIX-02
 **Success Criteria** (what must be TRUE):
-  1. On a device with a Dynamic Island or notch, the "VOWEL" title is not obscured and has visible space above it
-  2. When dragging a block on mobile, the block center aligns with the finger — no upward or downward offset
-**Plans**: 1 plan
+  1. Completing a daily puzzle triggers a network request to submit score
+  2. Results screen displays data fetched from the server (not hardcoded)
+  3. Game remains playable even if server is offline (graceful degradation)
 
-Plans:
-- [x] 09-01-PLAN.md — Viewport/CSS fixes (FIX-01) + coordinate standardization in moveAt() (FIX-02)
+### Phase 13: Local Verification
+**Goal**: Confirm the entire system works as expected in a local dev environment
+**Depends on**: Phase 12
+**Requirements**: VER-01
+**Success Criteria** (what must be TRUE):
+  1. User can play through the daily puzzle
+  2. Score is accurately recorded in backend
+  3. User sees their percentile rank compared to other local test data
+  4. No regressions in existing gameplay (v1.0/v1.1 features)
 
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 1. Game Foundation & Display | v1.0 | 3/3 | Complete | 2026-02-20 |
-| 2. Block Manipulation & Vowel Selection | v1.0 | 8/8 | Complete | 2026-02-23 |
-| 3. Game States & Win Conditions | v1.0 | 2/2 | Complete | 2026-02-20 |
-| 4. Animation Enhancements | v1.0 | 3/3 | Complete | 2026-02-23 |
-| 5. Mobile Optimization | v1.0 | 2/2 | Complete | 2026-02-23 |
-| 6. Daily Puzzle Engine | v1.1 | Complete    | 2026-02-24 | 2026-02-24 |
-| 7. Timer & Penalty System | v1.1 | Complete    | 2026-02-24 | 2026-02-24 |
-| 8. Results Screen | v1.1 | Complete | 2026-02-24 | 2026-02-24 |
-| 9. Mobile Fixes | v1.1 | Complete | 2026-02-24 | 2026-02-24 |
+| 10. Research & Architecture | v1.2 | 1/1 | Completed | 2026-02-24 |
+| 11. Backend Implementation | v1.2 | 3/3 | Completed | 2026-02-24 |
+| 12. Frontend Integration | v1.2 | 0/1 | In Progress | - |
+| 13. Local Verification | v1.2 | 0/1 | Not Started | - |
 
 ---
-
 *Roadmap created: 2026-02-19*
-*v1.0 archived: 2026-02-23*
-*v1.1 roadmap added: 2026-02-24*
+*v1.2 roadmap added: 2026-02-24*
