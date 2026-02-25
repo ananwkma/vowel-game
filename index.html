@@ -627,16 +627,11 @@
       
       <div class="instruction-step">
         <div class="step-num">1</div>
-        <div class="step-text">Every word is missing its vowels. Identify which letters are gone.</div>
+        <div class="step-text" id="instruction-main-text">Drag an orange block over a vowel to select it, then drop it in the correct spot.</div>
       </div>
 
       <div class="instruction-step">
         <div class="step-num">2</div>
-        <div class="step-text">Drag an empty block to select a vowel, then drop it into its correct spot.</div>
-      </div>
-
-      <div class="instruction-step">
-        <div class="step-num">3</div>
         <div class="step-text">Solve all 5 words for today. Speed counts, but every "Give Up" adds a time penalty!</div>
       </div>
 
@@ -1173,6 +1168,18 @@
     let rafPending = false;
     let latestPointerEvent = null;
 
+    // Mobile detection — coarse pointer = touch device
+    const isMobile = window.matchMedia('(pointer: coarse)').matches;
+    // Mobile interaction state machine: 'idle' | 'tap-pending' | 'picker-open' | 'dragging'
+    let mobileState = 'idle';
+    let mobileTapBlock = null;
+    const MOBILE_DRAG_THRESHOLD = 8; // px before tap becomes a drag
+
+    // Set device-appropriate instruction text
+    document.getElementById('instruction-main-text').textContent = isMobile
+      ? 'Tap an orange block to pick a vowel. Then drag it into the correct spot to solve the word.'
+      : 'Drag an orange block over a vowel to select it, then drop it in the correct spot.';
+
     /* ============================================================
        SECTION 4: DOM RENDERING
        renderBoard(state) — pure function converting state to DOM.
@@ -1336,7 +1343,39 @@
         const ev = latestPointerEvent;
         if (!currentDraggable || !ev) return;
 
-        // First actual movement — only reset to '_' if block was empty
+        // Mobile: check if tap-pending has crossed the drag threshold
+        if (isMobile && mobileState === 'tap-pending') {
+          const dx = ev.clientX - dragStartX;
+          const dy = ev.clientY - dragStartY;
+          if (Math.sqrt(dx * dx + dy * dy) < MOBILE_DRAG_THRESHOLD) return; // still a tap
+          // Crossed threshold — initialize drag
+          mobileState = 'dragging';
+          dragInitiated = true;
+          currentDraggable.classList.remove('block-swipe-in');
+          currentDraggable.classList.add('dragging');
+          currentDraggable.style.position = 'absolute';
+          currentDraggable.style.zIndex = 1000;
+          currentDraggable.style.left = `${initialDraggableXOffset}px`;
+          currentDraggable.style.top = `${initialDraggableRect.top - gameBoardRect.top}px`;
+          currentDraggable.style.margin = '0';
+          currentDraggable.style.width = `${initialDraggableRect.width}px`;
+          currentDraggable.style.height = `${initialDraggableRect.height}px`;
+          const origIdx = Array.from(gameBoard.children).indexOf(currentDraggable);
+          placeholderEl = document.createElement('div');
+          placeholderEl.className = 'block vowel-block placeholder-block';
+          placeholderEl.style.width = `${initialDraggableRect.width}px`;
+          placeholderEl.style.height = `${initialDraggableRect.height}px`;
+          if (origIdx !== -1 && origIdx < gameBoard.children.length) {
+            gameBoard.insertBefore(placeholderEl, gameBoard.children[origIdx]);
+          } else {
+            gameBoard.appendChild(placeholderEl);
+          }
+        }
+
+        // If still tap-pending (under threshold), do nothing yet
+        if (isMobile && mobileState === 'tap-pending') return;
+
+        // First actual movement — only reset to '_' if block was empty (desktop only)
         if (!dragInitiated) {
           dragInitiated = true;
           if (dragStartText === '_') {
@@ -1348,14 +1387,16 @@
         // moveAt() returns the clamped translation so we can compute the
         // block's client-space position without a second getBoundingClientRect().
         const finalTranslateX = moveAt(ev.clientX, ev.clientY);
-        const blockCenterX = initialDraggableRect.left + finalTranslateX + initialDraggableRect.width / 2;
-        vowelPicker.trackXAt(blockCenterX);
 
-        // Update the dragged block's letter based on which vowel the pointer is over.
-        const hoveredVowel = vowelPicker.getVowelAtPoint(ev.clientX, ev.clientY);
-        if (hoveredVowel) {
-          currentDraggable.textContent = hoveredVowel;
-          currentDraggable.classList.remove('empty');
+        // Desktop only: track vowel picker position and select hovered vowel
+        if (!isMobile) {
+          const blockCenterX = initialDraggableRect.left + finalTranslateX + initialDraggableRect.width / 2;
+          vowelPicker.trackXAt(blockCenterX);
+          const hoveredVowel = vowelPicker.getVowelAtPoint(ev.clientX, ev.clientY);
+          if (hoveredVowel) {
+            currentDraggable.textContent = hoveredVowel;
+            currentDraggable.classList.remove('empty');
+          }
         }
 
         // Use the leading edge (right when moving right, left when moving left)
@@ -1396,20 +1437,46 @@
       // Block all interaction during feedback window (won / gaveup phases)
       if (gameState.phase !== 'playing') return;
 
+      // --- Mobile: picker-open — resolve vowel selection or dismiss ---
+      if (isMobile && mobileState === 'picker-open') {
+        const vowel = vowelPicker.getVowelAtPoint(event.clientX, event.clientY);
+        if (vowel && mobileTapBlock) {
+          mobileTapBlock.textContent = vowel;
+          mobileTapBlock.classList.remove('empty');
+          checkWinCondition();
+        }
+        vowelPicker.hide();
+        mobileState = 'idle';
+        mobileTapBlock = null;
+        event.preventDefault();
+        return;
+      }
+
       const draggable = event.target.closest('.vowel-block[data-draggable="true"]');
       if (!draggable || event.button !== 0) return;
 
-      currentDraggable = draggable;
-      currentDraggable.classList.remove('block-swipe-in'); // stop animation so inline transform takes over
-      currentDraggable.classList.add('dragging');
-      dragInitiated = false; // will be set true on first pointermove
-
+      // Record common drag-start info used by both mobile and desktop
       dragStartX = event.clientX;
       dragStartY = event.clientY;
       prevPointerX = event.clientX;
-      initialDraggableRect = currentDraggable.getBoundingClientRect();
+      initialDraggableRect = draggable.getBoundingClientRect();
       gameBoardRect = gameBoard.getBoundingClientRect();
       initialDraggableXOffset = initialDraggableRect.left - gameBoardRect.left;
+      dragStartText = draggable.textContent.trim();
+      dragInitiated = false;
+      currentDraggable = draggable;
+
+      if (isMobile) {
+        // Mobile: defer drag setup — wait to see if this is a tap or a drag
+        mobileState = 'tap-pending';
+        mobileTapBlock = draggable;
+        event.preventDefault();
+        return;
+      }
+
+      // Desktop: start full drag immediately
+      currentDraggable.classList.remove('block-swipe-in');
+      currentDraggable.classList.add('dragging');
 
       currentDraggable.style.position = 'absolute';
       currentDraggable.style.zIndex = 1000;
@@ -1430,8 +1497,7 @@
         gameBoard.appendChild(placeholderEl);
       }
 
-      // Capture text and show picker immediately on lift — before any movement
-      dragStartText = currentDraggable.textContent.trim();
+      // Show picker immediately — vowel is selected by hovering during drag
       vowelPicker.show(currentDraggable);
 
       event.preventDefault();
@@ -1462,12 +1528,25 @@
       }
       placeholderEl = null;
       vowelPicker.hide();
+      if (isMobile) {
+        mobileState = 'idle';
+        mobileTapBlock = null;
+      }
     });
 
     document.addEventListener('pointerup', function(event) {
       rafPending = false;
       latestPointerEvent = null;
       if (!currentDraggable) return;
+
+      // Mobile tap-pending: finger lifted without a drag — show the vowel picker
+      if (isMobile && mobileState === 'tap-pending') {
+        mobileState = 'picker-open';
+        mobileTapBlock = currentDraggable;
+        vowelPicker.show(currentDraggable);
+        currentDraggable = null;
+        return;
+      }
 
       const droppedElement = currentDraggable;
       droppedElement.classList.remove('dragging');
@@ -1495,15 +1574,18 @@
       droppedElement.addEventListener('animationend', () => droppedElement.classList.remove('block-settle'), { once: true });
 
       if (dragInitiated) {
-        vowelPicker.hide();
-        // If released without hovering a vowel, restore the block's previous value
-        if (droppedElement.textContent.trim() === '_') {
-          droppedElement.textContent = dragStartText;
-          if (dragStartText !== '_') droppedElement.classList.remove('empty');
+        if (!isMobile) {
+          vowelPicker.hide();
+          // Desktop: restore block if no vowel was hovered during drag
+          if (droppedElement.textContent.trim() === '_') {
+            droppedElement.textContent = dragStartText;
+            if (dragStartText !== '_') droppedElement.classList.remove('empty');
+          }
         }
         checkWinCondition();
       }
 
+      if (isMobile) mobileState = 'idle';
       currentDraggable = null;
     });
 
@@ -1740,7 +1822,20 @@
        per-word outcomes, and completion. Persisted to localStorage
        keyed by today's date so mid-puzzle reloads resume correctly.
     ============================================================ */
+    function getUserId() {
+      let id = localStorage.getItem('vowel_user_id');
+      if (!id) {
+        // Use crypto.randomUUID() or a simple fallback
+        id = (typeof crypto !== 'undefined' && crypto.randomUUID) 
+          ? crypto.randomUUID() 
+          : 'user_' + Math.random().toString(36).substring(2, 15);
+        localStorage.setItem('vowel_user_id', id);
+      }
+      return id;
+    }
+
     let puzzleState = {
+      userId: getUserId(),               // unique persistent ID for leaderboard
       dateKey: DailyEngine.dateSeed,    // YYYY-MM-DD string
       wordIndex: 0,                      // 0-4, current word position
       outcomes: [],                      // Array of 'solved'|'gaveup' for completed words
@@ -1784,6 +1879,43 @@
       }
       console.log('[PuzzleState] Loaded:', JSON.stringify(puzzleState));
     }
+
+    /* ============================================================
+       SECTION: API SERVICE
+       Communicates with the Node.js backend for rankings.
+    ============================================================ */
+    const ApiService = {
+      baseUrl: '/api',
+
+      async submitScore(timeMs) {
+        try {
+          const response = await fetch(`${this.baseUrl}/scores`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: puzzleState.userId,
+              date: puzzleState.dateKey,
+              timeMs: timeMs
+            })
+          });
+          return response.ok;
+        } catch (e) {
+          console.warn('[ApiService] Score submission failed:', e);
+          return false;
+        }
+      },
+
+      async fetchStats(timeMs) {
+        try {
+          const response = await fetch(`${this.baseUrl}/stats?date=${puzzleState.dateKey}&timeMs=${timeMs}`);
+          if (!response.ok) throw new Error('Stats request failed');
+          return await response.json();
+        } catch (e) {
+          console.warn('[ApiService] Stats fetch failed:', e);
+          return null;
+        }
+      }
+    };
 
     /* ============================================================
        SECTION 7: VALIDATION & STATE MANAGEMENT
@@ -1903,7 +2035,8 @@
 
     /**
      * Renders the final results screen after the 5th word completes.
-     * Displays the total elapsed time (including penalties) and a return prompt.
+     * Displays the total elapsed time (including penalties) and a real-time
+     * percentile rank from the backend, with graceful fallback to simulated stats.
      */
     function showPuzzleComplete() {
       giveUpCountdown.stop();
@@ -1911,6 +2044,7 @@
 
       // Format final time as M:SS (puzzleState.timerElapsed is integer seconds)
       const totalSeconds = puzzleState.timerElapsed;
+      const timeMs = totalSeconds * 1000;
       const minutes = Math.floor(totalSeconds / 60);
       const seconds = totalSeconds % 60;
       const timeString = minutes + ':' + String(seconds).padStart(2, '0');
@@ -1930,10 +2064,10 @@
       time.className = 'results-time';
       time.textContent = timeString;
 
-      const rankValue = PerformanceStats.getPercentile(totalSeconds);
+      // Show a loading state while fetching real stats from the backend
       const rank = document.createElement('div');
       rank.className = 'results-rank';
-      rank.textContent = `Better than ${rankValue}% of players`;
+      rank.textContent = 'Loading stats\u2026';
 
       const divider = document.createElement('div');
       divider.className = 'results-divider';
@@ -1944,6 +2078,7 @@
 
       screen.appendChild(label);
       screen.appendChild(time);
+      screen.appendChild(rank);
       screen.appendChild(divider);
       screen.appendChild(tomorrow);
       board.appendChild(screen);
@@ -1951,6 +2086,29 @@
       document.getElementById('give-up-btn').style.display = 'none';
       renderProgress();
       console.log('[Puzzle] Complete! Time:', timeString, '— Outcomes:', puzzleState.outcomes.join(', '));
+
+      // Fire-and-forget score submission — does not block the UI
+      ApiService.submitScore(timeMs).then(ok => {
+        console.log('[Puzzle] Score submitted:', ok);
+      });
+
+      // Fetch real stats and update rank text; fall back to simulated stats on failure
+      ApiService.fetchStats(timeMs).then(stats => {
+        if (stats && typeof stats.percentile === 'number') {
+          let rankText = `Better than ${stats.percentile}% of players`;
+          if (typeof stats.totalPlayers === 'number' && stats.totalPlayers > 1) {
+            rankText += ` (${stats.totalPlayers} today)`;
+          }
+          rank.textContent = rankText;
+          console.log('[Puzzle] Real stats received:', stats);
+        } else {
+          throw new Error('Invalid stats response');
+        }
+      }).catch(() => {
+        const fallbackPercentile = PerformanceStats.getPercentile(totalSeconds);
+        rank.textContent = `Better than ${fallbackPercentile}% of players`;
+        console.warn('[Puzzle] Stats fetch failed — using simulated rank:', fallbackPercentile);
+      });
     }
 
     /* ============================================================
