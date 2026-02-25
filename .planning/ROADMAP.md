@@ -71,7 +71,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. After the 5th word completes, a results screen displays the total elapsed time including all penalties
   2. The results screen shows a message indicating the next puzzle is available tomorrow
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 08-01-PLAN.md — Results screen CSS + showPuzzleComplete() implementation + human verify
 
 ### Phase 9: Mobile Fixes
 **Goal**: The game title is fully visible on notch/Dynamic Island devices, and dragged blocks track the finger center precisely
