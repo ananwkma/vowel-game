@@ -1519,6 +1519,11 @@
 
       function start() {
         if (intervalId !== null) return; // already running — do not reset
+
+        // Block start if help modal is visible
+        const helpModal = document.getElementById('help-modal');
+        if (helpModal && helpModal.classList.contains('visible')) return;
+
         startTime = Date.now();
         // Render immediately so there's no 1-second blank delay
         tick();
@@ -1600,6 +1605,11 @@
 
       function start() {
         if (intervalId !== null || current <= 0) return;
+
+        // Block start if help modal is visible
+        const helpModal = document.getElementById('help-modal');
+        if (helpModal && helpModal.classList.contains('visible')) return;
+
         intervalId = setInterval(tick, 1000);
       }
 
@@ -1720,7 +1730,7 @@
       timerElapsed: 0,                   // accumulated seconds including penalties
       giveUpRemaining: 60,               // countdown value to restore on reload
       complete: false,                   // true after 5th word finishes
-      isFirstTime: true,                 // show help automatically for new players
+      isFirstTime: localStorage.getItem('vowel_introduced') !== 'true', // show help automatically for new players
     };
 
     function savePuzzleState() {
@@ -1745,6 +1755,7 @@
             puzzleState.timerElapsed = typeof parsed.timerElapsed === 'number' ? parsed.timerElapsed : 0;
             puzzleState.giveUpRemaining = typeof parsed.giveUpRemaining === 'number' ? parsed.giveUpRemaining : 60;
             puzzleState.complete = parsed.complete === true;
+            puzzleState.isFirstTime = parsed.isFirstTime !== false;
             // Guard: if already complete and not in debug mode, keep complete flag
             if (parsed.complete === true && DailyEngine.isDebug === false) {
               puzzleState.complete = true;
@@ -1954,6 +1965,7 @@
       hideHelp();
       if (puzzleState.isFirstTime) {
         puzzleState.isFirstTime = false;
+        localStorage.setItem('vowel_introduced', 'true');
         savePuzzleState();
       }
     });
