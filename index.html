@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Vowel">
+  <link rel="apple-touch-icon" href="https://via.placeholder.com/180/D4A574/1C1B18?text=V">
   <title>Vowel</title>
   <style>
     /* ============================================================
@@ -74,10 +78,10 @@
     #app {
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
+      min-height: 100dvh;
       padding: 32px 24px;
       padding-top: max(48px, env(safe-area-inset-top));
-      padding-bottom: max(32px, env(safe-area-inset-bottom));
+      padding-bottom: max(48px, env(safe-area-inset-bottom));
     }
 
     #game-header {
@@ -105,7 +109,7 @@
       flex-shrink: 0;
       display: flex;
       justify-content: center;
-      padding-bottom: 8px;
+      padding-bottom: 32px;
     }
 
     /* ============================================================
@@ -428,7 +432,7 @@
       #app {
         padding: 24px 12px;
         padding-top: max(40px, env(safe-area-inset-top));
-        padding-bottom: max(24px, env(safe-area-inset-bottom));
+        padding-bottom: max(32px, env(safe-area-inset-bottom));
       }
     }
 
@@ -440,7 +444,7 @@
       #app {
         padding: 20px 8px;
         padding-top: max(36px, env(safe-area-inset-top));
-        padding-bottom: max(20px, env(safe-area-inset-bottom));
+        padding-bottom: max(24px, env(safe-area-inset-bottom));
       }
     }
   </style>
