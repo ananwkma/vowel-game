@@ -26,9 +26,9 @@
 
 ### Frontend Integration
 
-- [ ] **FE-01**: Frontend submits completion time to `POST /api/scores` when the daily puzzle is finished
-- [ ] **FE-02**: Frontend requests `GET /api/stats` and displays the real average time and user's percentile on the results screen
-- [ ] **FE-03**: Frontend handles API failures gracefully (e.g., shows "Stats unavailable" or falls back to local view if server unreachable)
+- [x] **FE-01**: Frontend submits completion time to `POST /api/scores` when the daily puzzle is finished
+- [x] **FE-02**: Frontend requests `GET /api/stats` and displays the real average time and user's percentile on the results screen
+- [x] **FE-03**: Frontend handles API failures gracefully (e.g., shows "Stats unavailable" or falls back to local view if server unreachable)
 
 ### Verification
 
@@ -44,8 +44,8 @@
 | BE-02       | Phase 11 | Pending |
 | API-01      | Phase 11 | Pending |
 | API-02      | Phase 11 | Pending |
-| FE-01       | Phase 12 | Pending |
-| FE-02       | Phase 12 | Pending |
-| FE-03       | Phase 12 | Pending |
+| FE-01       | Phase 12 | Complete |
+| FE-02       | Phase 12 | Complete |
+| FE-03       | Phase 12 | Complete |
 | VER-01      | Phase 13 | Pending |
 

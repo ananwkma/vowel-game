@@ -24,7 +24,7 @@ See .planning/milestones/v1.1-ROADMAP.md (to be archived)
 
 - [x] **Phase 10: Research & Architecture** - Setup project structure for backend and define API spec
 - [x] **Phase 11: Backend Implementation** - Build Express server, SQLite DB, and Score/Stats APIs
-- [ ] **Phase 12: Frontend Integration** - Connect game client to backend APIs and display real stats
+- [x] **Phase 12: Frontend Integration** - Connect game client to backend APIs and display real stats
 - [ ] **Phase 13: Local Verification** - Validate end-to-end flow in local environment
 
 ## Phase Details
@@ -54,7 +54,7 @@ See .planning/milestones/v1.1-ROADMAP.md (to be archived)
 **Depends on**: Phase 11
 **Requirements**: FE-01, FE-02, FE-03
 **Plans**: 1 plan
-- [ ] 12-01-PLAN.md — Connect game client to backend APIs and display real stats
+- [x] 12-01-PLAN.md — Connect game client to backend APIs and display real stats
 
 **Success Criteria** (what must be TRUE):
   1. Completing a daily puzzle triggers a network request to submit score
@@ -77,7 +77,7 @@ See .planning/milestones/v1.1-ROADMAP.md (to be archived)
 |-------|-----------|----------------|--------|-----------|
 | 10. Research & Architecture | v1.2 | 1/1 | Completed | 2026-02-24 |
 | 11. Backend Implementation | v1.2 | 3/3 | Completed | 2026-02-24 |
-| 12. Frontend Integration | v1.2 | 0/1 | In Progress | - |
+| 12. Frontend Integration | v1.2 | 1/1 | Completed | 2026-02-25 |
 | 13. Local Verification | v1.2 | 0/1 | Not Started | - |
 
 ---
