@@ -5,27 +5,28 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Players can instantly understand and interact with any puzzle.
-**Current focus:** Phase 12 — Frontend Integration (v1.2)
+**Current focus:** Phase 13 — Local Verification (v1.2)
 
 ## Current Position
 
-Phase: 12 of 13 (Frontend Integration)
-Plan: 01 of 01 (Complete)
+Phase: 13 of 13 (Local Verification)
+Plan: 01 of 02 (Complete)
 Status: v1.2 Milestone In Progress
-Last activity: 2026-02-25 — Completed Plan 12-01 (Frontend Integration)
+Last activity: 2026-02-25 — Completed Plan 13-01 (Local Verification - Seed & API Checks)
 
-Progress: [████████████████----] 85% (v1.2)
+Progress: [████████████████████] 92% (v1.2)
 
 ## Performance Metrics
 
 **Velocity:**
 - v1.0 Plans: 18
 - v1.1 Plans: 6
-- v1.2 Plans: 5 (completed)
+- v1.2 Plans: 6 (completed)
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 12 | 01 | 8min | 3 | 1 |
+| 13 | 01 | 5min | 2 | 1 |
 
 ## Accumulated Context
 
@@ -38,6 +39,8 @@ Progress: [████████████████----] 85% (v1.2)
 - [Phase 12]: ApiService object pattern used for backend communication; fire-and-forget for score submission.
 - [Phase 12]: Loading state shown immediately in results screen; rank updated asynchronously from /api/stats.
 - [Phase 12]: Graceful fallback to PerformanceStats.getPercentile() when backend is unreachable.
+- [Phase 13]: Seed script is additive — safe to re-run, no delete before insert.
+- [Phase 13]: Date in seed script uses en-CA locale (YYYY-MM-DD) matching DailyEngine frontend pattern.
 
 ### Pending Todos
 
@@ -50,5 +53,5 @@ Progress: [████████████████----] 85% (v1.2)
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed Phase 12 Plan 01 (Frontend Integration)
-Resume file: .planning/phases/12-frontend-integration/12-01-SUMMARY.md
+Stopped at: Completed Phase 13 Plan 01 (Local Verification - Seed & API Checks)
+Resume file: .planning/phases/13-local-verification/13-01-SUMMARY.md

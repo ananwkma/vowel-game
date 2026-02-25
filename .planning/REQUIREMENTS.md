@@ -32,7 +32,7 @@
 
 ### Verification
 
-- [ ] **VER-01**: Full end-to-end flow works in local environment (Play → Win → Post → Get Stats → View Results)
+- [x] **VER-01**: Full end-to-end flow works in local environment (Play → Win → Post → Get Stats → View Results)
 
 ---
 
@@ -47,5 +47,5 @@
 | FE-01       | Phase 12 | Complete |
 | FE-02       | Phase 12 | Complete |
 | FE-03       | Phase 12 | Complete |
-| VER-01      | Phase 13 | Pending |
+| VER-01      | Phase 13 | Complete |
 
