@@ -1953,7 +1953,8 @@
 
     /**
      * Renders the final results screen after the 5th word completes.
-     * Displays the total elapsed time (including penalties) and a return prompt.
+     * Displays the total elapsed time (including penalties) and a real-time
+     * percentile rank from the backend, with graceful fallback to simulated stats.
      */
     function showPuzzleComplete() {
       giveUpCountdown.stop();
@@ -1961,6 +1962,7 @@
 
       // Format final time as M:SS (puzzleState.timerElapsed is integer seconds)
       const totalSeconds = puzzleState.timerElapsed;
+      const timeMs = totalSeconds * 1000;
       const minutes = Math.floor(totalSeconds / 60);
       const seconds = totalSeconds % 60;
       const timeString = minutes + ':' + String(seconds).padStart(2, '0');
@@ -1980,10 +1982,10 @@
       time.className = 'results-time';
       time.textContent = timeString;
 
-      const rankValue = PerformanceStats.getPercentile(totalSeconds);
+      // Show a loading state while fetching real stats from the backend
       const rank = document.createElement('div');
       rank.className = 'results-rank';
-      rank.textContent = `Better than ${rankValue}% of players`;
+      rank.textContent = 'Loading stats\u2026';
 
       const divider = document.createElement('div');
       divider.className = 'results-divider';
@@ -2002,6 +2004,29 @@
       document.getElementById('give-up-btn').style.display = 'none';
       renderProgress();
       console.log('[Puzzle] Complete! Time:', timeString, '— Outcomes:', puzzleState.outcomes.join(', '));
+
+      // Fire-and-forget score submission — does not block the UI
+      ApiService.submitScore(timeMs).then(ok => {
+        console.log('[Puzzle] Score submitted:', ok);
+      });
+
+      // Fetch real stats and update rank text; fall back to simulated stats on failure
+      ApiService.fetchStats(timeMs).then(stats => {
+        if (stats && typeof stats.percentile === 'number') {
+          let rankText = `Better than ${stats.percentile}% of players`;
+          if (typeof stats.totalPlayers === 'number' && stats.totalPlayers > 1) {
+            rankText += ` (${stats.totalPlayers} today)`;
+          }
+          rank.textContent = rankText;
+          console.log('[Puzzle] Real stats received:', stats);
+        } else {
+          throw new Error('Invalid stats response');
+        }
+      }).catch(() => {
+        const fallbackPercentile = PerformanceStats.getPercentile(totalSeconds);
+        rank.textContent = `Better than ${fallbackPercentile}% of players`;
+        console.warn('[Puzzle] Stats fetch failed — using simulated rank:', fallbackPercentile);
+      });
     }
 
     /* ============================================================
