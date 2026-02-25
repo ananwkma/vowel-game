@@ -376,6 +376,145 @@
     }
 
     /* ============================================================
+       SECTION: HELP BUTTON
+       Top-right "?" button for instructions.
+    ============================================================ */
+    #game-header {
+      position: relative;
+    }
+
+    #help-btn {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1.5px solid var(--color-vowel-text);
+      background: transparent;
+      color: var(--color-vowel-text);
+      font-family: var(--font-serif);
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.6;
+      transition: opacity 0.2s, transform 0.2s;
+      z-index: 10;
+    }
+
+    #help-btn:hover, #help-btn:active {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+
+    /* ============================================================
+       SECTION: INSTRUCTIONS MODAL
+       Overlay showing how to play.
+    ============================================================ */
+    #help-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(28, 27, 24, 0.85); /* near-black overlay */
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 24px;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    #help-modal.visible {
+      display: flex;
+    }
+
+    #help-modal-content {
+      background: var(--color-bg);
+      width: 100%;
+      max-width: 360px;
+      border-radius: 12px;
+      padding: 32px 24px;
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      text-align: center;
+      animation: modal-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes modal-pop {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    #help-modal h2 {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--color-vowel-text);
+    }
+
+    #help-modal p {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 24px;
+      color: var(--color-vowel-text);
+      opacity: 0.85;
+    }
+
+    #help-modal .instruction-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    #help-modal .step-num {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: var(--color-vowel-bg);
+      color: var(--color-vowel-text);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+
+    #help-modal .step-text {
+      font-size: 0.9rem;
+      line-height: 1.4;
+      color: var(--color-vowel-text);
+    }
+
+    #help-modal-close {
+      margin-top: 8px;
+      padding: 12px 32px;
+      background: var(--color-vowel-bg);
+      color: var(--color-vowel-text);
+      border: none;
+      border-radius: 6px;
+      font-family: var(--font-serif);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: var(--shadow-block);
+      transition: transform 0.1s;
+    }
+
+    #help-modal-close:active {
+      transform: translateY(2px);
+    }
+
+    /* ============================================================
        SECTION: RESULTS SCREEN
        Full-puzzle completion card shown after the 5th word.
     ============================================================ */
@@ -406,6 +545,14 @@
       letter-spacing: 0.05em;
       color: var(--color-vowel-text);
       line-height: 1;
+    }
+
+    #results-screen .results-rank {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--color-vowel-text);
+      opacity: 0.75;
+      margin-top: -8px;
     }
 
     #results-screen .results-divider {
@@ -453,6 +600,7 @@
   <div id="app">
     <header id="game-header">
       <h1 id="game-title">Vowel</h1>
+      <button id="help-btn" aria-label="How to play">?</button>
       <div id="progress-bar">
         <span id="word-counter">Word 1 of 5</span>
         <div id="pip-row" aria-hidden="true">
@@ -471,6 +619,29 @@
     <footer id="game-footer">
       <button id="give-up-btn" type="button">Give Up</button>
     </footer>
+  </div>
+
+  <div id="help-modal" aria-hidden="true">
+    <div id="help-modal-content">
+      <h2>How to Play</h2>
+      
+      <div class="instruction-step">
+        <div class="step-num">1</div>
+        <div class="step-text">Every word is missing its vowels. Identify which letters are gone.</div>
+      </div>
+
+      <div class="instruction-step">
+        <div class="step-num">2</div>
+        <div class="step-text">Drag the correct vowel from the bottom and drop it onto the empty block.</div>
+      </div>
+
+      <div class="instruction-step">
+        <div class="step-num">3</div>
+        <div class="step-text">Solve all 5 words for today. Speed counts, but every "Give Up" adds a time penalty!</div>
+      </div>
+
+      <button id="help-modal-close">Got it</button>
+    </div>
   </div>
 
   <div class="vowel-picker" aria-hidden="true">
@@ -1487,6 +1658,51 @@
 
   <script>
     /* ============================================================
+       SECTION: PERFORMANCE STATS
+       Provides simulated global averages and percentile rankings.
+    ============================================================ */
+    const PerformanceStats = (function() {
+      // Baseline average for 5 words: 120 seconds (2:00)
+      // Standard deviation: 45 seconds
+      const AVG = 120;
+      const STDEV = 45;
+
+      /**
+       * Calculates percentile based on normal distribution.
+       * Lower time = higher percentile.
+       */
+      function getPercentile(time) {
+        // Simple z-score calculation
+        const z = (time - AVG) / STDEV;
+        
+        // Error function approximation for normal distribution CDF
+        // t = 1 / (1 + p * |z|)
+        const p = 0.3275911;
+        const a1 = 0.254829592;
+        const a2 = -0.284496736;
+        const a3 = 1.421413741;
+        const a4 = -1.453152027;
+        const a5 = 1.061405429;
+        
+        const absZ = Math.abs(z);
+        const t = 1.0 / (1.0 + p * absZ);
+        const erf = 1.0 - (((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-absZ * absZ));
+        
+        // Percentile (0 to 1) where lower time is better
+        let percentile = 0.5 * (1.0 + (z < 0 ? -erf : erf));
+        
+        // Since lower time is better, invert so 1.0 is fast
+        percentile = 1.0 - percentile;
+        
+        return Math.min(99, Math.max(1, Math.round(percentile * 100)));
+      }
+
+      return {
+        getPercentile
+      };
+    })();
+
+    /* ============================================================
        SECTION 3.5: PUZZLE STATE
        Daily puzzle bookkeeping — tracks which word we're on,
        per-word outcomes, and completion. Persisted to localStorage
@@ -1499,6 +1715,7 @@
       timerElapsed: 0,                   // accumulated seconds including penalties
       giveUpRemaining: 60,               // countdown value to restore on reload
       complete: false,                   // true after 5th word finishes
+      isFirstTime: true,                 // show help automatically for new players
     };
 
     function savePuzzleState() {
@@ -1680,6 +1897,11 @@
       time.className = 'results-time';
       time.textContent = timeString;
 
+      const rankValue = PerformanceStats.getPercentile(totalSeconds);
+      const rank = document.createElement('div');
+      rank.className = 'results-rank';
+      rank.textContent = `Better than ${rankValue}% of players`;
+
       const divider = document.createElement('div');
       divider.className = 'results-divider';
 
@@ -1696,6 +1918,44 @@
       document.getElementById('give-up-btn').style.display = 'none';
       renderProgress();
       console.log('[Puzzle] Complete! Time:', timeString, '— Outcomes:', puzzleState.outcomes.join(', '));
+    }
+
+    /* ============================================================
+       SECTION: HELP MODAL & FIRST-TIME FLOW
+       Manages the instructions overlay.
+    ============================================================ */
+    const helpModal = document.getElementById('help-modal');
+    const helpBtn = document.getElementById('help-btn');
+    const helpCloseBtn = document.getElementById('help-modal-close');
+
+    function showHelp() {
+      helpModal.classList.add('visible');
+      helpModal.setAttribute('aria-hidden', 'false');
+    }
+
+    function hideHelp() {
+      helpModal.classList.remove('visible');
+      helpModal.setAttribute('aria-hidden', 'true');
+    }
+
+    helpBtn.addEventListener('click', showHelp);
+    helpCloseBtn.addEventListener('click', () => {
+      hideHelp();
+      if (puzzleState.isFirstTime) {
+        puzzleState.isFirstTime = false;
+        savePuzzleState();
+      }
+    });
+
+    // Close on overlay click
+    helpModal.addEventListener('click', (e) => {
+      if (e.target === helpModal) hideHelp();
+    });
+
+    // Auto-show for first time players (unless puzzle is already complete)
+    if (puzzleState.isFirstTime && !puzzleState.complete) {
+      // Small delay to let the initial word settle
+      setTimeout(showHelp, 500);
     }
 
     /* ============================================================
