@@ -1595,6 +1595,11 @@
         current = (typeof from === 'number' && from > 0) ? from : COUNTDOWN_START;
         puzzleState.giveUpRemaining = current;
         updateButtonText();
+        start();
+      }
+
+      function start() {
+        if (intervalId !== null || current <= 0) return;
         intervalId = setInterval(tick, 1000);
       }
 
@@ -1611,7 +1616,7 @@
         return current;
       }
 
-      return { reset, stop, getPenalty };
+      return { reset, start, stop, getPenalty };
     })();
 
     /* ============================================================
@@ -1931,11 +1936,17 @@
     function showHelp() {
       helpModal.classList.add('visible');
       helpModal.setAttribute('aria-hidden', 'false');
+      elapsedTimer.pause();
+      giveUpCountdown.stop();
     }
 
     function hideHelp() {
       helpModal.classList.remove('visible');
       helpModal.setAttribute('aria-hidden', 'true');
+      if (!puzzleState.complete) {
+        elapsedTimer.start();
+        giveUpCountdown.start();
+      }
     }
 
     helpBtn.addEventListener('click', showHelp);
@@ -1954,8 +1965,8 @@
 
     // Auto-show for first time players (unless puzzle is already complete)
     if (puzzleState.isFirstTime && !puzzleState.complete) {
-      // Small delay to let the initial word settle
-      setTimeout(showHelp, 500);
+      // Show immediately to ensure timer doesn't run before "Got it"
+      showHelp();
     }
 
     /* ============================================================
