@@ -4,7 +4,7 @@
 
 - ✅ **v1.0 MVP** — Phases 1–5 (shipped 2026-02-23)
 - ✅ **v1.1 Score, Streaks & Mobile Polish** — Phases 6–9 (completed 2026-02-24)
-- 🚧 **v1.2 Daily Leaderboard** — Phases 10–13 (active)
+- ✅ **v1.2 Daily Leaderboard** — Phases 10–13 (completed 2026-02-24)
 
 ## Phases
 
@@ -18,14 +18,14 @@ See .planning/milestones/v1.0-ROADMAP.md
 See .planning/milestones/v1.1-ROADMAP.md (to be archived)
 </details>
 
-### 🚧 v1.2 Daily Leaderboard & Backend Stats (In Progress)
+### ✅ v1.2 Daily Leaderboard & Backend Stats (Complete)
 
 **Milestone Goal:** Implement a real backend (Node.js/Express) to store daily puzzle completion times and provide real-time percentile rankings and averages.
 
 - [x] **Phase 10: Research & Architecture** - Setup project structure for backend and define API spec
 - [x] **Phase 11: Backend Implementation** - Build Express server, SQLite DB, and Score/Stats APIs
 - [x] **Phase 12: Frontend Integration** - Connect game client to backend APIs and display real stats
-- [ ] **Phase 13: Local Verification** - Validate end-to-end flow in local environment
+- [x] **Phase 13: Local Verification** - Validate end-to-end flow in local environment
 
 ## Phase Details
 
@@ -66,8 +66,8 @@ See .planning/milestones/v1.1-ROADMAP.md (to be archived)
 **Depends on**: Phase 12
 **Requirements**: VER-01
 **Plans**: 2 plans
-- [ ] 13-01-PLAN.md — Seed test data into SQLite and verify all API endpoints automated
-- [ ] 13-02-PLAN.md — Human gameplay verification: full end-to-end flow with real percentile
+- [x] 13-01-PLAN.md — Seed test data into SQLite and verify all API endpoints automated
+- [x] 13-02-PLAN.md — Human gameplay verification: full end-to-end flow with real percentile
 
 **Success Criteria** (what must be TRUE):
   1. User can play through the daily puzzle
@@ -82,7 +82,7 @@ See .planning/milestones/v1.1-ROADMAP.md (to be archived)
 | 10. Research & Architecture | v1.2 | 1/1 | Completed | 2026-02-24 |
 | 11. Backend Implementation | v1.2 | 3/3 | Completed | 2026-02-24 |
 | 12. Frontend Integration | v1.2 | Complete    | 2026-02-25 | 2026-02-25 |
-| 13. Local Verification | 1/2 | In Progress|  | - |
+| 13. Local Verification | v1.2 | 2/2 | Completed | 2026-02-24 |
 
 ---
 *Roadmap created: 2026-02-19*
