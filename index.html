@@ -1881,6 +1881,36 @@
     }
 
     /* ============================================================
+       SECTION: PERSONAL BEST
+       Stores and retrieves the player's all-time best daily run
+       in localStorage. No backend required.
+    ============================================================ */
+    const PersonalBest = {
+      KEY: 'vowel_best_ms',
+
+      // Returns best time in ms, or null if no run recorded yet
+      get() {
+        const val = localStorage.getItem(this.KEY);
+        return val ? parseInt(val, 10) : null;
+      },
+
+      // Updates best if timeMs is better. Returns true if it's a new best.
+      update(timeMs) {
+        const current = this.get();
+        if (current === null || timeMs < current) {
+          localStorage.setItem(this.KEY, timeMs);
+          return true;
+        }
+        return false;
+      },
+
+      format(ms) {
+        const s = Math.round(ms / 1000);
+        return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+      }
+    };
+
+    /* ============================================================
        SECTION: API SERVICE
        Communicates with the Node.js backend for rankings.
     ============================================================ */
@@ -2064,10 +2094,21 @@
       time.className = 'results-time';
       time.textContent = timeString;
 
-      // Show a loading state while fetching real stats from the backend
+      // Personal best — check before updating so we know if this run beats it
+      const prevBest = PersonalBest.get();
+      const isNewBest = PersonalBest.update(timeMs);
+
       const rank = document.createElement('div');
       rank.className = 'results-rank';
-      rank.textContent = 'Loading stats\u2026';
+      if (prevBest === null) {
+        rank.textContent = 'First run!';
+        rank.style.opacity = '1';
+      } else if (isNewBest) {
+        rank.textContent = 'New personal best!';
+        rank.style.opacity = '1';
+      } else {
+        rank.textContent = 'Personal best: ' + PersonalBest.format(prevBest);
+      }
 
       const divider = document.createElement('div');
       divider.className = 'results-divider';
@@ -2086,29 +2127,6 @@
       document.getElementById('give-up-btn').style.display = 'none';
       renderProgress();
       console.log('[Puzzle] Complete! Time:', timeString, '— Outcomes:', puzzleState.outcomes.join(', '));
-
-      // Fire-and-forget score submission — does not block the UI
-      ApiService.submitScore(timeMs).then(ok => {
-        console.log('[Puzzle] Score submitted:', ok);
-      });
-
-      // Fetch real stats and update rank text; fall back to simulated stats on failure
-      ApiService.fetchStats(timeMs).then(stats => {
-        if (stats && typeof stats.percentile === 'number') {
-          let rankText = `Better than ${stats.percentile}% of players`;
-          if (typeof stats.totalPlayers === 'number' && stats.totalPlayers > 1) {
-            rankText += ` (${stats.totalPlayers} today)`;
-          }
-          rank.textContent = rankText;
-          console.log('[Puzzle] Real stats received:', stats);
-        } else {
-          throw new Error('Invalid stats response');
-        }
-      }).catch(() => {
-        const fallbackPercentile = PerformanceStats.getPercentile(totalSeconds);
-        rank.textContent = `Better than ${fallbackPercentile}% of players`;
-        console.warn('[Puzzle] Stats fetch failed — using simulated rank:', fallbackPercentile);
-      });
     }
 
     /* ============================================================
