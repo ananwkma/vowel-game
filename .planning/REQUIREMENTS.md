@@ -12,7 +12,7 @@ Requirements for the Word Game Collection milestone. Each maps to roadmap phases
 - [ ] **HUB-01**: User can see a card-based hub portal with a card for each game (VOWEL, Word Ladder, Letter Hunt)
 - [ ] **HUB-02**: User can navigate from the hub to any game via its card
 - [ ] **HUB-03**: User can see on the hub which of today's daily puzzles they have already completed
-- [ ] **HUB-04**: All game files share a common set of CSS design tokens (colors, fonts, spacing) for visual consistency
+- [x] **HUB-04**: All game files share a common set of CSS design tokens (colors, fonts, spacing) for visual consistency
 - [ ] **HUB-05**: VOWEL game is accessible at vowel.html with identical functionality to the current index.html game
 
 ### Word Ladder
@@ -68,7 +68,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HUB-01 | Phase 14 | Pending |
 | HUB-02 | Phase 14 | Pending |
 | HUB-03 | Phase 14 | Pending |
-| HUB-04 | Phase 14 | Pending |
+| HUB-04 | Phase 14 | Complete |
 | HUB-05 | Phase 14 | Pending |
 | LADR-01 | Phase 15 | Pending |
 | LADR-02 | Phase 15 | Pending |

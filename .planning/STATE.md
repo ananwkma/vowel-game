@@ -10,24 +10,24 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Current Position
 
 Phase: 14 of 16 (Hub + VOWEL Migration)
-Plan: — of TBD in current phase
-Status: Context gathered, ready for planning
-Last activity: 2026-02-25 — Phase 14 context captured
+Plan: 1 of TBD in current phase
+Status: In progress — Plan 01 complete
+Last activity: 2026-02-26 — 14-01 design tokens created
 
 Progress: [░░░░░░░░░░] 0% (v2.0 — 0/3 phases complete)
 
 ## Performance Metrics
 
 **Velocity (v2.0):**
-- Total plans completed: 0
-- Average duration: —
-- Total execution time: —
+- Total plans completed: 1
+- Average duration: ~1 min
+- Total execution time: ~1 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 14. Hub + VOWEL Migration | TBD | — | — |
+| 14. Hub + VOWEL Migration | 1 | ~1 min | ~1 min |
 | 15. Word Ladder | TBD | — | — |
 | 16. Letter Hunt | TBD | — | — |
 
@@ -46,6 +46,8 @@ Recent decisions for v2.0:
 - Pointer Events (not separate touch/mouse) for Letter Hunt input — unified handling, fewer edge cases on budget Android
 - BFS preprocess at startup (pattern hashmap c*t → [cat,cut,cot]) — avoids 5-15s freeze on first puzzle generation on mobile
 - Shared CSS design tokens in Phase 14 — foundation all subsequent games depend on
+- [14-01] Token names normalized to semantic (--color-primary vs --color-vowel-bg) for multi-game decoupling
+- [14-01] Google Fonts @import placed in design-tokens.css — one link tag covers both font and tokens for all game pages
 
 ### Pending Todos
 
@@ -59,6 +61,6 @@ Recent decisions for v2.0:
 
 ## Session Continuity
 
-Last session: 2026-02-25
-Stopped at: Phase 14 context gathered
-Resume file: .planning/phases/14-hub-vowel-migration/14-CONTEXT.md
+Last session: 2026-02-26
+Stopped at: Completed 14-01-PLAN.md (design tokens)
+Resume file: .planning/phases/14-hub-vowel-migration/14-01-SUMMARY.md

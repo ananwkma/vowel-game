@@ -91,7 +91,7 @@ Plans:
 | 11. Backend Implementation | v1.2 | 3/3 | Complete | 2026-02-24 |
 | 12. Frontend Integration | v1.2 | 1/1 | Complete | 2026-02-25 |
 | 13. Local Verification | v1.2 | 2/2 | Complete | 2026-02-25 |
-| 14. Hub + VOWEL Migration | v2.0 | 0/TBD | Not started | - |
+| 14. Hub + VOWEL Migration | 1/3 | In Progress|  | - |
 | 15. Word Ladder | v2.0 | 0/TBD | Not started | - |
 | 16. Letter Hunt | v2.0 | 0/TBD | Not started | - |
 
