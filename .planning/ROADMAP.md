@@ -50,7 +50,12 @@ See .planning/milestones/v1.2-ROADMAP.md
   3. User can see on the hub which of today's daily puzzles they have already completed, without logging in
   4. VOWEL loads from vowel.html and plays with identical functionality — same words, same timer, same scoring, same personal best — as the old index.html
   5. All game pages share the same CSS design tokens (colors, fonts, spacing) so the collection feels visually unified
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 14-01-PLAN.md — Extract shared CSS design tokens to styles/design-tokens.css
+- [ ] 14-02-PLAN.md — Build hub portal (index.html) with game cards and daily status; create ladder.html and hunt.html placeholders
+- [ ] 14-03-PLAN.md — Migrate VOWEL to vowel.html with back button and daily completion status write
 
 ### Phase 15: Word Ladder
 **Goal**: Players can play a daily Word Ladder puzzle — changing one letter at a time from start to target — and see how their path compares to the optimal solution
