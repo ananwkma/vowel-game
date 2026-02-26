@@ -65,27 +65,27 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| HUB-01 | — | Pending |
-| HUB-02 | — | Pending |
-| HUB-03 | — | Pending |
-| HUB-04 | — | Pending |
-| HUB-05 | — | Pending |
-| LADR-01 | — | Pending |
-| LADR-02 | — | Pending |
-| LADR-03 | — | Pending |
-| LADR-04 | — | Pending |
-| LADR-05 | — | Pending |
-| HUNT-01 | — | Pending |
-| HUNT-02 | — | Pending |
-| HUNT-03 | — | Pending |
-| HUNT-04 | — | Pending |
-| HUNT-05 | — | Pending |
+| HUB-01 | Phase 14 | Pending |
+| HUB-02 | Phase 14 | Pending |
+| HUB-03 | Phase 14 | Pending |
+| HUB-04 | Phase 14 | Pending |
+| HUB-05 | Phase 14 | Pending |
+| LADR-01 | Phase 15 | Pending |
+| LADR-02 | Phase 15 | Pending |
+| LADR-03 | Phase 15 | Pending |
+| LADR-04 | Phase 15 | Pending |
+| LADR-05 | Phase 15 | Pending |
+| HUNT-01 | Phase 16 | Pending |
+| HUNT-02 | Phase 16 | Pending |
+| HUNT-03 | Phase 16 | Pending |
+| HUNT-04 | Phase 16 | Pending |
+| HUNT-05 | Phase 16 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 15 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 15 ⚠️
+- Mapped to phases: 15
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-02-25*
-*Last updated: 2026-02-25 after initial v2.0 definition*
+*Last updated: 2026-02-25 — traceability mapped to phases 14-16*

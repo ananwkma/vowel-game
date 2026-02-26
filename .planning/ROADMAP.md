@@ -1,10 +1,11 @@
-# Roadmap: Yellow Blocks Word Game (VOWEL)
+# Roadmap: Word Game Collection
 
 ## Milestones
 
 - ✅ **v1.0 MVP** — Phases 1–5 (shipped 2026-02-23)
 - ✅ **v1.1 Score, Streaks & Mobile Polish** — Phases 6–9 (shipped 2026-02-24)
 - ✅ **v1.2 Daily Leaderboard & Backend Stats** — Phases 10–13 (shipped 2026-02-25)
+- 🚧 **v2.0 Word Game Collection** — Phases 14–16 (in progress)
 
 ## Phases
 
@@ -29,6 +30,52 @@ See .planning/milestones/v1.2-ROADMAP.md
 
 </details>
 
+### 🚧 v2.0 Word Game Collection (In Progress)
+
+**Milestone Goal:** Expand from a single VOWEL game into a three-game collection with a unified portal hub, Word Ladder, and Letter Hunt.
+
+- [ ] **Phase 14: Hub + VOWEL Migration** — Portal hub with card navigation; VOWEL relocated to vowel.html with shared design tokens and hash-based routing
+- [ ] **Phase 15: Word Ladder** — Daily start-to-target word puzzle with BFS optimal path, path history, and personal best
+- [ ] **Phase 16: Letter Hunt** — Daily word-search grid with Canvas lasso selection, mystery category reveal, and two-phase timed scoring
+
+## Phase Details
+
+### Phase 14: Hub + VOWEL Migration
+**Goal**: Players can access all three games from a central portal and play VOWEL from its new location
+**Depends on**: Phase 13 (v1.2 complete)
+**Requirements**: HUB-01, HUB-02, HUB-03, HUB-04, HUB-05
+**Success Criteria** (what must be TRUE):
+  1. User can open index.html and see three game cards (VOWEL, Word Ladder, Letter Hunt) in the same warm aesthetic as the current game
+  2. User can tap or click any game card and land on that game's page
+  3. User can see on the hub which of today's daily puzzles they have already completed, without logging in
+  4. VOWEL loads from vowel.html and plays with identical functionality — same words, same timer, same scoring, same personal best — as the old index.html
+  5. All game pages share the same CSS design tokens (colors, fonts, spacing) so the collection feels visually unified
+**Plans**: TBD
+
+### Phase 15: Word Ladder
+**Goal**: Players can play a daily Word Ladder puzzle — changing one letter at a time from start to target — and see how their path compares to the optimal solution
+**Depends on**: Phase 14
+**Requirements**: LADR-01, LADR-02, LADR-03, LADR-04, LADR-05
+**Success Criteria** (what must be TRUE):
+  1. User can play today's Word Ladder puzzle and every player on the same day sees the same start and target words
+  2. User's word entry is rejected if it is not a valid dictionary word or if it differs from the previous word by more or fewer than one letter
+  3. User can see a scrollable path history of every word they have entered so far, in order from start toward target
+  4. After solving or giving up, user can see the shortest possible solution computed by BFS alongside their own path
+  5. User's personal best (fewest steps to solve) for each daily puzzle is saved in localStorage and persists across sessions
+**Plans**: TBD
+
+### Phase 16: Letter Hunt
+**Goal**: Players can play a daily word-search puzzle — circling hidden words with a lasso — with a mystery category that reveals itself mid-game and separate scores for the easy and hard phases
+**Depends on**: Phase 15
+**Requirements**: HUNT-01, HUNT-02, HUNT-03, HUNT-04, HUNT-05
+**Success Criteria** (what must be TRUE):
+  1. User can play today's Letter Hunt puzzle and every player on the same day sees the same grid and words
+  2. User can click-and-drag to draw a lasso around letters; correctly encircled category words stay highlighted, incorrect selections dissolve without penalty
+  3. After finding all 3 easy words, the mystery category name is revealed before the hard phase begins
+  4. User can see separate timers and scores for the easy phase and the hard phase
+  5. The grid contains exactly 6 hidden words (3 easy + 3 hard) belonging to a shared mystery category
+**Plans**: TBD
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -39,7 +86,10 @@ See .planning/milestones/v1.2-ROADMAP.md
 | 11. Backend Implementation | v1.2 | 3/3 | Complete | 2026-02-24 |
 | 12. Frontend Integration | v1.2 | 1/1 | Complete | 2026-02-25 |
 | 13. Local Verification | v1.2 | 2/2 | Complete | 2026-02-25 |
+| 14. Hub + VOWEL Migration | v2.0 | 0/TBD | Not started | - |
+| 15. Word Ladder | v2.0 | 0/TBD | Not started | - |
+| 16. Letter Hunt | v2.0 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-19*
-*Last updated: 2026-02-25 — v1.2 archived*
+*Last updated: 2026-02-25 — v2.0 phases 14-16 added*
