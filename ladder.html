@@ -280,9 +280,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: var(--spacing-md);
-      padding: var(--spacing-xl);
+      justify-content: flex-start;
+      padding: var(--spacing-xl) var(--spacing-lg);
+      padding-top: max(60px, calc(var(--spacing-xl) + env(safe-area-inset-top)));
+      overflow-y: auto;
+      gap: var(--spacing-sm);
       text-align: center;
     }
 
@@ -291,23 +293,30 @@
     }
 
     .results-title {
-      font-size: 1.8rem;
+      font-size: 2rem;
       font-weight: 700;
-      margin-bottom: var(--spacing-sm);
+      letter-spacing: 0.04em;
     }
 
     .results-steps {
-      font-size: 1.1rem;
-      opacity: 0.8;
+      font-size: 1rem;
+      opacity: 0.75;
+    }
+
+    .results-section-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      opacity: 0.5;
+      margin-top: var(--spacing-md);
     }
 
     .results-optimal-path {
       display: flex;
       flex-direction: column;
-      gap: var(--spacing-xs);
       align-items: center;
-      margin-top: var(--spacing-md);
-      max-height: 300px;
+      gap: 2px;
+      max-height: 320px;
       overflow-y: auto;
     }
 
@@ -318,19 +327,31 @@
       opacity: 0;
     }
 
-    .optimal-word.revealed {
-      opacity: 1;
-      transition: opacity 0.3s ease-in;
+    .optimal-word.optimal-start { font-weight: 700; }
+    .optimal-word.optimal-end { font-weight: 700; color: var(--color-success); }
+    .optimal-word.revealed { opacity: 1; transition: opacity 0.3s ease-in; }
+
+    /* Arrow connector between words in optimal path */
+    .optimal-word::after { content: '↓'; display: block; font-size: 0.65rem; opacity: 0.4; line-height: 1.2; }
+    .optimal-word:last-child::after { content: ''; }
+
+    .results-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-sm);
+      justify-content: center;
+      margin-top: var(--spacing-lg);
     }
 
     .results-btn {
-      padding: 12px 28px;
+      padding: 12px 24px;
       border-radius: var(--block-radius);
       font-family: var(--font-serif);
       font-size: 0.95rem;
       font-weight: 700;
       border: none;
       cursor: pointer;
+      min-width: 120px;
     }
 
     .btn-primary {
@@ -341,8 +362,16 @@
 
     .btn-secondary {
       background: transparent;
-      border: 1px solid var(--color-secondary);
-      color: var(--color-secondary);
+      border: 1px solid rgba(44,43,40,0.3);
+      color: var(--color-ladder-text);
+    }
+
+    /* ============================================================
+       SECTION: CONFETTI ANIMATION
+    ============================================================ */
+    @keyframes confettiFall {
+      0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(var(--fall-y)) translateX(var(--drift-x)) rotate(var(--spin)); opacity: 0; }
     }
   </style>
 </head>
@@ -1109,17 +1138,234 @@
       if (gameState.gaveUp || gameState.completed) return;
       gameState.gaveUp = true;
       DailyStatus.markCompleted('ladder');
-      // Plan 03 implements: animateOptimalPath() then showResults({ solved: false })
+      // showResults handles give-up animation and results display
       showResults({ solved: false });
     }
 
     /* ============================================================
-       SECTION: RESULTS STUB
-       Plan 03 implements the full results screen
+       SECTION: GAME CONTROLS
     ============================================================ */
-    function showResults(opts) {
-      console.log('[WordLadder] showResults called:', opts);
-      // Plan 03 will implement the full results screen
+    function disableGameControls() {
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.4';
+      giveUpBtn.disabled = true;
+    }
+
+    /* ============================================================
+       SECTION: OPTIMAL PATH ANIMATION
+    ============================================================ */
+    async function animateOptimalPath(container) {
+      // container is the .results-optimal-path div, already in the DOM
+      if (!OPTIMAL_PATH) return;
+
+      for (let i = 0; i < OPTIMAL_PATH.length; i++) {
+        const word = OPTIMAL_PATH[i];
+        const el = document.createElement('div');
+        el.className = 'optimal-word';
+        el.textContent = word;
+
+        // Mark start and target for visual distinction
+        if (i === 0) el.classList.add('optimal-start');
+        if (i === OPTIMAL_PATH.length - 1) el.classList.add('optimal-end');
+
+        container.appendChild(el);
+
+        // Stagger each word reveal: append hidden, then fade in after brief delay
+        await new Promise(resolve => setTimeout(resolve, 300));
+        el.classList.add('revealed');
+      }
+    }
+
+    /* ============================================================
+       SECTION: CONFETTI
+    ============================================================ */
+    function fireConfetti() {
+      const colors = ['#D4A574', '#E8C99A', '#C49060', '#F5F0E8', '#1C1B18'];
+      const count = 48;
+      const originX = window.innerWidth / 2;
+      const originY = window.innerHeight * 0.38;
+
+      for (let i = 0; i < count; i++) {
+        const el = document.createElement('div');
+        const size = 5 + Math.random() * 7;
+        const fallY = 180 + Math.random() * 260;
+        const driftX = (Math.random() - 0.5) * 260;
+        const spin = (Math.random() - 0.5) * 600;
+        const duration = 0.9 + Math.random() * 0.7;
+        const delay = Math.random() * 0.25;
+
+        el.style.cssText = [
+          'position:fixed',
+          `left:${originX + (Math.random() - 0.5) * 40}px`,
+          `top:${originY}px`,
+          `width:${size}px`,
+          `height:${size * (0.35 + Math.random() * 0.55)}px`,
+          `background:${colors[Math.floor(Math.random() * colors.length)]}`,
+          'border-radius:2px',
+          'pointer-events:none',
+          'z-index:9999',
+          `--fall-y:${fallY}px`,
+          `--drift-x:${driftX}px`,
+          `--spin:${spin}deg`,
+          `animation:confettiFall ${duration}s ease-in ${delay}s both`
+        ].join(';');
+
+        document.body.appendChild(el);
+        el.addEventListener('animationend', () => el.remove(), { once: true });
+      }
+    }
+
+    /* ============================================================
+       SECTION: SHARE RESULT
+    ============================================================ */
+    function shareResult({ solved, steps, delta }) {
+      const today = new Date().toISOString().split('T')[0];
+      const start = dailyPuzzle.start;
+      const target = dailyPuzzle.target;
+
+      let text;
+      if (solved) {
+        if (delta === 0) {
+          text = `Word Ladder ${today} | ${start} → ${target} | Solved in ${steps} step${steps !== 1 ? 's' : ''} (Optimal!) 🎯`;
+        } else {
+          text = `Word Ladder ${today} | ${start} → ${target} | Solved in ${steps} step${steps !== 1 ? 's' : ''} (+${delta} from optimal)`;
+        }
+      } else {
+        text = `Word Ladder ${today} | ${start} → ${target} | Gave up | Optimal: ${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''}`;
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          const shareBtn = document.getElementById('share-btn');
+          if (shareBtn) {
+            const original = shareBtn.textContent;
+            shareBtn.textContent = 'Copied!';
+            setTimeout(() => { shareBtn.textContent = original; }, 1500);
+          }
+        }).catch(() => {
+          prompt('Copy this result:', text);
+        });
+      } else {
+        prompt('Copy this result:', text);
+      }
+    }
+
+    /* ============================================================
+       SECTION: RESET GAME (Try Again)
+    ============================================================ */
+    function resetGame() {
+      if (!dailyPuzzle) return;
+      // Reset game state — same daily puzzle, fresh attempt
+      gameState.currentWord = dailyPuzzle.start;
+      gameState.pendingTileIndex = null;
+      gameState.pendingLetter = null;
+      gameState.playerPath = [dailyPuzzle.start];
+      gameState.completed = false;
+      gameState.gaveUp = false;
+
+      // Clear UI
+      historyContainer.innerHTML = '';
+      clearError();
+      giveUpBar.style.width = '0%';
+
+      // Re-enable game controls
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = '';
+      giveUpBtn.disabled = false;
+
+      // Re-initialize game UI
+      addToHistory(dailyPuzzle.start, true); // Start word back as first history entry
+      renderTiles(dailyPuzzle.start);
+
+      // Hide results screen
+      const resultsScreen = document.getElementById('results-screen');
+      resultsScreen.hidden = true;
+      resultsScreen.innerHTML = '';
+    }
+
+    /* ============================================================
+       SECTION: RESULTS SCREEN
+    ============================================================ */
+    async function showResults({ solved }) {
+      disableGameControls();
+
+      const resultsScreen = document.getElementById('results-screen');
+      const steps = gameState.playerPath.length - 1; // Steps taken (start not counted)
+      const delta = steps - OPTIMAL_STEPS;           // How far from optimal
+
+      // Build results screen HTML
+      let titleText, subtitleText, extraContent = '', buttonRow = '';
+
+      if (solved) {
+        if (delta === 0) {
+          titleText = 'Optimal!';
+          subtitleText = `Solved in ${steps} step${steps !== 1 ? 's' : ''} — perfect solution`;
+        } else {
+          titleText = 'Solved!';
+          subtitleText = `Solved in ${steps} step${steps !== 1 ? 's' : ''} (+${delta} from optimal)`;
+        }
+
+        // Show optimal path immediately (non-animated — player already solved)
+        if (OPTIMAL_PATH) {
+          extraContent = `
+            <div class="results-section-label">Optimal path (${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''})</div>
+            <div class="results-optimal-path" id="results-optimal-path">
+              ${OPTIMAL_PATH.map((w, i) => `<div class="optimal-word revealed ${i === 0 ? 'optimal-start' : ''} ${i === OPTIMAL_PATH.length - 1 ? 'optimal-end' : ''}">${w}</div>`).join('')}
+            </div>`;
+        }
+
+        if (delta > 0) {
+          buttonRow += `<button class="results-btn btn-secondary" id="try-again-btn" type="button">Try Again</button>`;
+        }
+      } else {
+        // Gave up
+        titleText = 'Gave Up';
+        const remaining = gameState.playerPath.length > 1
+          ? `after ${gameState.playerPath.length - 1} step${gameState.playerPath.length - 1 !== 1 ? 's' : ''}`
+          : 'at the start';
+        subtitleText = `${remaining} — optimal path was ${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''}`;
+
+        // Optimal path will be animated — add empty container
+        extraContent = `
+          <div class="results-section-label">Optimal path (${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''})</div>
+          <div class="results-optimal-path" id="results-optimal-path"></div>`;
+      }
+
+      buttonRow += `
+        <button class="results-btn btn-primary" id="share-btn" type="button">Share</button>
+        <a href="index.html" class="results-btn btn-secondary" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">← Word Games</a>`;
+
+      resultsScreen.innerHTML = `
+        <div class="results-title">${titleText}</div>
+        <div class="results-steps">${subtitleText}</div>
+        ${extraContent}
+        <div class="results-actions">${buttonRow}</div>`;
+
+      // Show results screen
+      resultsScreen.hidden = false;
+
+      // Wire Try Again if present
+      const tryAgainBtn = resultsScreen.querySelector('#try-again-btn');
+      if (tryAgainBtn) {
+        tryAgainBtn.addEventListener('click', resetGame);
+      }
+
+      // Wire Share button
+      const shareBtn = resultsScreen.querySelector('#share-btn');
+      if (shareBtn) {
+        shareBtn.addEventListener('click', () => shareResult({ solved, steps, delta }));
+      }
+
+      // If give-up: animate optimal path after showing screen
+      if (!solved) {
+        const optimalContainer = resultsScreen.querySelector('#results-optimal-path');
+        await animateOptimalPath(optimalContainer);
+      }
+
+      // If optimal solve: fire confetti
+      if (solved && delta === 0) {
+        fireConfetti();
+      }
     }
 
     /* ============================================================
