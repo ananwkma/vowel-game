@@ -5,13 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** Players can instantly understand and interact with any puzzle.
-**Current focus:** Planning next milestone
+**Current focus:** Defining requirements for v2.0
 
 ## Current Position
 
-Phase: v1.2 complete — between milestones
-Status: Ready for `/gsd:new-milestone`
-Last activity: 2026-02-25 — v1.2 milestone archived
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-25 — Milestone v2.0 started
 
 ## Accumulated Context
 
@@ -30,4 +31,4 @@ Last activity: 2026-02-25 — v1.2 milestone archived
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: v1.2 milestone completion
+Stopped at: v2.0 milestone kick-off

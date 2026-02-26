@@ -41,7 +41,11 @@ Players can instantly understand and interact with any puzzle — the mechanics 
 
 ### Active
 
-(Next milestone — to be defined with `/gsd:new-milestone`)
+<!-- v2.0 Word Game Collection -->
+- [ ] Game collection hub (index.html portal, card-based, same aesthetic)
+- [ ] VOWEL migrated to vowel.html
+- [ ] Word Ladder game (daily, start→target, one-letter changes, path history, personal best)
+- [ ] Letter Hunt game (daily word-search grid, lasso/bubble mechanic, mystery category reveal, timed easy/hard scoring)
 
 ### Deferred
 
@@ -91,5 +95,15 @@ Players can instantly understand and interact with any puzzle — the mechanics 
 | Personal best in localStorage (not backend) | No deployment needed, works offline, per-device | ✓ Good — replaced leaderboard after v1.2 |
 | Separate mobile gestures (tap=pick, drag=position) | Finger obscures letters during hover-select on touch | ✓ Good — shipped post-v1.2 audit |
 
+## Current Milestone: v2.0 Word Game Collection
+
+**Goal:** Expand from a single VOWEL game into a multi-game collection hub with two original new games.
+
+**Target features:**
+- Game collection hub portal (index.html) with card navigation
+- VOWEL migrated to vowel.html (existing game, relocated)
+- Word Ladder — daily puzzle, change one letter at a time, path history, personal best
+- Letter Hunt — daily word-search grid, lasso/bubble selection mechanic, mystery category reveal, timed easy/hard split scoring
+
 ---
-*Last updated: 2026-02-25 after v1.2 milestone*
+*Last updated: 2026-02-25 after v2.0 milestone start*
