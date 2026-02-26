@@ -2,24 +2,62 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Word Ladder">
+  <link rel="apple-touch-icon" href="https://via.placeholder.com/180/D4A574/1C1B18?text=L">
   <title>Word Ladder — Word Games</title>
+  <!-- REQUIRED: Shared design tokens for visual consistency across all games -->
   <link rel="stylesheet" href="styles/design-tokens.css">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    /* ============================================================
+       SECTION: GOOGLE FONTS
+    ============================================================ */
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&display=swap');
+
+    /* ============================================================
+       SECTION: CSS VARIABLES
+       Bridge: map shared token names to ladder-specific names
+    ============================================================ */
+    :root {
+      --color-ladder-primary: var(--color-primary);       /* amber for selected tile */
+      --color-ladder-bg: var(--color-bg);
+      --color-ladder-text: var(--color-primary-text);
+      --color-ladder-warning: var(--color-warning);       /* give-up bar fill */
+      --color-ladder-success: var(--color-success);       /* results solved */
+    }
+
+    /* ============================================================
+       SECTION: GLOBAL RESET & BASE
+    ============================================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
     body {
       font-family: var(--font-serif);
-      background-color: var(--color-bg);
-      color: var(--color-primary-text);
+      background-color: var(--color-ladder-bg);
+      color: var(--color-ladder-text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: var(--spacing-xl);
     }
-    h1 { font-size: 2rem; margin-bottom: var(--spacing-md); }
-    p { font-size: 1rem; opacity: 0.65; }
+
+    /* ============================================================
+       SECTION: BACK TO HUB
+    ============================================================ */
     #back-link {
       position: fixed;
       top: max(12px, env(safe-area-inset-top));
@@ -27,20 +65,766 @@
       z-index: 1000;
       padding: 8px 16px;
       background-color: transparent;
-      color: var(--color-primary);
+      color: var(--color-ladder-primary);
       text-decoration: none;
       font-family: var(--font-serif);
       font-size: 0.875rem;
       font-weight: 600;
       border-radius: var(--block-radius);
       transition: background-color var(--transition-fast);
+      -webkit-user-select: none;
+      user-select: none;
     }
-    #back-link:hover { background-color: rgba(212, 165, 116, 0.1); }
+
+    #back-link:hover {
+      background-color: rgba(212, 165, 116, 0.1);
+    }
+
+    #back-link:active {
+      background-color: rgba(212, 165, 116, 0.2);
+    }
+
+    /* ============================================================
+       SECTION: LAYOUT
+    ============================================================ */
+    #app {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 60px;
+      gap: var(--spacing-md);
+      max-width: 400px;
+      margin: 0 auto;
+      width: 100%;
+      padding-left: var(--spacing-md);
+      padding-right: var(--spacing-md);
+      padding-bottom: var(--spacing-xl);
+    }
+
+    #target-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.5;
+      font-family: var(--font-serif);
+    }
+
+    #target-display {
+      text-align: center;
+      letter-spacing: 0.15em;
+      font-weight: 700;
+      font-size: 2rem;
+      font-family: var(--font-serif);
+    }
+
+    /* ============================================================
+       SECTION: TILES
+    ============================================================ */
+    #tiles-container {
+      display: flex;
+      flex-direction: row;
+      gap: var(--block-gap);
+      justify-content: center;
+    }
+
+    .tile {
+      width: var(--block-size);
+      height: var(--block-size);
+      border-radius: var(--block-radius);
+      background-color: var(--color-secondary);
+      color: var(--color-secondary-text);
+      font-family: var(--font-serif);
+      font-size: 1.4rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 2px solid transparent;
+      box-shadow: var(--shadow-md);
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .tile.selected {
+      border-color: var(--color-ladder-primary);
+      box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.35);
+    }
+
+    /* ============================================================
+       SECTION: ERROR MESSAGE
+    ============================================================ */
+    #error-message {
+      text-align: center;
+      color: var(--color-ladder-warning);
+      font-size: 0.85rem;
+      min-height: 1.2em;
+      margin-top: var(--spacing-xs);
+    }
+
+    /* ============================================================
+       SECTION: HISTORY
+    ============================================================ */
+    #history-container {
+      overflow-y: auto;
+      max-height: 280px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+      padding-bottom: var(--spacing-sm);
+    }
+
+    .history-entry {
+      text-align: center;
+      letter-spacing: 0.15em;
+      font-size: 1.2rem;
+      font-weight: 500;
+      opacity: 0.6;
+      padding: var(--spacing-xs) 0;
+    }
+
+    /* ============================================================
+       SECTION: BUTTONS
+    ============================================================ */
+    #submit-btn {
+      width: 100%;
+      height: 52px;
+      background-color: var(--color-primary);
+      color: var(--color-primary-text);
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: var(--block-radius);
+      cursor: pointer;
+      box-shadow: var(--shadow-md);
+    }
+
+    #give-up-wrapper {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      border-radius: var(--block-radius);
+    }
+
+    #give-up-btn {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      border: 1px solid rgba(196, 131, 111, 0.4);
+      color: var(--color-ladder-warning);
+      font-family: var(--font-serif);
+      font-size: 0.8rem;
+      cursor: pointer;
+      border-radius: var(--block-radius);
+      position: relative;
+      z-index: 1;
+    }
+
+    #give-up-bar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0%;
+      background-color: var(--color-ladder-warning);
+      opacity: 0.25;
+      transition: none;
+      z-index: 0;
+    }
+
+    /* ============================================================
+       SECTION: HIDDEN INPUT (mobile keyboard trigger)
+    ============================================================ */
+    #hidden-input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+      width: 1px;
+      height: 1px;
+    }
+
+    /* ============================================================
+       SECTION: ANIMATIONS
+    ============================================================ */
+    @keyframes tile-shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+
+    @keyframes tile-pop {
+      0% { transform: translateY(0); opacity: 1; }
+      60% { transform: translateY(-28px); opacity: 0.6; }
+      100% { transform: translateY(-28px); opacity: 0; }
+    }
+
+    .tiles-shaking { animation: tile-shake 0.4s ease-in-out; }
+    .tiles-popping { animation: tile-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+    /* ============================================================
+       SECTION: RESULTS SCREEN
+    ============================================================ */
+    #results-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--color-ladder-bg);
+      z-index: 5000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-xl);
+      text-align: center;
+    }
+
+    #results-screen[hidden] {
+      display: none;
+    }
+
+    .results-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .results-steps {
+      font-size: 1.1rem;
+      opacity: 0.8;
+    }
+
+    .results-optimal-path {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+      align-items: center;
+      margin-top: var(--spacing-md);
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .optimal-word {
+      font-size: 1rem;
+      letter-spacing: 0.12em;
+      font-weight: 500;
+      opacity: 0;
+    }
+
+    .optimal-word.revealed {
+      opacity: 1;
+      transition: opacity 0.3s ease-in;
+    }
+
+    .results-btn {
+      padding: 12px 28px;
+      border-radius: var(--block-radius);
+      font-family: var(--font-serif);
+      font-size: 0.95rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: var(--color-primary-text);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--color-secondary);
+      color: var(--color-secondary);
+    }
   </style>
 </head>
 <body>
   <a href="index.html" id="back-link" aria-label="Back to Word Games hub">← Back</a>
-  <h1>Word Ladder</h1>
-  <p>Coming soon</p>
+  <input type="text" id="hidden-input" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" aria-hidden="true" tabindex="-1">
+
+  <div id="app">
+    <div id="target-label">TARGET</div>
+    <div id="target-display" aria-label="Target word"></div>
+
+    <div id="tiles-container" role="group" aria-label="Current word tiles"></div>
+    <div id="error-message" role="alert" aria-live="polite"></div>
+
+    <div id="history-container" aria-label="Word path history"></div>
+
+    <button id="submit-btn" type="button">Submit</button>
+
+    <div style="margin-top: var(--spacing-md); width: 100%;">
+      <div id="give-up-wrapper">
+        <button id="give-up-btn" type="button">Hold to give up</button>
+        <div id="give-up-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results screen (hidden by default) -->
+  <div id="results-screen" hidden aria-modal="true" role="dialog">
+    <!-- Populated by JavaScript -->
+  </div>
+
+  <!-- Confetti canvas -->
+  <canvas id="confetti-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;" hidden></canvas>
+
+  <script>
+    /* ============================================================
+       SECTION: DICTIONARY
+       Common English words suitable for Word Ladder puzzles.
+       Copied from vowel.html WORDS array — same 2710-word list.
+    ============================================================ */
+    const DICTIONARY = [
+      'ABLE', 'ABOVE', 'ABUSE', 'ACCEPT', 'ACCESS', 'ACCORD', 'ACROSS', 'ACTION', 'ACTIVE', 'ACTOR',
+      'ACTUAL', 'ADAPT', 'ADMIT', 'ADOPT', 'ADULT', 'ADVICE', 'ADVISE', 'AFFECT', 'AFFORD', 'AFRAID',
+      'AGENCY', 'AGENDA', 'AGENT', 'AGREE', 'AHEAD', 'ALARM', 'ALBUM', 'ALIVE', 'ALLOW', 'ALONE',
+      'ALONG', 'ALTER', 'ALWAYS', 'AMOUNT', 'ANGEL', 'ANGER', 'ANGLE', 'ANGRY', 'ANIMAL', 'ANNUAL',
+      'ANSWER', 'ANYONE', 'ANYWAY', 'APART', 'APPEAL', 'APPEAR', 'APPLE', 'APPLY', 'ARENA', 'ARGUE',
+      'ARISE', 'AROUND', 'ARRAY', 'ARRIVE', 'ARTIST', 'ASIDE', 'ASPECT', 'ASSESS', 'ASSIST', 'ASSUME',
+      'ASSURE', 'ATTACH', 'ATTACK', 'ATTEND', 'AUGUST', 'AUTHOR', 'AVENUE', 'AVOID', 'AWARD', 'AWARE',
+      'BACKED', 'BADLY', 'BAKER', 'BARLEY', 'BARREL', 'BASKET', 'BATTLE', 'BEACH', 'BEANS', 'BEARD',
+      'BEAST', 'BEAUTY', 'BEFORE', 'BEGAN', 'BEGIN', 'BEGUN', 'BEHIND', 'BEING', 'BELIEF', 'BELIEVE',
+      'BELONG', 'BELOW', 'BENCH', 'BESIDE', 'BETTER', 'BEYOND', 'BISHOP', 'BITTER', 'BLACK', 'BLADE',
+      'BLAME', 'BLAST', 'BLEND', 'BLOCK', 'BLOOD', 'BOARD', 'BOAST', 'BONUS', 'BOOST', 'BOOTH',
+      'BORDER', 'BOTTLE', 'BOTTOM', 'BOUGHT', 'BOUND', 'BRAIN', 'BRAKE', 'BRANCH', 'BRAND', 'BREACH',
+      'BREAD', 'BREAK', 'BREATH', 'BREED', 'BRIDGE', 'BRIEF', 'BRIGHT', 'BRING', 'BROAD', 'BROKEN',
+      'BROWN', 'BUDGET', 'BUILD', 'BUILT', 'BUREAU', 'BURIAL', 'BUTTON', 'BUYER', 'CABLE', 'CAMERA',
+      'CANCER', 'CANNOT', 'CARBON', 'CAREER', 'CARRY', 'CASTLE', 'CASUAL', 'CATCH', 'CAUGHT', 'CAUSES',
+      'CENTRE', 'CHAIN', 'CHAIR', 'CHANCE', 'CHANGE', 'CHARGE', 'CHART', 'CHASE', 'CHEAP', 'CHECK',
+      'CHEST', 'CHIEF', 'CHILD', 'CHOIR', 'CHOSE', 'CHURCH', 'CIRCLE', 'CIVIL', 'CLAIM', 'CLASS',
+      'CLEAN', 'CLEAR', 'CLIENT', 'CLIMB', 'CLINIC', 'CLOCK', 'CLOSE', 'CLOTH', 'CLOUD', 'COACH',
+      'COAST', 'COFFEE', 'COLUMN', 'COMBAT', 'COMING', 'COMMON', 'COMPLY', 'COPPER', 'CORNER', 'COSTLY',
+      'COUNT', 'COUNTY', 'COUPLE', 'COURSE', 'COURT', 'COUSIN', 'COVERS', 'CRAFT', 'CRANE', 'CRASH',
+      'CREAM', 'CREATE', 'CREDIT', 'CRISIS', 'CRITIC', 'CROSS', 'CROWD', 'CROWN', 'CURVE', 'CUSTOM',
+      'CYCLE', 'DAILY', 'DAMAGE', 'DANCE', 'DANGER', 'DEBATE', 'DEBTOR', 'DECIDE', 'DEEPLY', 'DEFEAT',
+      'DEFECT', 'DEFEND', 'DEFINE', 'DEGREE', 'DELAY', 'DEMAND', 'DEPEND', 'DEPUTY', 'DESERT', 'DESIGN',
+      'DESIRE', 'DETAIL', 'DETECT', 'DEVICE', 'DIARY', 'DIFFER', 'DINNER', 'DIRECT', 'DOCTOR', 'DOLLAR',
+      'DOMAIN', 'DOUBLE', 'DOUBT', 'DOZEN', 'DRAFT', 'DRAIN', 'DRAMA', 'DREAD', 'DREAM', 'DRESS',
+      'DRIED', 'DRIFT', 'DRILL', 'DRINK', 'DRIVE', 'DRIVEN', 'DRIVER', 'DROVE', 'DURING', 'EAGER',
+      'EARLY', 'EARTH', 'EASILY', 'EFFECT', 'EFFORT', 'EIGHTY', 'EITHER', 'ELEVEN', 'ELITE', 'EMERGE',
+      'EMPIRE', 'EMPLOY', 'EMPTY', 'ENABLE', 'ENERGY', 'ENGINE', 'ENJOY', 'ENOUGH', 'ENSURE', 'ENTER',
+      'ENTIRE', 'ENTITY', 'ENTRY', 'EQUAL', 'EQUITY', 'ERROR', 'ESCAPE', 'ESSAY', 'ESTATE', 'ETHICS',
+      'EUROPE', 'EVENT', 'EVERY', 'EVOLVE', 'EXACT', 'EXCEED', 'EXCEPT', 'EXCESS', 'EXCUSE', 'EXEMPT',
+      'EXIST', 'EXISTS', 'EXPAND', 'EXPECT', 'EXPERT', 'EXPORT', 'EXTENT', 'EXTRA', 'FABRIC', 'FACIAL',
+      'FACING', 'FACTOR', 'FAILED', 'FAIRLY', 'FAITH', 'FALLEN', 'FALSE', 'FAMILY', 'FAMOUS', 'FATHER',
+      'FAULT', 'FELLOW', 'FEMALE', 'FIBER', 'FIELD', 'FIFTH', 'FIFTY', 'FIGHT', 'FIGURE', 'FILLER',
+      'FINAL', 'FINELY', 'FINISH', 'FISCAL', 'FIXED', 'FLASH', 'FLEET', 'FLIGHT', 'FLOOR', 'FLUID',
+      'FLYING', 'FOCUS', 'FOLLOW', 'FORCE', 'FORCED', 'FOREST', 'FORGET', 'FORMAL', 'FORMAT', 'FORMER',
+      'FORTH', 'FORTY', 'FORUM', 'FOSSIL', 'FOSTER', 'FOUGHT', 'FOUND', 'FOURTH', 'FRAME', 'FRANK',
+      'FRAUD', 'FREELY', 'FRENCH', 'FRESH', 'FRIEND', 'FRIGHT', 'FRONT', 'FROZEN', 'FRUIT', 'FULLY',
+      'FUNNY', 'FUTURE', 'GARDEN', 'GATHER', 'GENDER', 'GENTLE', 'GERMAN', 'GIANT', 'GIVEN', 'GLANCE',
+      'GLASS', 'GLOBAL', 'GLOBE', 'GOING', 'GOLDEN', 'GOVERN', 'GRACE', 'GRADE', 'GRAND', 'GRANT',
+      'GRASS', 'GREAT', 'GREEN', 'GREET', 'GRIEF', 'GROUND', 'GROUP', 'GROWN', 'GROWTH', 'GUARD',
+      'GUESS', 'GUEST', 'GUIDE', 'GUILTY', 'GUITAR', 'HABIT', 'HABITS', 'HANDLE', 'HAPPEN', 'HAPPY',
+      'HARDLY', 'HARSH', 'HEALTH', 'HEARTH', 'HEARTY', 'HEAVEN', 'HEAVY', 'HEIGHT', 'HELLO', 'HELPER',
+      'HIGHER', 'HIGHLY', 'HOCKEY', 'HOLDER', 'HOLLOW', 'HONEST', 'HONEY', 'HONOR', 'HOPING', 'HORSE',
+      'HOTEL', 'HOUSE', 'HUMAN', 'HUMBLE', 'HUNGER', 'HUNTER', 'IDEAL', 'IGNORE', 'IMAGE', 'IMMUNE',
+      'IMPACT', 'IMPORT', 'INDEED', 'INDEX', 'INNER', 'INPUT', 'INSECT', 'INSERT', 'INSIDE', 'INSIST',
+      'INTENT', 'INVEST', 'INVITE', 'IRONIC', 'ISLAND', 'ISSUE', 'ISSUED', 'ITSELF', 'JACKET', 'JERSEY',
+      'JOINT', 'JORDAN', 'JOSEPH', 'JOURNEY', 'JOYFUL', 'JUDGE', 'JUDGED', 'JUICE', 'JUNIOR', 'KEEPER',
+      'KINDLY', 'KNIFE', 'KNIGHT', 'KNOCK', 'KNOWN', 'LABEL', 'LABOR', 'LABOUR', 'LADDER', 'LADIES',
+      'LANDED', 'LARGE', 'LASER', 'LATELY', 'LATER', 'LATEST', 'LATIN', 'LAUGH', 'LAUNCH', 'LAWYER',
+      'LAYER', 'LEADER', 'LEAGUE', 'LEARN', 'LEASE', 'LEAST', 'LEAVE', 'LEAVES', 'LEGACY', 'LEGAL',
+      'LENGTH', 'LESSON', 'LETTER', 'LEVEL', 'LEVELS', 'LIABLE', 'LIGHT', 'LIKELY', 'LIMIT', 'LINEAR',
+      'LINKS', 'LISTEN', 'LITTLE', 'LIVES', 'LIVING', 'LOADED', 'LOCAL', 'LOCATE', 'LOGIC', 'LONELY',
+      'LOOSE', 'LOVELY', 'LOWER', 'LOWEST', 'LUCKY', 'LUMBER', 'LUNCH', 'LUXURY', 'MADAME', 'MAGIC',
+      'MAINLY', 'MAKING', 'MAJOR', 'MAKER', 'MANAGE', 'MANNER', 'MANUAL', 'MARCH', 'MARGIN', 'MARINE',
+      'MARKED', 'MARKET', 'MARTIN', 'MASTER', 'MATCH', 'MATRIX', 'MATTER', 'MATURE', 'MAYBE', 'MAYOR',
+      'MEANT', 'MEDIA', 'MEDIUM', 'MEMBER', 'MEMORY', 'MENTAL', 'MERELY', 'MERGER', 'METAL', 'METHOD',
+      'MIDDLE', 'MIGHT', 'MILLER', 'MINING', 'MINOR', 'MINUS', 'MINUTE', 'MIRROR', 'MISERY', 'MIXED',
+      'MOBILE', 'MODEL', 'MODERN', 'MODEST', 'MODIFY', 'MODULE', 'MOMENT', 'MONEY', 'MONTH', 'MORAL',
+      'MORRIS', 'MORTAL', 'MOSTLY', 'MOTHER', 'MOTION', 'MOTOR', 'MOTORY', 'MOUNT', 'MOUNTS', 'MOUSE',
+      'MOUTH', 'MOUTHS', 'MOVIE', 'MOVING', 'MURDER', 'MUSCLE', 'MUSEUM', 'MUSIC', 'MUSICAL', 'MUTUAL',
+      'MYSELF', 'NARROW', 'NATION', 'NATIVE', 'NATURE', 'NEARBY', 'NEARLY', 'NEEDED', 'NEEDLE', 'NEEDS',
+      'NEPHEW', 'NETTLE', 'NEVER', 'NEWEST', 'NEWLY', 'NICKEL', 'NIGHT', 'NIGHTY', 'NOBODY', 'NOISE',
+      'NORMAL', 'NORTH', 'NOTED', 'NOTICE', 'NOTION', 'NOVEL', 'NUMBER', 'NURSE', 'OBJECT', 'OBLIGE',
+      'OBTAIN', 'OCCUR', 'OCEAN', 'OFFER', 'OFFICE', 'OFFSET', 'OFTEN', 'ONWARD', 'OPENED', 'ORANGE',
+      'ORDER', 'ORDERS', 'ORIGIN', 'OTHER', 'OTHERS', 'OUTER', 'OUTLET', 'OUTPUT', 'OWNER', 'OVERLY',
+      'OXFORD', 'PACKED', 'PACKET', 'PALACE', 'PANEL', 'PAPER', 'PARADE', 'PARCEL', 'PARENT', 'PARISH',
+      'PARKER', 'PARTLY', 'PARTY', 'PASSAGE', 'PASSIVE', 'PASTURE', 'PATENT', 'PATROL', 'PATRON',
+      'PAUSEY', 'PAYING', 'PAYMENT', 'PEACE', 'PENALTY', 'PENDING', 'PERIOD', 'PERMIT', 'PERSON',
+      'PHASE', 'PHONE', 'PHOTO', 'PHRASE', 'PIANO', 'PICKED', 'PIECE', 'PILOT', 'PILLAR', 'PIRATE',
+      'PITCH', 'PLACE', 'PLACED', 'PLACES', 'PLAIN', 'PLAINS', 'PLANE', 'PLANET', 'PLANT', 'PLATE',
+      'PLAYER', 'PLEASE', 'PLENTY', 'POCKET', 'POEM', 'POET', 'POETIC', 'POISON', 'POLICE', 'POLICY',
+      'POLISH', 'PORTAL', 'POSTED', 'POTENT', 'POUND', 'POWDER', 'POWER', 'PRAYER', 'PREFER', 'PRESS',
+      'PRETTY', 'PREVUE', 'PRICE', 'PRICED', 'PRICES', 'PRIDE', 'PRIEST', 'PRIME', 'PRINCE', 'PRINT',
+      'PRIOR', 'PRISON', 'PRIZE', 'PROFIT', 'PROMPT', 'PROOF', 'PROPER', 'PROUD', 'PROVE', 'PROVED',
+      'PUBLIC', 'PULLED', 'PUNISH', 'PURPLE', 'PURPOSE', 'PURSUE', 'PUSHED', 'QUAINT', 'QUARTZ', 'QUEEN',
+      'QUENCH', 'QUESTS', 'QUEUE', 'QUICK', 'QUIET', 'QUITE', 'QUIVER', 'QUOTED', 'RACING', 'RADIAL',
+      'RADIO', 'RADIUS', 'RAISE', 'RAISED', 'RANGE', 'RAPID', 'RARELY', 'RATHER', 'RATIO', 'RATING',
+      'REACH', 'READER', 'READY', 'REALLY', 'REASON', 'RECALL', 'RECENT', 'RECORD', 'REDUCE', 'REEL',
+      'REFER', 'REFORM', 'REGARD', 'REGION', 'RELAX', 'RELATE', 'RELIEF', 'RELY', 'REMAIN', 'REMEDY',
+      'REMIND', 'REMOTE', 'RENDER', 'RENTAL', 'REPAIR', 'REPEAT', 'REPLY', 'REPORT', 'RESORT', 'RESULT',
+      'RETAIL', 'RETAIN', 'RETIRE', 'RETURN', 'REVEAL', 'REVIEW', 'REWARD', 'RHYTHM', 'RIDDLE', 'RIDING',
+      'RIGHTS', 'RISING', 'RITUAL', 'RIVER', 'ROBOT', 'ROBUST', 'ROCKET', 'ROCKS', 'ROLLER', 'ROMANS',
+      'ROUGH', 'ROUGHLY', 'ROUND', 'ROUNDS', 'ROUTE', 'ROUTER', 'ROYAL', 'RUBBER', 'RUGGED', 'RULE',
+      'RULING', 'RUNNER', 'RURAL', 'SACRED', 'SAFETY', 'SALARY', 'SAMPLE', 'SAVING', 'SCALE', 'SCARCE',
+      'SCENE', 'SCHEME', 'SCHOOL', 'SCOPE', 'SCORE', 'SCORES', 'SCREEN', 'SCRIPT', 'SEARCH', 'SEASON',
+      'SECOND', 'SECRET', 'SECTOR', 'SECURE', 'SEEING', 'SELECT', 'SELLER', 'SENATE', 'SENDER', 'SENIOR',
+      'SENSOR', 'SERIES', 'SERVE', 'SERVED', 'SERVER', 'SETTLE', 'SEVEN', 'SEVERE', 'SHADOW', 'SHALL',
+      'SHAPE', 'SHARE', 'SHARED', 'SHARP', 'SHEEP', 'SHELF', 'SHELL', 'SHELLS', 'SHIELD', 'SHIFT',
+      'SHIFTED', 'SHIRT', 'SHOCK', 'SHOOT', 'SHOOTER', 'SHORE', 'SHORED', 'SHORT', 'SHORTER', 'SHOT',
+      'SHOULD', 'SHOUT', 'SHOWN', 'SHRINK', 'SIGHT', 'SIGNAL', 'SIGNED', 'SILENT', 'SILVER', 'SIMPLY',
+      'SINCE', 'SINGLE', 'SISTER', 'SITTING', 'SIXTY', 'SIZED', 'SKILL', 'SLEEP', 'SLEEPY', 'SLIDE',
+      'SLIGHT', 'SLOWLY', 'SLUDGE', 'SMALL', 'SMART', 'SMILE', 'SMITH', 'SMOKE', 'SMOOTH', 'SOCCER',
+      'SOCIAL', 'SOFTLY', 'SOLID', 'SOLVE', 'SORRY', 'SOUGHT', 'SOUND', 'SOURCE', 'SOUTH', 'SOVIET',
+      'SPACE', 'SPACED', 'SPARE', 'SPEAK', 'SPEECH', 'SPEED', 'SPEEDY', 'SPELLS', 'SPHERE', 'SPIRIT',
+      'SPOKEN', 'SPORT', 'SPREAD', 'SPRING', 'SQUARE', 'STABLE', 'STAFF', 'STAGE', 'STAGES', 'STAIRS',
+      'STAKE', 'STANCE', 'STAND', 'START', 'STARTED', 'STATE', 'STATIC', 'STATUS', 'STEADY', 'STEAM',
+      'STEEL', 'STEREO', 'STICK', 'STICKY', 'STILL', 'STILLY', 'STOCK', 'STOCKS', 'STOLEN', 'STONE',
+      'STOOD', 'STOP', 'STORE', 'STORM', 'STORY', 'STRAIN', 'STREAM', 'STREET', 'STRESS', 'STRICT',
+      'STRIP', 'STRIPE', 'STRIVE', 'STRONG', 'STRUCK', 'STUDIO', 'STUDY', 'STUFF', 'STUPID', 'STYLE',
+      'SUBTLE', 'SUDDEN', 'SUFFER', 'SUGAR', 'SUGARY', 'SUIT', 'SUITE', 'SUITED', 'SUMMER', 'SUMMIT',
+      'SUNDAY', 'SUPER', 'SUPPER', 'SUPPLY', 'SURELY', 'SURVEY', 'SWEET', 'SWITCH', 'SYMBOL', 'SYSTEM',
+      'TABLES', 'TABLET', 'TACKLE', 'TAKEN', 'TALENT', 'TALK', 'TALKED', 'TALL', 'TANK', 'TAPE',
+      'TARGET', 'TARIFF', 'TASK', 'TASTE', 'TASTEY', 'TAVERN', 'TAXES', 'TEACH', 'TEAM', 'TECH',
+      'TEETH', 'TELLER', 'TEMPLE', 'TENANT', 'TENSION', 'TEXTILE', 'THEATRE', 'THEORY', 'THERE', 'THESE',
+      'THESIS', 'THICK', 'THING', 'THINGS', 'THINK', 'THIRD', 'THIRTY', 'THOSE', 'THOUGH', 'THREAD',
+      'THREAT', 'THREW', 'THRILL', 'THRIVE', 'THROAT', 'THRONE', 'THROW', 'THROWN', 'TICKET', 'TIGHT',
+      'TIMELY', 'TIMING', 'TITLED', 'TOASTS', 'TODAY', 'TOKENS', 'TONIGHT', 'TOOK', 'TOOL', 'TOPIC',
+      'TORCHY', 'TOTAL', 'TOTALS', 'TOUCH', 'TOUGH', 'TOUR', 'TOWARD', 'TOWER', 'TOWN', 'TRACED',
+      'TRACK', 'TRACKS', 'TRADE', 'TRADER', 'TRAILS', 'TRAIN', 'TRAINS', 'TRAITS', 'TRAVEL', 'TREAT',
+      'TREATY', 'TREND', 'TRENDS', 'TRIAL', 'TRIBAL', 'TRICK', 'TRICKY', 'TRIPLE', 'TRIP', 'TROOPS',
+      'TROPHY', 'TRUCK', 'TRULY', 'TRUST', 'TRUSTS', 'TRUTH', 'TRUTHS', 'TRYING', 'TUNE', 'TUNNEL',
+      'TURKEY', 'TURN', 'TURNED', 'TURTLE', 'TWELVE', 'TWENTY', 'TWIN', 'TYPE', 'TYPING', 'UNABLE',
+      'UNDER', 'UNDUE', 'UNION', 'UNITE', 'UNITY', 'UNLESS', 'UNLIKE', 'UNLOCK', 'UNPAID', 'UNTIL',
+      'UNUSED', 'UPDATE', 'UPHOLD', 'UPLIFT', 'UPON', 'UPSET', 'UPWARD', 'URBAN', 'URGENT', 'USAGE',
+      'USABLE', 'USED', 'USEFUL', 'USER', 'USUAL', 'UTMOST', 'VACANT', 'VACUUM', 'VALID', 'VALLEY',
+      'VALUE', 'VALUED', 'VALUES', 'VANISH', 'VARIED', 'VARIES', 'VARY', 'VARYING', 'VASTLY', 'VEHICLE',
+      'VELVET', 'VENDOR', 'VENTURE', 'VENUES', 'VERBAL', 'VERIFY', 'VERSES', 'VERSION', 'VERY',
+      'VESSEL', 'VICE', 'VICTIM', 'VIDEO', 'VIDEOS', 'VIEW', 'VIEWER', 'VIRTUE', 'VIRUS', 'VISIT',
+      'VISUAL', 'VITAL', 'VOICE', 'VOICES', 'VOLUME', 'VOLUMES', 'VOTER', 'VOTING', 'VOYAGE', 'WAGE',
+      'WAIT', 'WAITING', 'WAKE', 'WALK', 'WALKED', 'WALKER', 'WALLED', 'WALLET', 'WALL', 'WANT',
+      'WANTED', 'WARD', 'WARM', 'WASHER', 'WASH', 'WASTE', 'WASTED', 'WATCH', 'WATER', 'WATERS',
+      'WAVE', 'WEAKLY', 'WEALTH', 'WEAPON', 'WEAR', 'WEATHER', 'WEAVING', 'WEBSITE', 'WEEK', 'WEEKLY',
+      'WEIGHT', 'WELL', 'WENT', 'WERE', 'WEST', 'WHALES', 'WHAT', 'WHEEL', 'WHEELS', 'WHENCE', 'WHEN',
+      'WHERE', 'WHICH', 'WHILE', 'WHILST', 'WHITE', 'WHITES', 'WHOLE', 'WHOLLY', 'WHOSE', 'WICKED',
+      'WIDELY', 'WIDE', 'WIFE', 'WILD', 'WILL', 'WINDOW', 'WIND', 'WINE', 'WING', 'WINNER', 'WINTER',
+      'WIRE', 'WISDOM', 'WISE', 'WISH', 'WITH', 'WITHIN', 'WIZARD', 'WOMAN', 'WOMEN', 'WOODEN',
+      'WOOD', 'WORD', 'WORK', 'WORKER', 'WORLDS', 'WORLD', 'WORSE', 'WORST', 'WORTH', 'WORTHY',
+      'WOUNDS', 'WRITE', 'WRITER', 'WRITES', 'WRITTEN', 'WRONG', 'WROTE', 'YEAR', 'YELLOW', 'YIELDS',
+      'YOUNG', 'YOUNGER', 'YOURS', 'YOUTH', 'YOUTHS', 'ZERO', 'ZODIAC', 'ZONE', 'ZONES',
+      'ABANDON', 'ABILITY', 'ABSENCE', 'ACADEMY', 'ACCOUNT', 'ACCUSED', 'ACHIEVE', 'ACQUIRE', 'ADDRESS', 'AGAINST',
+      'AIRPORT', 'ALCOHOL', 'ALLEGED', 'ALREADY', 'AMAZING', 'ANALYZE', 'ANCIENT', 'ANOTHER', 'ANXIOUS', 'ANYBODY',
+      'APPLIED', 'APPOINT', 'APPROVE', 'ARCHIVE', 'ARTICLE', 'ARTISTS', 'ASSAULT', 'ASSUMED', 'ASSURED', 'ATTEMPT',
+      'ATTRACT', 'AUCTION', 'AVERAGE', 'BACKING', 'BALANCE', 'BANKING', 'BARRIER', 'BATTERY', 'BECAUSE', 'BEDROOM',
+      'BELIEVED', 'BENEATH', 'BENEFIT', 'BESIDES', 'BETWEEN', 'BILLION', 'BINDING', 'BLOCKED', 'BOATING', 'BOTTLES',
+      'BRAVERY', 'BREATHE', 'BRIDGES', 'BRITISH', 'BROTHER', 'BROUGHT', 'BUILDER', 'BURNING', 'CABINET', 'CALLED',
+      'CAPABLE', 'CAPITAL', 'CAPTAIN', 'CAPTION', 'CAPTURE', 'CAREFUL', 'CARRIER', 'CAUTION', 'CEILING', 'CENTRAL',
+      'CENTURY', 'CERTAIN', 'CHAMBER', 'CHANNEL', 'CHAPTER', 'CHARITY', 'CHARLIE', 'CHARTER', 'CHEAPER', 'CHECKED',
+      'CHICKEN', 'CLASSIC', 'CLEANER', 'CLEARLY', 'CLIMATE', 'CLOSING', 'COLLECT', 'COLLEGE', 'COMBINE', 'COMFORT',
+      'COMMAND', 'COMMENT', 'COMPACT', 'COMPANY', 'COMPARE', 'COMPETE', 'COMPLEX', 'CONCEPT', 'CONCERN', 'CONCERT',
+      'CONDUCT', 'CONFIRM', 'CONNECT', 'CONSENT', 'CONSOLE', 'CONTACT', 'CONTAIN', 'CONTENT', 'CONTEST', 'CONTEXT',
+      'CONTROL', 'CONVERT', 'COOKING', 'CORRECT', 'COUNCIL', 'COUNSEL', 'COUNTER', 'COUNTRY', 'COUPLES', 'COURAGE',
+      'COVERED', 'CRAFTED', 'CREATED', 'CREATOR', 'CULTURE', 'CURRENT', 'CUTTING', 'DEBATED', 'DECIDED', 'DECLARE',
+      'DECLINE', 'DEFAULT', 'DEFENSE', 'DEFICIT', 'DELIVER', 'DENSITY', 'DEPOSIT', 'DESERVE', 'DESKTOP', 'DESPITE',
+      'DESTINY', 'DESTROY', 'DETAILS', 'DEVELOP', 'DIAMOND', 'DIGITAL', 'DIGNITY', 'DINNERS', 'DIRECTS', 'DISEASE',
+      'DISPLAY', 'DISPUTE', 'DISTANT', 'DIVIDED', 'DIVORCE', 'DOCTORS', 'DRIVING', 'DYNAMIC', 'EASTERN', 'ECONOMY',
+      'EDITION', 'EFFECTS', 'EFFORTS', 'EIGHTEE', 'ELEMENT', 'ELEVENT', 'ELIGIBL', 'EMPEROR', 'EMPLOYD', 'EMPLOYE',
+      'ENABLED', 'ENDLESS', 'ENDURED', 'ENEMIES', 'ENFORC', 'ENGAGED', 'ENGINES', 'ENGLISH', 'ENHANCE', 'ENJOYED',
+      'ENTERED', 'ENTRIES', 'EQUALLY', 'ESCAPED', 'ESSENCE', 'ESTABLI', 'ESTATES', 'ETHICAL', 'EVENING', 'EXACTLY',
+      'EXAMINE', 'EXAMPLE', 'EXCEEDS', 'EXCLUDE', 'EXECUTE', 'EXHAUST', 'EXHIBIT', 'EXISTED', 'EXITING', 'EXPANDS',
+      'EXPECTS', 'EXPENSE', 'EXPLAIN', 'EXPLORE', 'EXPORTS', 'EXPRESS', 'EXTRACT', 'EXTREME', 'FACTORY', 'FACULTY',
+      'FAILING', 'FAILURE', 'FAMILIE', 'FASHION', 'FASTENE', 'FEATURE', 'FEDERAL', 'FEELING', 'FICTION', 'FIFTEEN',
+      'FIGHTER', 'FIGURES', 'FINALLY', 'FINDING', 'FINISHE', 'FIRMLY', 'FISHING', 'FITNESS', 'FLIGHTS', 'FLOWERS',
+      'FOCUSED', 'FOREVER', 'FORMULA', 'FORTUNE', 'FORWARD', 'FREEDOM', 'FRIENDS', 'FRIGATE', 'FURTHER', 'GALLERY',
+      'GARBAGE', 'GARDENS', 'GENUINE', 'GEOLOGY', 'GESTURE', 'GETTING', 'GHOSTLY', 'GLACIER', 'GLASSED', 'GLIMPSE',
+      'GLORIFY', 'GLOWING', 'GRADUATE', 'GRAMMAR', 'GRAPHIC', 'GRATEFUL', 'GRAVITY', 'GREATER', 'GREATLY', 'GRIEVED',
+      'GROUNDS', 'GROUPED', 'GROWING', 'GUESSES', 'GUIDING', 'HANDLED', 'HAPPILY', 'HARVEST', 'HEALTHY', 'HEAVILY',
+      'HELPFUL', 'HELPING', 'HEROISM', 'HIGHEST', 'HIGHWAY', 'HISTORY', 'HOLDING', 'HOLIDAY', 'HONESTY', 'HOPEFUL',
+      'HORIZON', 'HOUSING', 'HOWEVER', 'HUNDRED', 'HUNGRY', 'HUSBAND', 'HYGIENE', 'ICEBERG', 'IDEALLY', 'IGNITED',
+      'ILLNESS', 'IMAGINE', 'IMITATE', 'IMMENSE', 'IMPLIES', 'IMPROVE', 'IMPULSE', 'INCLINE', 'INCLUDE', 'INCOME',
+      'INDEXES', 'INDOORS', 'INDUCED', 'INFANCY', 'INFINIT', 'INFLICT', 'INFORM', 'INITIAL', 'INJURED', 'INQUIRY',
+      'INSIGHT', 'INSPECT', 'INSTALL', 'INSTANT', 'INSTEAD', 'INSULIN', 'INTENSE', 'INTERIM', 'INVOLVE', 'ISLANDS',
+      'ISOLATE', 'ISSUING', 'ITSELF', 'JACKETS', 'JANUARY', 'JEWELRY', 'JOURNEY', 'JUDGING', 'JUSTICE', 'JUSTIFY',
+      'KEEPING', 'KEYWORD', 'KICKING', 'KINDLY', 'KINGDOM', 'KITCHEN', 'KNOWING', 'KNUCKLE', 'LABELED', 'LANTERN',
+      'LAPTOPS', 'LARGELY', 'LASTING', 'LATERAL', 'LAUGHED', 'LAUNDRY', 'LEADERS', 'LEADING', 'LEAFLET', 'LEANING',
+      'LEARNED', 'LEASING', 'LEATHER', 'LECTURE', 'LEGALLY', 'LEGENDS', 'LEISURE', 'LETTERS', 'LETTING', 'LEXICON',
+      'LIBERAL', 'LIBERTY', 'LIBRARY', 'LICENSE', 'LIMITED', 'LINEAGE', 'LISTING', 'LITERAL', 'LIVING', 'LOADING',
+      'LOGICAL', 'LOOKING', 'LOOSELY', 'LOYALTY', 'LUGGAGE', 'MACHINE', 'MAGICAL', 'MAGNETS', 'MAILBOX', 'MAILING',
+      'MAJESTY', 'MAKINGS', 'MANAGED', 'MANAGER', 'MANDATE', 'MANNERS', 'MARGINS', 'MARKETS', 'MARRIED', 'MASTERS',
+      'MATCHES', 'MAXIMUM', 'MEANING', 'MEASURE', 'MEDICAL', 'MEETING', 'MELTING', 'MEMBERS', 'MEMOIRS', 'MENTION',
+      'MESSAGE', 'METHODS', 'MILLION', 'MINERAL', 'MINIMAL', 'MINIMUM', 'MIRRORS', 'MISSING', 'MISSION', 'MISTAKE',
+      'MIXTURE', 'MOBILITY', 'MODELS', 'MOMENTS', 'MONITOR', 'MONSTER', 'MONTHLY', 'MORNING', 'MOTHERS', 'MOUNTAIN',
+      'MOUNTED', 'MOVABLE', 'MUSICAL', 'MYSTERY', 'NATURAL', 'NEAREST', 'NEGLECT', 'NEITHER', 'NERVOUS', 'NETWORK',
+      'NEUTRAL', 'NEWNESS', 'NOMINAL', 'NOTHING', 'NOTICED', 'NOVELTY', 'NUCLEAR', 'NUMBERS', 'NURSERY', 'NURSING',
+      'OBJECTS', 'OBLIGED', 'OBSERVE', 'OBVIOUS', 'OFFENSE', 'OFFERED', 'OFFICER', 'OFFICES', 'OPENING', 'OPERATE',
+      'OPINION', 'OPTIONS', 'ORDERED', 'ORGANIC', 'OUTCOME', 'OUTSIDE', 'OVERALL', 'OVERLAP', 'OVERSEA', 'OWNERS',
+      'PACIFIC', 'PACKAGE', 'PACKETS', 'PAINTER', 'PALACES', 'PARALLE', 'PARENTS', 'PARKING', 'PARTIAL', 'PARTNER',
+      'PASSAGE', 'PASSIVE', 'PASTURE', 'PATENTS', 'PATIENT', 'PATTERN', 'PAYMENT', 'PENALTY', 'PENDING', 'PENSIONS',
+      'PERCENT', 'PERFECT', 'PERFORM', 'PERIODS', 'PERMITS', 'PERSIST', 'PERSONA', 'PERSUAD', 'PHRASES', 'PHYSICS',
+      'PICTURE', 'PILLARS', 'PIONEER', 'PIRATES', 'PLACING', 'PLANNED', 'PLASTIC', 'PLATFOR', 'PLAYERS', 'PLAYING',
+      'PLEASANT', 'PLEASED', 'POCKETS', 'POINTED', 'POISONS', 'POLICIE', 'POPULAR', 'PORTION', 'POSSESS', 'POSTAGE',
+      'POTENCY', 'POVERTY', 'POWDERS', 'POWERED', 'PRECISE', 'PREDICT', 'PREFACE', 'PREFERA', 'PREMIER', 'PREPARE',
+      'PRESENT', 'PREVENT', 'PREVIEW', 'PRIMARY', 'PRINTER', 'PRIVACY', 'PRIVATE', 'PROBLEM', 'PROCEED', 'PROCESS',
+      'PRODUCE', 'PRODUCT', 'PROFILE', 'PROFITS', 'PROGRAM', 'PROJECT', 'PROMISE', 'PROMOTE', 'PROPERY', 'PROTECT',
+      'PROTEIN', 'PROTEST', 'PROUDLY', 'PROVIDE', 'PROVOST', 'PUBERTY', 'PUBLISH', 'PUDDING', 'PULLING', 'PURPOSE',
+      'PURSUED', 'PUSHING', 'QUALIFY', 'QUALITY', 'QUARTER', 'QUEENLY', 'QUICKET', 'QUICKLY', 'QUIETER', 'QUIETLY',
+      'QUITTED', 'RADIANT', 'RADICAL', 'RAISING', 'RAMBLER', 'RANDOM', 'RAPIDLY', 'RATINGS', 'REACHED', 'REACTOR',
+      'READING', 'REALITY', 'REALIZE', 'REASONS', 'REBUILD', 'RECEIVE', 'RECITES', 'RECORDS', 'RECOVER', 'RECRUIT',
+      'REDUCED', 'REFRESH', 'REFUSAL', 'REGARDS', 'REGIONS', 'REGULAR', 'RELATED', 'RELIANT', 'RELIEVE', 'REMAINS',
+      'REMARKS', 'REMEDY', 'REMOVAL', 'REMOVED', 'RENDERS', 'RENEWAL', 'REPAIRS', 'REPLAC', 'REPORTS', 'REQUEST',
+      'REQUIRE', 'RESERVE', 'RESOLVE', 'RESPECT', 'RESPOND', 'RESTORE', 'RESULTS', 'RETIRED', 'RETURNS', 'REVEALS',
+      'REVENUE', 'REVERSE', 'REVIEWS', 'REVISED', 'REVIVED', 'REWARDS', 'RIDDLES', 'ROUGHLY', 'ROUTINE', 'RUNNING',
+      'SAILING', 'SALVAGE', 'SAMPLES', 'SAVINGS', 'SCALARY', 'SCANNED', 'SCENERY', 'SCHEMES', 'SCHOOLS', 'SCIENCE',
+      'SCOOPED', 'SCORED', 'SCRAPER', 'SCREAMS', 'SCREENS', 'SCRIPTS', 'SEASONS', 'SEATING', 'SECRETS', 'SECTION',
+      'SECTORS', 'SECURED', 'SEEINGS', 'SEGMENT', 'SELLERS', 'SENDING', 'SENSORS', 'SERIOUS', 'SERVANT', 'SERVING',
+      'SESSION', 'SETTING', 'SETTLED', 'SEVENTH', 'SEVERAL', 'SHARING', 'SHELTER', 'SHIFTED', 'SHINING', 'SHIPPED',
+      'SHOOTER', 'SHORTER', 'SHOWING', 'SHOWMAN', 'SICKNES', 'SIGNALS', 'SIGNING', 'SILENCE', 'SILICON', 'SIMILAR',
+      'SINGERS', 'SINGING', 'SISTERS', 'SITUATE', 'SKATING', 'SKILLED', 'SLAVERY', 'SLEEPED', 'SLEEVES', 'SLIDING',
+      'SMILING', 'SMOKING', 'SOCIETY', 'SOLDIER', 'SOLVING', 'SOURCES', 'SPANISH', 'SPATIAL', 'SPEAKER', 'SPECIAL',
+      'SPECIES', 'SPECTRA', 'SPHERES', 'SPIDERS', 'SPIRITS', 'SPONSOR', 'SPRINGS', 'SQUARED', 'STADIUM', 'STAGING',
+      'STANDS', 'STARTED', 'STARTUP', 'STATED', 'STATION', 'STATURE', 'STATUTE', 'STICKER', 'STORAGE', 'STORIES',
+      'STORMED', 'STRANGE', 'STREAMS', 'STREETS', 'STRETCH', 'STRIPED', 'STROKES', 'STUDENT', 'STUDIED', 'STUDIES',
+      'STUDIOS', 'STYLISH', 'SUBJECT', 'SUBSIDY', 'SUCCESS', 'SUCTION', 'SUGGEST', 'SUICIDE', 'SUMMARY', 'SUMMERS',
+      'SUMMITS', 'SUNRISE', 'SUPPORT', 'SUPPOSE', 'SUPREME', 'SURFACE', 'SURGEON', 'SURNAME', 'SURPLUS', 'SURVIVE',
+      'SUSPECT', 'SUSTAIN', 'SYMBOLS', 'SYMPTOM', 'SYSTEMS', 'TACKLED', 'TACTICS', 'TALENTS', 'TALKING', 'TARGETS',
+      'TEACHER', 'TELLING', 'TENANTS', 'TENSION', 'TEXTILE', 'THEATRE', 'THERAPY', 'THEREBY', 'THERMAL', 'THINLY',
+      'THIRSTY', 'THISTLE', 'THOUGHT', 'THREADS', 'THREATS', 'THROUGH', 'THUNDER', 'TICKETS', 'TITLED', 'TOBACCO',
+      'TONIGHT', 'TORCHES', 'TOTALED', 'TOURISM', 'TOWARDS', 'TOWSLED', 'TRACERY', 'TRACKER', 'TRADING', 'TRAFFIC',
+      'TRAGEDY', 'TRAINED', 'TRAINER', 'TRANSIT', 'TREATED', 'TRIBUTE', 'TRIGGER', 'TRIUMPH', 'TROPICS', 'TROUBLE',
+      'TRUSTED', 'TRUSTEE', 'TWELFTH', 'TWENTIE', 'TYPICAL', 'UNKNOWN', 'UNUSUAL', 'UPDATED', 'UPWARDS', 'USELESS',
+      'UTILITY', 'VACANCY', 'VAGUELY', 'VALUING', 'VARIOUS', 'VARYING', 'VEHICLE', 'VENTURE', 'VERSION', 'VESSELS',
+      'VETERAN', 'VICTORY', 'VILLAGE', 'VIOLENT', 'VISITOR', 'VOLCANO', 'VOLTAGE', 'VOLUMES', 'WAITING', 'WALKING',
+      'WARNING', 'WARRANT', 'WASHING', 'WATCHED', 'WEAKNES', 'WEATHER', 'WEAVING', 'WEBSITE', 'WEDDING', 'WEEKEND',
+      'WELCOME', 'WELFARE', 'WESTERN', 'WHEREAS', 'WHETHER', 'WHISPER', 'WHISTLE', 'WHOEVER', 'WINNERS', 'WINTERS',
+      'WITNESS', 'WORKING', 'WRITERS', 'WRITING', 'WRITTEN', 'YOUNGER',
+      'ABSOLUTE', 'ACADEMIC', 'ACCEPTED', 'ACCIDENT', 'ACCURACY', 'ACCURATE', 'ACHIEVED', 'ACQUIRED', 'ACTIVITY', 'ACTUALLY',
+      'ADDITION', 'ADEQUATE', 'ADJACENT', 'ADJUSTED', 'ADVANCED', 'ADVISORY', 'ADVOCATE', 'AIRCRAFT', 'AIRLINES', 'ALLIANCE',
+      'ALTHOUGH', 'ANALYSIS', 'ANYTHING', 'APPARENT', 'APPENDIX', 'APPROACH', 'APPROVAL', 'APPROVED', 'ARGUMENT', 'ARTISTIC',
+      'ASSEMBLY', 'ASSESSED', 'ASSISTED', 'ATTACKED', 'ATTITUDE', 'AUDIENCE', 'AUTORITY', 'AUTOMATE', 'BALLOONS', 'BASEBALL',
+      'BASELINE', 'BECOMING', 'BEGINNER', 'BEHAVIOR', 'BELIEVED', 'BENEFITS', 'BIRTHDAY', 'BOUNDARY', 'BREAKING', 'BUILDING',
+      'BUSINESS', 'CALENDAR', 'CAPACITY', 'CARRIAGE', 'CATEGORY', 'CAUTIOUS', 'CHAMPION', 'CHANGING', 'CHEMICAL', 'CHILDREN',
+      'CIRCULAR', 'CIVILIAN', 'CLEANING', 'CLEARING', 'CLINICAL', 'CLOTHING', 'COCKTAIL', 'COHESIVE', 'COLLAPSE', 'COLLECTS',
+      'COLONIAL', 'COLUMBIA', 'COMBINED', 'COMFORTA', 'COMMANDS', 'COMMENTS', 'COMMERCE', 'COMPLETE', 'COMPOSER', 'COMPOUND',
+      'COMPRESS', 'COMPUTER', 'CONCEIVE', 'CONCEPTS', 'CONCERNS', 'CONCRETE', 'CONDENSE', 'CONFLICT', 'CONGRESS', 'CONSERVE',
+      'CONSIDER', 'CONSISTS', 'CONSTANT', 'CONSUMER', 'CONTACTS', 'CONTAINS', 'CONTENTS', 'CONTINUE', 'CONTRACT', 'CONTRARY',
+      'CONTROLS', 'CONVERSE', 'CONVINCE', 'COOKBOOK', 'CREATING', 'CREATIVE', 'CREDIBLE', 'CRITICAL', 'CULTURAL', 'CURRENCY',
+      'DATABASE', 'DEADLINE', 'DECIDING', 'DECISION', 'DECLARED', 'DECORATE', 'DECREASE', 'DEFERRED', 'DEFINING', 'DELEGATE',
+      'DELIVERY', 'DEMOCRAT', 'DEPARTED', 'DEPOSITS', 'DESCRIBE', 'DESERTED', 'DESIGNER', 'DETACHED', 'DETAILED', 'DETERMIN',
+      'DEVIATED', 'DEVICES', 'DIAGONAL', 'DIALOGUE', 'DIAMETER', 'DIAMONDS', 'DIRECTOR', 'DISABLED', 'DISASTER', 'DISCLOSE',
+      'DISCOUNT', 'DISCOVER', 'DISCRETE', 'DISEASES', 'DISORDER', 'DISPATCH', 'DISPLACE', 'DISPLAYS', 'DISPOSAL', 'DISPUTED',
+      'DISTANCE', 'DISTINCT', 'DISTRICT', 'DIVIDED', 'DIVISION', 'DOCUMENT', 'DOMESTIC', 'DOMINATE', 'DONATION', 'DOUBTFUL',
+      'DURATION', 'DYNAMICS', 'EARNINGS', 'ECONOMIC', 'EDUCATED', 'EIGHTEEN', 'EIGHTIES', 'ELECTION', 'ELECTORS', 'ELECTRIC',
+      'ELEMENTS', 'ELEVATOR', 'ELIGIBLE', 'EMPHASIS', 'EMPLOYEE', 'EMPLOYER', 'EMPTYING', 'ENABLING', 'ENCLOSED', 'ENORMOUS',
+      'ENTIRELY', 'ENTRANCE', 'ENVELOPE', 'EQUALITY', 'EQUATION', 'EQUIPPED', 'ESCAPING', 'ESTIMATE', 'EVERYONE', 'EVIDENCE',
+      'EXAMINED', 'EXAMPLES', 'EXCHANGE', 'EXCLUDED', 'EXERCISE', 'EXHIBITS', 'EXISTING', 'EXPANDED', 'EXPECTED', 'EXPENSES',
+      'EXPLAINED', 'EXPLORED', 'EXPOSURE', 'EXTERNAL', 'EXTREMELY', 'FACILITY', 'FAILURES', 'FAMILIAR', 'FAVORITE', 'FEATURES',
+      'FEEDBACK', 'FESTIVAL', 'FIGHTING', 'FILENAME', 'FINISHED', 'FIREWALL', 'FLEXIBLE', 'FLOATING', 'FOCUSING', 'FOOTBALL',
+      'FORECAST', 'FOREIGN', 'FORMULAS', 'FRACTION', 'FREQUENT', 'FRESHMAN', 'FRIENDLY', 'FUNCTION', 'GATHERED', 'GENERATE',
+      'GENEROUS', 'GENETICS', 'GRAPHICS', 'GRATEFUL', 'GREETING', 'GUIDANCE', 'HANDLING', 'HAPPENED', 'HARDWARE', 'HEADLINE',
+      'HOLDINGS', 'HOLIDAYS', 'HOMELAND', 'HOSPITAL', 'IDENTIFY', 'IDEOLOGY', 'IGNORANT', 'ILLUSION', 'IMAGEING', 'INCLUDES',
+      'INCOMING', 'INDICATE', 'INDIRECT', 'INDUSTRY', 'INFERIOR', 'INFINITE', 'INFORMED', 'INHERENT', 'INITIALS', 'INITIATE',
+      'INNOCENT', 'INSPIRED', 'INSTANCE', 'INSTRUCT', 'INTEGRAL', 'INTENDED', 'INTENTLY', 'INTERIOR', 'INTERNAL', 'INTERVAL',
+      'INTIMATE', 'INVASION', 'INVESTED', 'INVOLVED', 'ISLANDER', 'ISOLATED', 'JUDGMENT', 'JUNCTION', 'KEYBOARD', 'LANGUAGE',
+      'LEARNING', 'LECTURES', 'LIMITING', 'LISTENER', 'LOCATION', 'LOGISTIC', 'MAGAZINE', 'MAGNETIC', 'MAINTAIN', 'MAJORITY',
+      'MANAGING', 'MANIFEST', 'MARGINAL', 'MARRIAGE', 'MATERIAL', 'MEASURED', 'MEASURES', 'MEANTIME', 'MECHANIC', 'MEDICINE',
+      'MEETINGS', 'MEMORIES', 'MENTALLY', 'MERCHANT', 'MESSAGES', 'METALLIC', 'MILITARY', 'MINORITY', 'MISERIES', 'MISSIONS',
+      'MISTAKES', 'MODERATE', 'MONETARY', 'MONITORS', 'MOUNTAIN', 'MOVEMENT', 'MULTIPLE', 'NATIONAL', 'NEGATIVE', 'NETWORKS',
+      'NORTHERN', 'NOTEBOOK', 'OBSTACLE', 'OBTAINED', 'OCCASION', 'OFFENDED', 'OFFICERS', 'OPERATED', 'OPERATOR', 'OPINIONS',
+      'OPTIONAL', 'ORDINARY', 'ORGANISM', 'ORIGINAL', 'OUTCOMES', 'OUTGOING', 'OUTLINED', 'OVERCOME', 'OVERSEAS', 'PACKAGES',
+      'PAINTING', 'PARALLEL', 'PARENTS', 'PARTICLE', 'PARTNERS', 'PATIENCE', 'PATIENTS', 'PATTERNS', 'PAYMENTS', 'PEACEFUL',
+      'PERSONAL', 'PETITION', 'PHARMACY', 'PHYSICAL', 'PICTURES', 'PLANNING', 'PLATFORM', 'PLEASANT', 'PLEASURE', 'POLICIES',
+      'POLITICS', 'PORTABLE', 'PORTRAIT', 'POSITION', 'POSSIBLE', 'POSTINGS', 'PRACTICE', 'PRECIOUS', 'PRECISELY', 'PREPARED',
+      'PRESENCE', 'PRESERVE', 'PRESSURE', 'PREVIOUS', 'PRINCESS', 'PRIORITY', 'PROBABLY', 'PROBLEMS', 'PROCEEDS', 'PRODUCED',
+      'PRODUCER', 'PRODUCTS', 'PROGRESS', 'PROJECTS', 'PROMISED', 'PROMOTED', 'PROPERTY', 'PROPOSAL', 'PROPOSED', 'PROSPECT',
+      'PROTOCOL', 'PROVIDED', 'PROVIDER', 'PROVINCE', 'PURCHASE', 'PURPOSES', 'PURSUING', 'QUANTITY', 'QUESTION', 'RAILROAD',
+      'RATIONAL', 'REACTION', 'READINGS', 'REALIZED', 'REASONED', 'RECEIPTS', 'RECEIVED', 'RECEIVER', 'RECENTLY', 'RECOGNIZ',
+      'RECORDER', 'RECOVERY', 'REFERRED', 'REGIONAL', 'REGISTER', 'REGULATE', 'REJECTED', 'RELATIVE', 'RELEASED', 'RELIGION',
+      'REMEMBER', 'REPORTED', 'REPORTER', 'REPUBLIC', 'REQUESTS', 'REQUIRED', 'RESEARCH', 'RESERVED', 'RESIDENT', 'RESIDUAL',
+      'RESOLVED', 'RESOURCE', 'RESPONSE', 'RESTORED', 'RETAILER', 'RETAINED', 'REVEALED', 'REVENUES', 'REVERSAL', 'REVERSED',
+      'REVISION', 'REWARDED', 'ROBUSTLY', 'ROUTINES', 'SAMPLING', 'SCHEDULE', 'SCHOOLS', 'SCIENCES', 'SCREENED', 'SEARCHED',
+      'SEASONS', 'SECONDLY', 'SECTIONS', 'SECURITY', 'SELECTED', 'SENSIBLE', 'SENTENCE', 'SEPARATE', 'SEQUENCE', 'SERVICES',
+      'SESSIONS', 'SETTINGS', 'SETTLED', 'SHIPPING', 'SHORTAGE', 'SHUTDOWN', 'SICKNESS', 'SIDEWALK', 'SIGNALED', 'SILENTLY',
+      'SINGULAR', 'SKELETON', 'SLIGHTLY', 'SOFTWARE', 'SOLUTION', 'SOUTHERN', 'SPEAKING', 'SPECIFIC', 'SPEECHES', 'SPELLING',
+      'SPENDING', 'SPORTING', 'STANDARD', 'STANDING', 'STARTING', 'STATIONS', 'STEERING', 'STOCKING', 'STRANGER', 'STRATEGY',
+      'STRENGTH', 'STRESSED', 'STRETCHED', 'STRIKING', 'STRUGGLE', 'STUDENTS', 'STUDYING', 'SUBJECTS', 'SUBSTANT', 'SUBTITLE',
+      'SUBURBAN', 'SUDDENLY', 'SUFFERED', 'SUPERIOR', 'SUPPLIER', 'SUPPLIES', 'SUPPOSED', 'SURGERY', 'SURPRISE', 'SURVEYED',
+      'SURVIVED', 'SYLLABLE', 'SYMBOLIC', 'SYMPTOMS', 'TERMINAL', 'TERRIBLE', 'TEXTBOOK', 'THEORIES', 'THERAPEU', 'THEREFOR',
+      'THIRTEEN', 'THOUSAND', 'THREADED', 'THREATEN', 'THROUGH', 'TICKETS', 'TOGETHER', 'TOMORROW', 'TOWNSHIP', 'TOXICITY',
+      'TRACKING', 'TRADINGS', 'TRAINING', 'TRANSFER', 'TRAVELER', 'TREASURE', 'TREASURY', 'TRIANGLE', 'TRIGGERS', 'TROUBLED',
+      'TRUSTEES', 'TURNOVER', 'ULTIMATE', 'UMBRELLA', 'UNIVERSE', 'UPCOMING', 'UPGRADED', 'VALUABLE', 'VARIABLE', 'VARIANTS',
+      'VEHICLES', 'VELOCITY', 'VERTICAL', 'VIOLENCE', 'VISITORS', 'WAITING', 'WALKING', 'WATCHING', 'WEAKNESS', 'WEARABLE',
+      'WEATHER', 'WEBSITES', 'WELLNESS', 'WESTERLY', 'WHATEVER', 'WILDLIFE', 'WORKSHOP', 'WRAPPING', 'WRITINGS', 'YESTERDAY'
+    ];
+
+    /* ============================================================
+       SECTION: ADJACENCY MAP
+       Pre-computed at startup: O(1) one-letter-change lookup
+    ============================================================ */
+    function buildAdjacencyMap(words) {
+      const adjacency = {};
+      const byLength = {};
+
+      words.forEach(word => {
+        const upper = word.toUpperCase();
+        const len = upper.length;
+        if (!byLength[len]) byLength[len] = [];
+        byLength[len].push(upper);
+        adjacency[upper] = []; // Initialize all words
+      });
+
+      words.forEach(word => {
+        const upper = word.toUpperCase();
+        const candidates = byLength[upper.length] || [];
+        candidates.forEach(candidate => {
+          if (candidate === upper) return;
+          let diffs = 0;
+          for (let i = 0; i < upper.length; i++) {
+            if (upper[i] !== candidate[i]) diffs++;
+            if (diffs > 1) break; // Early exit
+          }
+          if (diffs === 1) adjacency[upper].push(candidate);
+        });
+      });
+
+      return adjacency;
+    }
+
+    const ADJACENCY = buildAdjacencyMap(DICTIONARY);
+
+    /* ============================================================
+       SECTION: BFS SHORTEST PATH
+    ============================================================ */
+    function bfsShortestPath(start, target, adjacency) {
+      const startU = start.toUpperCase();
+      const targetU = target.toUpperCase();
+      if (startU === targetU) return [startU];
+
+      const visited = new Set([startU]);
+      const queue = [[startU, [startU]]];
+
+      while (queue.length > 0) {
+        const [current, path] = queue.shift();
+        const neighbors = adjacency[current] || [];
+        for (const neighbor of neighbors) {
+          if (neighbor === targetU) return [...path, targetU];
+          if (!visited.has(neighbor)) {
+            visited.add(neighbor);
+            queue.push([neighbor, [...path, neighbor]]);
+          }
+        }
+      }
+      return null;
+    }
+
+    /* ============================================================
+       SECTION: SEEDED PRNG
+       Copied from vowel.html — same algorithm for consistency
+    ============================================================ */
+    function seededRandom(seedStr) {
+      let h = 0;
+      for (let i = 0; i < seedStr.length; i++) {
+        h = Math.imul(31, h) + seedStr.charCodeAt(i) | 0;
+      }
+      let s = h >>> 0;
+      return function() {
+        s += 0x6D2B79F5;
+        let t = Math.imul(s ^ s >>> 15, 1 | s);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+
+    /* ============================================================
+       SECTION: DAILY PUZZLE ENGINE
+       Deterministic seed: same date → same puzzle for all players
+    ============================================================ */
+    const DATE_SEED = (() => {
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      return today + '_ladder_v1';
+    })();
+
+    function getDailyLadderPuzzle() {
+      // Only consider 5-letter words (most ladder puzzles use 5-letter words)
+      const fiveLetterWords = Object.keys(ADJACENCY).filter(w =>
+        w.length === 5 && ADJACENCY[w].length >= 2 // Must have at least 2 neighbors
+      );
+
+      if (fiveLetterWords.length < 2) return null;
+
+      // Try up to 20 seed offsets to find a valid pair with a BFS path
+      for (let attempt = 0; attempt < 20; attempt++) {
+        const rng = seededRandom(DATE_SEED + '_' + attempt);
+        const startIdx = Math.floor(rng() * fiveLetterWords.length);
+        const targetIdx = Math.floor(rng() * fiveLetterWords.length);
+
+        const start = fiveLetterWords[startIdx];
+        const target = fiveLetterWords[targetIdx];
+
+        if (start === target) continue;
+
+        const path = bfsShortestPath(start, target, ADJACENCY);
+        if (path && path.length >= 4 && path.length <= 10) {
+          // Require path of 3-9 steps (not trivially short, not impossibly long)
+          return { start, target, optimalPath: path };
+        }
+      }
+
+      // Absolute fallback: known-good pair
+      return { start: 'STONE', target: 'CRANE', optimalPath: bfsShortestPath('STONE', 'CRANE', ADJACENCY) };
+    }
+
+    const dailyPuzzle = getDailyLadderPuzzle();
+    const OPTIMAL_PATH = dailyPuzzle ? dailyPuzzle.optimalPath : null;
+    const OPTIMAL_STEPS = OPTIMAL_PATH ? OPTIMAL_PATH.length - 1 : 0;
+
+    /* ============================================================
+       SECTION: VALIDATION HELPERS
+    ============================================================ */
+    function isValidDictionaryWord(word) {
+      return !!ADJACENCY[word.toUpperCase()];
+    }
+
+    function countLetterDiffs(wordA, wordB) {
+      const a = wordA.toUpperCase();
+      const b = wordB.toUpperCase();
+      if (a.length !== b.length) return Infinity;
+      let diffs = 0;
+      for (let i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) diffs++;
+      }
+      return diffs;
+    }
+
+    function isValidNextWord(currentWord, candidateWord) {
+      const upper = candidateWord.toUpperCase();
+      const neighbors = ADJACENCY[currentWord.toUpperCase()] || [];
+      return neighbors.includes(upper);
+    }
+
+    /* ============================================================
+       SECTION: DAILY STATUS
+       Follows vowel.html DailyStatus pattern for hub integration
+    ============================================================ */
+    const DailyStatus = {
+      KEY: 'wordGames_dailyStatus',
+
+      markCompleted(gameId) {
+        const today = new Date().toISOString().split('T')[0];
+        let status = {};
+        try {
+          status = JSON.parse(localStorage.getItem(this.KEY) || '{}');
+        } catch(e) {}
+        status[gameId] = { completed: true, dateKey: today, timestamp: Date.now() };
+        try {
+          localStorage.setItem(this.KEY, JSON.stringify(status));
+        } catch(e) {
+          console.warn('[DailyStatus] Save error:', e);
+        }
+      }
+    };
+
+    /* ============================================================
+       SECTION: STARTUP LOG (verification)
+    ============================================================ */
+    console.log('[WordLadder] Today\'s puzzle:', dailyPuzzle ? dailyPuzzle.start : 'NONE', '→', dailyPuzzle ? dailyPuzzle.target : 'NONE');
+    console.log('[WordLadder] Optimal steps:', OPTIMAL_STEPS);
+    console.log('[WordLadder] ADJACENCY sample:', Object.keys(ADJACENCY).slice(0, 3));
+  </script>
 </body>
 </html>
