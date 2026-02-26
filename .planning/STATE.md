@@ -11,8 +11,8 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 
 Phase: 14 of 16 (Hub + VOWEL Migration)
 Plan: — of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-25 — v2.0 roadmap created (phases 14–16)
+Status: Context gathered, ready for planning
+Last activity: 2026-02-25 — Phase 14 context captured
 
 Progress: [░░░░░░░░░░] 0% (v2.0 — 0/3 phases complete)
 
@@ -60,5 +60,5 @@ Recent decisions for v2.0:
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Roadmap created — ready to plan Phase 14
-Resume file: None
+Stopped at: Phase 14 context gathered
+Resume file: .planning/phases/14-hub-vowel-migration/14-CONTEXT.md
