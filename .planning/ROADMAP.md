@@ -60,14 +60,18 @@ Plans:
 ### Phase 15: Word Ladder
 **Goal**: Players can play a daily Word Ladder puzzle — changing one letter at a time from start to target — and see how their path compares to the optimal solution
 **Depends on**: Phase 14
-**Requirements**: LADR-01, LADR-02, LADR-03, LADR-04, LADR-05
+**Requirements**: LADR-01, LADR-02, LADR-03, LADR-05 (LADR-04 descoped per user decision)
 **Success Criteria** (what must be TRUE):
   1. User can play today's Word Ladder puzzle and every player on the same day sees the same start and target words
   2. User's word entry is rejected if it is not a valid dictionary word or if it differs from the previous word by more or fewer than one letter
   3. User can see a scrollable path history of every word they have entered so far, in order from start toward target
   4. After solving or giving up, user can see the shortest possible solution computed by BFS alongside their own path
-  5. User's personal best (fewest steps to solve) for each daily puzzle is saved in localStorage and persists across sessions
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 15-01-PLAN.md — HTML skeleton, CSS layout, dictionary engine (adjacency map, BFS, daily puzzle seed)
+- [ ] 15-02-PLAN.md — Tile interaction, word submission validation, stamp animation, path history, give-up hold
+- [ ] 15-03-PLAN.md — Results screen (win/give-up), optimal path animation, confetti, share, try again, hub integration
 
 ### Phase 16: Letter Hunt
 **Goal**: Players can play a daily word-search puzzle — circling hidden words with a lasso — with a mystery category that reveals itself mid-game and separate scores for the easy and hard phases
@@ -92,9 +96,9 @@ Plans:
 | 12. Frontend Integration | v1.2 | 1/1 | Complete | 2026-02-25 |
 | 13. Local Verification | v1.2 | 2/2 | Complete | 2026-02-25 |
 | 14. Hub + VOWEL Migration | v2.0 | Complete    | 2026-02-26 | 2026-02-25 |
-| 15. Word Ladder | v2.0 | 0/TBD | Not started | - |
+| 15. Word Ladder | v2.0 | 0/3 | Not started | - |
 | 16. Letter Hunt | v2.0 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-19*
-*Last updated: 2026-02-25 — Phase 14 complete (3/3 plans done)*
+*Last updated: 2026-02-26 — Phase 15 planned (3 plans: 15-01, 15-02, 15-03)*
