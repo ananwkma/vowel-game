@@ -53,9 +53,9 @@ See .planning/milestones/v1.2-ROADMAP.md
 **Plans**: 3 plans
 
 Plans:
-- [ ] 14-01-PLAN.md — Extract shared CSS design tokens to styles/design-tokens.css
-- [ ] 14-02-PLAN.md — Build hub portal (index.html) with game cards and daily status; create ladder.html and hunt.html placeholders
-- [ ] 14-03-PLAN.md — Migrate VOWEL to vowel.html with back button and daily completion status write
+- [x] 14-01-PLAN.md — Extract shared CSS design tokens to styles/design-tokens.css
+- [x] 14-02-PLAN.md — Build hub portal (index.html) with game cards and daily status; create ladder.html and hunt.html placeholders
+- [x] 14-03-PLAN.md — Migrate VOWEL to vowel.html with back button and daily completion status write
 
 ### Phase 15: Word Ladder
 **Goal**: Players can play a daily Word Ladder puzzle — changing one letter at a time from start to target — and see how their path compares to the optimal solution
@@ -91,10 +91,10 @@ Plans:
 | 11. Backend Implementation | v1.2 | 3/3 | Complete | 2026-02-24 |
 | 12. Frontend Integration | v1.2 | 1/1 | Complete | 2026-02-25 |
 | 13. Local Verification | v1.2 | 2/2 | Complete | 2026-02-25 |
-| 14. Hub + VOWEL Migration | 3/3 | Complete   | 2026-02-26 | - |
+| 14. Hub + VOWEL Migration | v2.0 | 3/3 | Complete | 2026-02-25 |
 | 15. Word Ladder | v2.0 | 0/TBD | Not started | - |
 | 16. Letter Hunt | v2.0 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-19*
-*Last updated: 2026-02-25 — v2.0 phases 14-16 added*
+*Last updated: 2026-02-25 — Phase 14 complete (3/3 plans done)*

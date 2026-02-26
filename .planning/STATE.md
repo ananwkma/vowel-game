@@ -19,15 +19,15 @@ Progress: [░░░░░░░░░░] 0% (v2.0 — 0/3 phases complete)
 ## Performance Metrics
 
 **Velocity (v2.0):**
-- Total plans completed: 2
-- Average duration: ~1.5 min
-- Total execution time: ~3 min
+- Total plans completed: 3
+- Average duration: ~2.3 min
+- Total execution time: ~8 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 14. Hub + VOWEL Migration | 2 | ~3 min | ~1.5 min |
+| 14. Hub + VOWEL Migration | 3 | ~8 min | ~2.3 min |
 | 15. Word Ladder | TBD | — | — |
 | 16. Letter Hunt | TBD | — | — |
 
@@ -51,6 +51,9 @@ Recent decisions for v2.0:
 - [14-02] VOWEL card uses native <a> anchor — no JS needed, works with browser history and accessibility
 - [14-02] Inactive cards use <div> not <a> — avoids keyboard focus traps on non-activatable elements
 - [14-02] Hub reads wordGames_dailyStatus from localStorage at load time — simple daily completion check
+- [14-03] Bridge :root block maps shared tokens to VOWEL-specific names — avoids renaming 2300+ lines of CSS variable references
+- [14-03] DailyStatus.markCompleted called at top of showPuzzleComplete() — ensures hub status write happens even if DOM rendering throws
+- [14-03] Google Fonts @import kept in vowel.html as deliberate duplicate — resilience if design-tokens.css fails to load
 
 ### Pending Todos
 
@@ -64,6 +67,6 @@ Recent decisions for v2.0:
 
 ## Session Continuity
 
-Last session: 2026-02-26
-Stopped at: Completed 14-02-PLAN.md (hub portal + placeholders)
-Resume file: .planning/phases/14-hub-vowel-migration/14-02-SUMMARY.md
+Last session: 2026-02-25
+Stopped at: Completed 14-03-PLAN.md (VOWEL game migrated to vowel.html)
+Resume file: .planning/phases/14-hub-vowel-migration/14-03-SUMMARY.md
