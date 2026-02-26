@@ -264,6 +264,11 @@
     .tiles-shaking { animation: tile-shake 0.4s ease-in-out; }
     .tiles-popping { animation: tile-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
 
+    /* History start entry — slightly muted to indicate it's the origin, not a step */
+    .history-entry.history-start {
+      opacity: 0.45;
+    }
+
     /* ============================================================
        SECTION: RESULTS SCREEN
     ============================================================ */
@@ -825,6 +830,315 @@
     console.log('[WordLadder] Today\'s puzzle:', dailyPuzzle ? dailyPuzzle.start : 'NONE', '→', dailyPuzzle ? dailyPuzzle.target : 'NONE');
     console.log('[WordLadder] Optimal steps:', OPTIMAL_STEPS);
     console.log('[WordLadder] ADJACENCY sample:', Object.keys(ADJACENCY).slice(0, 3));
+
+    /* ============================================================
+       SECTION: GAME STATE
+    ============================================================ */
+    let gameState = {
+      currentWord: dailyPuzzle ? dailyPuzzle.start : 'STONE',
+      targetWord: dailyPuzzle ? dailyPuzzle.target : 'CRANE',
+      playerPath: [dailyPuzzle ? dailyPuzzle.start : 'STONE'], // Includes start word; target appended on win
+      pendingTileIndex: null,  // Which tile index is being edited (null = none)
+      pendingLetter: null,     // The typed letter for the pending tile (null = unchanged)
+      completed: false,
+      gaveUp: false,
+    };
+
+    /* ============================================================
+       SECTION: DOM REFERENCES
+    ============================================================ */
+    const tilesContainer = document.getElementById('tiles-container');
+    const historyContainer = document.getElementById('history-container');
+    const targetDisplay = document.getElementById('target-display');
+    const errorMessage = document.getElementById('error-message');
+    const submitBtn = document.getElementById('submit-btn');
+    const giveUpBtn = document.getElementById('give-up-btn');
+    const giveUpBar = document.getElementById('give-up-bar');
+    const hiddenInput = document.getElementById('hidden-input');
+
+    /* ============================================================
+       SECTION: TILE RENDERING
+    ============================================================ */
+    const tileElements = [];
+
+    function renderTiles(word) {
+      tilesContainer.innerHTML = '';
+      tileElements.length = 0;
+      const letters = word.toUpperCase().split('');
+
+      letters.forEach((letter, idx) => {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.setAttribute('data-index', idx);
+        tile.setAttribute('role', 'button');
+        tile.setAttribute('aria-label', 'Tile ' + (idx + 1) + ': ' + letter);
+
+        // Show pending letter if this tile is being edited
+        if (idx === gameState.pendingTileIndex && gameState.pendingLetter) {
+          tile.textContent = gameState.pendingLetter;
+          tile.classList.add('selected');
+        } else {
+          tile.textContent = letter;
+          if (idx === gameState.pendingTileIndex) tile.classList.add('selected');
+        }
+
+        tile.addEventListener('click', () => selectTile(idx));
+        tilesContainer.appendChild(tile);
+        tileElements[idx] = tile;
+      });
+    }
+
+    /* ============================================================
+       SECTION: TILE SELECTION
+    ============================================================ */
+    function selectTile(index) {
+      if (gameState.completed || gameState.gaveUp) return;
+
+      // Reset the previously pending tile to its original letter
+      if (gameState.pendingTileIndex !== null && gameState.pendingTileIndex !== index) {
+        tileElements[gameState.pendingTileIndex].textContent =
+          gameState.currentWord[gameState.pendingTileIndex].toUpperCase();
+        tileElements[gameState.pendingTileIndex].classList.remove('selected');
+        gameState.pendingLetter = null;
+      }
+
+      gameState.pendingTileIndex = index;
+      tileElements[index].classList.add('selected');
+
+      // Focus hidden input so mobile keyboard opens
+      hiddenInput.value = '';
+      hiddenInput.focus();
+
+      clearError();
+    }
+
+    /* ============================================================
+       SECTION: HIDDEN INPUT — capture typed characters
+    ============================================================ */
+    hiddenInput.addEventListener('input', (e) => {
+      if (gameState.pendingTileIndex === null) return;
+
+      // Get last character typed (handles rapid input on mobile)
+      const raw = e.target.value;
+      const char = raw.slice(-1).toUpperCase();
+
+      if (char && /[A-Z]/.test(char)) {
+        gameState.pendingLetter = char;
+        tileElements[gameState.pendingTileIndex].textContent = char;
+      }
+
+      // Reset input value so next keypress always triggers 'input' event
+      e.target.value = '';
+    });
+
+    // Also listen for keydown on desktop (Enter = submit shortcut)
+    hiddenInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        submitWord();
+      }
+    });
+
+    /* ============================================================
+       SECTION: ERROR DISPLAY
+    ============================================================ */
+    function showError(msg) {
+      errorMessage.textContent = msg;
+    }
+
+    function clearError() {
+      errorMessage.textContent = '';
+    }
+
+    function shakeTiles() {
+      tilesContainer.classList.remove('tiles-shaking');
+      // Force reflow to restart animation
+      void tilesContainer.offsetWidth;
+      tilesContainer.classList.add('tiles-shaking');
+      tilesContainer.addEventListener('animationend', () => {
+        tilesContainer.classList.remove('tiles-shaking');
+      }, { once: true });
+    }
+
+    /* ============================================================
+       SECTION: SUBMIT BUTTON WIRE
+    ============================================================ */
+    submitBtn.addEventListener('click', submitWord);
+
+    /* ============================================================
+       SECTION: STAMP ANIMATION
+    ============================================================ */
+    function stampAnimation() {
+      return new Promise(resolve => {
+        tilesContainer.classList.add('tiles-popping');
+        tilesContainer.addEventListener('animationend', () => {
+          tilesContainer.classList.remove('tiles-popping');
+          resolve();
+        }, { once: true });
+      });
+    }
+
+    /* ============================================================
+       SECTION: HISTORY
+    ============================================================ */
+    function addToHistory(word, isStart = false) {
+      const entry = document.createElement('div');
+      entry.className = 'history-entry';
+      if (isStart) entry.classList.add('history-start');
+      entry.textContent = word.toUpperCase();
+      entry.setAttribute('aria-label', word);
+      historyContainer.appendChild(entry);
+
+      // Auto-scroll so newest entry is always visible
+      historyContainer.scrollTop = historyContainer.scrollHeight;
+    }
+
+    /* ============================================================
+       SECTION: WORD SUBMISSION
+    ============================================================ */
+    async function submitWord() {
+      if (gameState.completed || gameState.gaveUp) return;
+      if (gameState.pendingTileIndex === null) {
+        showError('Tap a tile to change a letter');
+        return;
+      }
+
+      // Build the candidate word from current tiles
+      const letters = gameState.currentWord.toUpperCase().split('');
+      if (gameState.pendingLetter) {
+        letters[gameState.pendingTileIndex] = gameState.pendingLetter;
+      }
+      const candidate = letters.join('');
+
+      // Validation: count diffs
+      const diffs = countLetterDiffs(gameState.currentWord, candidate);
+
+      if (diffs === 0) {
+        showError('Change exactly one letter');
+        shakeTiles();
+        return;
+      }
+
+      if (diffs > 1) {
+        showError('Change exactly one letter');
+        shakeTiles();
+        return;
+      }
+
+      // Validation: dictionary check (must be a neighbor in adjacency map)
+      if (!isValidNextWord(gameState.currentWord, candidate)) {
+        showError('Not a valid word');
+        shakeTiles();
+        return;
+      }
+
+      // Valid word — proceed with stamp animation
+      clearError();
+      await stampAnimation();
+
+      // Update state
+      const prevWord = gameState.currentWord;
+      gameState.currentWord = candidate;
+      gameState.pendingTileIndex = null;
+      gameState.pendingLetter = null;
+      gameState.playerPath.push(candidate);
+
+      // Add previous word to history (the "stamp" leaves this mark)
+      addToHistory(prevWord);
+
+      // Check win condition (exact match)
+      if (candidate === gameState.targetWord) {
+        gameState.completed = true;
+        DailyStatus.markCompleted('ladder');
+        // Slight delay before showing results to let stamp animation settle
+        setTimeout(() => showResults({ solved: true }), 400);
+        return;
+      }
+
+      // Render fresh tiles for the new current word
+      renderTiles(candidate);
+    }
+
+    /* ============================================================
+       SECTION: GIVE UP HOLD MECHANIC
+    ============================================================ */
+    function setupGiveUp() {
+      const HOLD_DURATION_MS = 3000;
+      let holdState = { active: false, startTime: null, timerId: null };
+
+      giveUpBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        if (gameState.completed || gameState.gaveUp) return;
+
+        holdState.active = true;
+        holdState.startTime = Date.now();
+        giveUpBar.style.width = '0%';
+
+        holdState.timerId = setInterval(() => {
+          const elapsed = Date.now() - holdState.startTime;
+          const progress = Math.min(elapsed / HOLD_DURATION_MS, 1);
+          giveUpBar.style.width = (progress * 100) + '%';
+
+          if (progress >= 1) {
+            clearInterval(holdState.timerId);
+            holdState.active = false;
+            triggerGiveUp();
+          }
+        }, 16); // ~60fps
+      });
+
+      // Cancel on pointer release (anywhere on document, in case user drags off button)
+      document.addEventListener('pointerup', () => {
+        if (holdState.active) {
+          clearInterval(holdState.timerId);
+          giveUpBar.style.width = '0%';
+          holdState.active = false;
+        }
+      });
+
+      document.addEventListener('pointercancel', () => {
+        if (holdState.active) {
+          clearInterval(holdState.timerId);
+          giveUpBar.style.width = '0%';
+          holdState.active = false;
+        }
+      });
+    }
+
+    function triggerGiveUp() {
+      if (gameState.gaveUp || gameState.completed) return;
+      gameState.gaveUp = true;
+      DailyStatus.markCompleted('ladder');
+      // Plan 03 implements: animateOptimalPath() then showResults({ solved: false })
+      showResults({ solved: false });
+    }
+
+    /* ============================================================
+       SECTION: RESULTS STUB
+       Plan 03 implements the full results screen
+    ============================================================ */
+    function showResults(opts) {
+      console.log('[WordLadder] showResults called:', opts);
+      // Plan 03 will implement the full results screen
+    }
+
+    /* ============================================================
+       SECTION: GAME INIT
+    ============================================================ */
+    function initGame() {
+      targetDisplay.textContent = gameState.targetWord;
+      targetDisplay.setAttribute('aria-label', 'Target: ' + gameState.targetWord);
+      addToHistory(gameState.currentWord, true); // Start word as first history entry (isStart=true)
+      renderTiles(gameState.currentWord);
+    }
+
+    /* ============================================================
+       SECTION: DOMCONTENTLOADED — boot the game
+    ============================================================ */
+    document.addEventListener('DOMContentLoaded', () => {
+      initGame();
+      setupGiveUp();
+    });
   </script>
 </body>
 </html>
