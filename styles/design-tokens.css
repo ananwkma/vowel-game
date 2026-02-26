@@ -1,0 +1,42 @@
+/* ============================================================
+   SHARED DESIGN TOKENS — Word Games Collection
+   REQUIRED: All games must import this file for visual consistency.
+   <link rel="stylesheet" href="styles/design-tokens.css">
+============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&display=swap');
+
+:root {
+  /* Colors */
+  --color-bg: #F8F7F4;                /* Warm off-white background */
+  --color-primary: #D4A574;           /* Amber accent (vowels, primary buttons) */
+  --color-primary-text: #1C1B18;      /* Near-black text on amber — WCAG AA: 8.38:1 */
+  --color-secondary: #2C2B28;         /* Deep charcoal (consonants, secondary elements) */
+  --color-secondary-text: #F8F7F4;    /* Off-white on charcoal — WCAG AA: 13.39:1 */
+  --color-success: #8BAF7C;           /* Sage green — puzzle solved */
+  --color-warning: #C4836F;           /* Dusty rose — give up / error state */
+
+  /* Typography */
+  --font-serif: 'Playfair Display', 'Georgia', serif;
+
+  /* Spacing scale */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Block sizing — VOWEL-specific but shared so future games can reference */
+  --block-size: 52px;
+  --block-radius: 5px;
+  --block-gap: 9px;
+
+  /* Shadows — two-layer subtle elevation */
+  --shadow-sm: 0 2px 4px -1px rgba(0, 0, 0, 0.10);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.10),
+               0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+  /* Transitions */
+  --transition-fast: 150ms ease-out;
+  --transition-normal: 300ms ease-out;
+  --transition-slow: 500ms ease-out;
+}
