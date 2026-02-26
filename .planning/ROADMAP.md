@@ -69,7 +69,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 15-01-PLAN.md — HTML skeleton, CSS layout, dictionary engine (adjacency map, BFS, daily puzzle seed)
+- [x] 15-01-PLAN.md — HTML skeleton, CSS layout, dictionary engine (adjacency map, BFS, daily puzzle seed)
 - [ ] 15-02-PLAN.md — Tile interaction, word submission validation, stamp animation, path history, give-up hold
 - [ ] 15-03-PLAN.md — Results screen (win/give-up), optimal path animation, confetti, share, try again, hub integration
 
@@ -96,9 +96,9 @@ Plans:
 | 12. Frontend Integration | v1.2 | 1/1 | Complete | 2026-02-25 |
 | 13. Local Verification | v1.2 | 2/2 | Complete | 2026-02-25 |
 | 14. Hub + VOWEL Migration | v2.0 | Complete    | 2026-02-26 | 2026-02-25 |
-| 15. Word Ladder | v2.0 | 0/3 | Not started | - |
+| 15. Word Ladder | v2.0 | 1/3 | In progress | - |
 | 16. Letter Hunt | v2.0 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-19*
-*Last updated: 2026-02-26 — Phase 15 planned (3 plans: 15-01, 15-02, 15-03)*
+*Last updated: 2026-02-26 — Phase 15 plan 01 complete (HTML skeleton + engine layer: adjacency map, BFS, daily puzzle seed)*

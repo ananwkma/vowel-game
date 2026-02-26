@@ -5,30 +5,30 @@
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** Players can instantly understand and interact with any puzzle — the mechanics are intuitive, the win/lose feedback is immediate and satisfying.
-**Current focus:** Phase 14 — Hub + VOWEL Migration
+**Current focus:** Phase 15 — Word Ladder
 
 ## Current Position
 
-Phase: 14 of 16 (Hub + VOWEL Migration)
-Plan: 3 of TBD in current phase
-Status: In progress — Plan 03 complete
-Last activity: 2026-02-25 — 14-03 VOWEL game migrated to vowel.html
+Phase: 15 of 16 (Word Ladder)
+Plan: 1 of 3 in current phase
+Status: In progress — Plan 01 complete
+Last activity: 2026-02-26 — 15-01 Word Ladder HTML skeleton and engine built
 
-Progress: [░░░░░░░░░░] 0% (v2.0 — 0/3 phases complete)
+Progress: [█░░░░░░░░░] 10% (v2.0 — 1/3 phases partially complete)
 
 ## Performance Metrics
 
 **Velocity (v2.0):**
-- Total plans completed: 3
-- Average duration: ~2.3 min
-- Total execution time: ~8 min
+- Total plans completed: 4
+- Average duration: ~2.5 min
+- Total execution time: ~12 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 14. Hub + VOWEL Migration | 3 | ~8 min | ~2.3 min |
-| 15. Word Ladder | TBD | — | — |
+| 15. Word Ladder | 1/3 done | ~4 min | ~4 min |
 | 16. Letter Hunt | TBD | — | — |
 
 *Updated after each plan completion*
@@ -54,6 +54,11 @@ Recent decisions for v2.0:
 - [14-03] Bridge :root block maps shared tokens to VOWEL-specific names — avoids renaming 2300+ lines of CSS variable references
 - [14-03] DailyStatus.markCompleted called at top of showPuzzleComplete() — ensures hub status write happens even if DOM rendering throws
 - [14-03] Google Fonts @import kept in vowel.html as deliberate duplicate — resilience if design-tokens.css fails to load
+- [15-01] seededRandom algorithm copied exactly from vowel.html (Math.imul Murmurhash variant) — consistency across games
+- [15-01] DATE_SEED includes _ladder_v1 suffix — game-namespaced to avoid cross-game collisions; v1 enables future rotation
+- [15-01] 5-letter word filter + minimum 2 adjacency neighbors — ensures non-isolated words with meaningful puzzle pairs
+- [15-01] Path length constraint 4-10 (3-9 steps) with 20-attempt fallback loop before absolute STONE→CRANE fallback
+- [15-01] DailyStatus.markCompleted follows vowel.html exact pattern — hub reads same wordGames_dailyStatus localStorage key
 
 ### Pending Todos
 
@@ -62,11 +67,11 @@ Recent decisions for v2.0:
 ### Blockers/Concerns
 
 - Phase 14 risk: Breaking VOWEL during hub migration. Mitigation: test vowel.html independently before integrating hub; validate on actual GitHub Pages URL.
-- Phase 15 risk: BFS connected component gaps in 2710-word list. Mitigation: run union-find analysis during Phase 15; validate 100 daily seeds produce solvable puzzles.
+- Phase 15 risk: BFS connected component gaps in 2710-word list. Mitigation: 20-attempt seeded fallback + STONE→CRANE absolute fallback now implemented; further union-find analysis can be done in plans 02/03 if needed.
 - Phase 16 risk: Mobile lasso UX on budget devices. Mitigation: profile on Moto G4 equivalent; target >30 FPS over 30-minute session.
 
 ## Session Continuity
 
-Last session: 2026-02-25
-Stopped at: Completed 14-03-PLAN.md (VOWEL game migrated to vowel.html)
-Resume file: .planning/phases/14-hub-vowel-migration/14-03-SUMMARY.md
+Last session: 2026-02-26
+Stopped at: Completed 15-01-PLAN.md (Word Ladder HTML skeleton and engine layer)
+Resume file: .planning/phases/15-word-ladder/15-01-SUMMARY.md

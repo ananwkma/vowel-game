@@ -17,11 +17,11 @@ Requirements for the Word Game Collection milestone. Each maps to roadmap phases
 
 ### Word Ladder
 
-- [ ] **LADR-01**: User can play a daily Word Ladder puzzle — one start→target word pair per day, same for all players
-- [ ] **LADR-02**: User's word entry is only accepted if it differs from the previous word by exactly one letter and is a valid dictionary word
+- [x] **LADR-01**: User can play a daily Word Ladder puzzle — one start→target word pair per day, same for all players
+- [x] **LADR-02**: User's word entry is only accepted if it differs from the previous word by exactly one letter and is a valid dictionary word
 - [ ] **LADR-03**: User can see a path history showing their chain of words from start toward the target as they play
 - [ ] **LADR-04**: User's personal best (fewest steps) for each daily puzzle is persisted in localStorage
-- [ ] **LADR-05**: After completing or giving up, user can see the optimal shortest path computed by BFS
+- [x] **LADR-05**: After completing or giving up, user can see the optimal shortest path computed by BFS
 
 ### Letter Hunt
 
@@ -70,11 +70,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | HUB-03 | Phase 14 | Complete |
 | HUB-04 | Phase 14 | Complete |
 | HUB-05 | Phase 14 | Complete |
-| LADR-01 | Phase 15 | Pending |
-| LADR-02 | Phase 15 | Pending |
+| LADR-01 | Phase 15 | Complete |
+| LADR-02 | Phase 15 | Complete |
 | LADR-03 | Phase 15 | Pending |
 | LADR-04 | Phase 15 | Pending |
-| LADR-05 | Phase 15 | Pending |
+| LADR-05 | Phase 15 | Complete |
 | HUNT-01 | Phase 16 | Pending |
 | HUNT-02 | Phase 16 | Pending |
 | HUNT-03 | Phase 16 | Pending |
