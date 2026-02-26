@@ -34,7 +34,7 @@ See .planning/milestones/v1.2-ROADMAP.md
 
 **Milestone Goal:** Expand from a single VOWEL game into a three-game collection with a unified portal hub, Word Ladder, and Letter Hunt.
 
-- [ ] **Phase 14: Hub + VOWEL Migration** — Portal hub with card navigation; VOWEL relocated to vowel.html with shared design tokens and hash-based routing
+- [x] **Phase 14: Hub + VOWEL Migration** — Portal hub with card navigation; VOWEL relocated to vowel.html with shared design tokens and hash-based routing (completed 2026-02-26)
 - [ ] **Phase 15: Word Ladder** — Daily start-to-target word puzzle with BFS optimal path, path history, and personal best
 - [ ] **Phase 16: Letter Hunt** — Daily word-search grid with Canvas lasso selection, mystery category reveal, and two-phase timed scoring
 
@@ -91,7 +91,7 @@ Plans:
 | 11. Backend Implementation | v1.2 | 3/3 | Complete | 2026-02-24 |
 | 12. Frontend Integration | v1.2 | 1/1 | Complete | 2026-02-25 |
 | 13. Local Verification | v1.2 | 2/2 | Complete | 2026-02-25 |
-| 14. Hub + VOWEL Migration | 1/3 | In Progress|  | - |
+| 14. Hub + VOWEL Migration | 3/3 | Complete   | 2026-02-26 | - |
 | 15. Word Ladder | v2.0 | 0/TBD | Not started | - |
 | 16. Letter Hunt | v2.0 | 0/TBD | Not started | - |
 

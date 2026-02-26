@@ -10,24 +10,24 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Current Position
 
 Phase: 14 of 16 (Hub + VOWEL Migration)
-Plan: 1 of TBD in current phase
-Status: In progress — Plan 01 complete
-Last activity: 2026-02-26 — 14-01 design tokens created
+Plan: 3 of TBD in current phase
+Status: In progress — Plan 03 complete
+Last activity: 2026-02-25 — 14-03 VOWEL game migrated to vowel.html
 
 Progress: [░░░░░░░░░░] 0% (v2.0 — 0/3 phases complete)
 
 ## Performance Metrics
 
 **Velocity (v2.0):**
-- Total plans completed: 1
-- Average duration: ~1 min
-- Total execution time: ~1 min
+- Total plans completed: 2
+- Average duration: ~1.5 min
+- Total execution time: ~3 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 14. Hub + VOWEL Migration | 1 | ~1 min | ~1 min |
+| 14. Hub + VOWEL Migration | 2 | ~3 min | ~1.5 min |
 | 15. Word Ladder | TBD | — | — |
 | 16. Letter Hunt | TBD | — | — |
 
@@ -48,6 +48,9 @@ Recent decisions for v2.0:
 - Shared CSS design tokens in Phase 14 — foundation all subsequent games depend on
 - [14-01] Token names normalized to semantic (--color-primary vs --color-vowel-bg) for multi-game decoupling
 - [14-01] Google Fonts @import placed in design-tokens.css — one link tag covers both font and tokens for all game pages
+- [14-02] VOWEL card uses native <a> anchor — no JS needed, works with browser history and accessibility
+- [14-02] Inactive cards use <div> not <a> — avoids keyboard focus traps on non-activatable elements
+- [14-02] Hub reads wordGames_dailyStatus from localStorage at load time — simple daily completion check
 
 ### Pending Todos
 
@@ -62,5 +65,5 @@ Recent decisions for v2.0:
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 14-01-PLAN.md (design tokens)
-Resume file: .planning/phases/14-hub-vowel-migration/14-01-SUMMARY.md
+Stopped at: Completed 14-02-PLAN.md (hub portal + placeholders)
+Resume file: .planning/phases/14-hub-vowel-migration/14-02-SUMMARY.md
