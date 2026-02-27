@@ -92,21 +92,32 @@
       text-transform: uppercase;
       color: var(--color-ladder-text);
       text-align: center;
-      margin-bottom: var(--spacing-md);
+      flex-shrink: 0;
     }
 
     #app {
       display: flex;
       flex-direction: column;
       align-items: center;
+      min-height: 100dvh;
       padding-top: max(48px, env(safe-area-inset-top));
+      padding-bottom: max(48px, env(safe-area-inset-bottom));
       gap: 0;
       max-width: 400px;
       margin: 0 auto;
       width: 100%;
       padding-left: var(--spacing-md);
       padding-right: var(--spacing-md);
-      padding-bottom: var(--spacing-xl);
+    }
+
+    #game-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding-bottom: 52px; /* offset title height so content feels truly centred */
     }
 
     #target-label,
@@ -608,22 +619,24 @@
 
   <div id="app">
     <h1 id="game-title">Ladder</h1>
-    <div id="target-label">TARGET</div>
-    <div id="target-display" aria-label="Target word"></div>
+    <div id="game-content">
+      <div id="target-label">TARGET</div>
+      <div id="target-display" aria-label="Target word"></div>
 
-    <div id="current-label">YOUR WORD</div>
-    <div id="tiles-container" role="group" aria-label="Current word tiles"></div>
-    <div id="tile-hint" aria-hidden="true">tap a letter to change it</div>
-    <div id="error-message" role="alert" aria-live="polite"></div>
+      <div id="current-label">YOUR WORD</div>
+      <div id="tiles-container" role="group" aria-label="Current word tiles"></div>
+      <div id="tile-hint" aria-hidden="true">tap a letter to change it</div>
+      <div id="error-message" role="alert" aria-live="polite"></div>
 
-    <div id="history-container" aria-label="Word path history"></div>
+      <div id="history-container" aria-label="Word path history"></div>
 
-    <button id="undo-btn" type="button" disabled>Undo</button>
+      <button id="undo-btn" type="button" disabled>Undo</button>
 
-    <div style="margin-top: var(--spacing-md); width: 100%;">
-      <div id="give-up-wrapper">
-        <button id="give-up-btn" type="button">Hold to give up</button>
-        <div id="give-up-bar"></div>
+      <div style="margin-top: var(--spacing-md); width: 100%;">
+        <div id="give-up-wrapper">
+          <button id="give-up-btn" type="button">Hold to give up</button>
+          <div id="give-up-bar"></div>
+        </div>
       </div>
     </div>
   </div>
