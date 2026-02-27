@@ -43,19 +43,14 @@
 
     #hub-grid {
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: var(--spacing-md);
     }
 
-    @media (min-width: 768px) {
-      #hub-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-
     .game-card {
-      display: block;
-      padding: var(--spacing-lg);
+      display: flex;
+      flex-direction: column;
+      aspect-ratio: 1;
       background: #FFFFFF;
       border-radius: var(--block-radius);
       box-shadow: var(--shadow-md);
@@ -63,6 +58,7 @@
       text-decoration: none;
       color: inherit;
       cursor: pointer;
+      overflow: hidden;
       transition:
         opacity var(--transition-normal),
         filter var(--transition-normal),
@@ -88,13 +84,28 @@
       opacity: 0.65;
     }
 
+    .card-preview {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-bg);
+      width: 100%;
+    }
+
+    .card-preview svg {
+      width: 55%;
+    }
+
     .game-card h2 {
-      font-size: 1.25rem;
+      font-size: 1rem;
       font-family: var(--font-serif);
       font-weight: 700;
       letter-spacing: 0.15em;
       text-transform: uppercase;
       color: var(--color-primary-text);
+      padding: var(--spacing-md);
+      border-top: 1px solid rgba(28, 27, 24, 0.07);
       margin: 0;
     }
   </style>
@@ -105,15 +116,69 @@
     <p id="hub-tagline">Daily puzzles await</p>
 
     <div id="hub-grid">
+
       <a href="vowel.html" class="game-card" id="card-vowel" data-game="vowel">
-        <h2>VOWEL</h2>
+        <div class="card-preview">
+          <!-- Two rows of blocks: amber = vowel, dark = consonant -->
+          <svg viewBox="0 0 124 52" xmlns="http://www.w3.org/2000/svg">
+            <rect x="0"   y="0"  width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="26"  y="0"  width="20" height="20" rx="3" fill="#D4A574"/>
+            <rect x="52"  y="0"  width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="78"  y="0"  width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="104" y="0"  width="20" height="20" rx="3" fill="#D4A574"/>
+            <rect x="0"   y="32" width="20" height="20" rx="3" fill="#D4A574"/>
+            <rect x="26"  y="32" width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="52"  y="32" width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="78"  y="32" width="20" height="20" rx="3" fill="#D4A574"/>
+            <rect x="104" y="32" width="20" height="20" rx="3" fill="#2C2B28"/>
+          </svg>
+        </div>
+        <h2>Vowel</h2>
       </a>
+
       <a class="game-card" id="card-ladder" href="ladder.html">
+        <div class="card-preview">
+          <!-- Three rows: green (target), dark (current), light grey (history) -->
+          <svg viewBox="0 0 124 80" xmlns="http://www.w3.org/2000/svg">
+            <rect x="0"   y="0"  width="20" height="20" rx="3" fill="#8BAF7C"/>
+            <rect x="26"  y="0"  width="20" height="20" rx="3" fill="#8BAF7C"/>
+            <rect x="52"  y="0"  width="20" height="20" rx="3" fill="#8BAF7C"/>
+            <rect x="78"  y="0"  width="20" height="20" rx="3" fill="#8BAF7C"/>
+            <rect x="104" y="0"  width="20" height="20" rx="3" fill="#8BAF7C"/>
+            <rect x="0"   y="30" width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="26"  y="30" width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="52"  y="30" width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="78"  y="30" width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="104" y="30" width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="0"   y="60" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="26"  y="60" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="52"  y="60" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="78"  y="60" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="104" y="60" width="20" height="20" rx="3" fill="#D8D5CE"/>
+          </svg>
+        </div>
         <h2>Ladder</h2>
       </a>
+
       <div class="game-card disabled" id="card-hunt" aria-disabled="true">
+        <div class="card-preview">
+          <!-- 2×5 neutral grid suggesting a letter search -->
+          <svg viewBox="0 0 124 52" xmlns="http://www.w3.org/2000/svg">
+            <rect x="0"   y="0"  width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="26"  y="0"  width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="52"  y="0"  width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="78"  y="0"  width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="104" y="0"  width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="0"   y="32" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="26"  y="32" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="52"  y="32" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="78"  y="32" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="104" y="32" width="20" height="20" rx="3" fill="#D8D5CE"/>
+          </svg>
+        </div>
         <h2>Hunt</h2>
       </div>
+
     </div>
   </div>
 
