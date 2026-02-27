@@ -84,11 +84,22 @@
     /* ============================================================
        SECTION: LAYOUT
     ============================================================ */
+    #game-title {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--color-ladder-text);
+      text-align: center;
+      margin-bottom: var(--spacing-md);
+    }
+
     #app {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding-top: 60px;
+      padding-top: max(48px, env(safe-area-inset-top));
       gap: 0;
       max-width: 400px;
       margin: 0 auto;
@@ -583,6 +594,7 @@
   <input type="text" id="hidden-input" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" aria-hidden="true" tabindex="-1">
 
   <div id="app">
+    <h1 id="game-title">Ladder</h1>
     <div id="target-label">TARGET</div>
     <div id="target-display" aria-label="Target word"></div>
 
