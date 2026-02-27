@@ -413,43 +413,6 @@
             won: false
         };
 
-        function initGame() {
-            const rng = seededRandom(DATE_SEED);
-            
-            // 1. Pick quote
-            const quoteIndex = Math.floor(rng() * QUOTES.length);
-            gameState.quote = QUOTES[quoteIndex];
-
-            // 2. Extract unique letters (uppercase)
-            const uniqueLetters = [...new Set(gameState.quote.text.toUpperCase().replace(/[^A-Z]/g, '').split(''))].sort();
-            
-            // 3. Shuffle number assignments 1..N
-            const numbers = uniqueLetters.map((_, i) => i + 1);
-            for (let i = numbers.length - 1; i > 0; i--) {
-                const j = Math.floor(rng() * (i + 1));
-                [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
-            }
-
-            // 4. Build mapping
-            uniqueLetters.forEach((letter, i) => {
-                gameState.letterToNum[letter] = numbers[i];
-                gameState.cipherMap[numbers[i]] = letter;
-            });
-
-            // 5. Render
-            buildQuoteDOM();
-
-            // 6. Load Progress
-            const saved = CipherProgress.load();
-            if (saved) {
-                Object.keys(saved).forEach(numStr => {
-                    const num = parseInt(numStr);
-                    const letter = saved[numStr];
-                    assignLetter(num, letter, false); // false = don't save during batch load
-                });
-            }
-        }
-
         function buildQuoteDOM() {
             const display = document.getElementById('quote-display');
             const authorLabel = document.getElementById('quote-author');
