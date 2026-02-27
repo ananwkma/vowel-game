@@ -2271,9 +2271,9 @@
       shareBtn.textContent = 'Share';
       shareBtn.addEventListener('click', () => {
         const today = new Date().toISOString().split('T')[0];
-        let text = `VOWEL ${today} | ${timeString}`;
-        if (isNewBest) text += ' 🏆 New personal best!';
-        else if (prevBest !== null) text += ` | Best: ${PersonalBest.format(prevBest)}`;
+        const pips = puzzleState.outcomes.map(o => o === 'solved' ? '🟢' : '🔴').join('');
+        let text = `VOWEL ${today}\n${pips}\n⏱ ${timeString}`;
+        if (isNewBest) text += ' 🏆';
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(text).then(() => {
             const orig = shareBtn.textContent;
