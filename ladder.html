@@ -176,16 +176,27 @@
     }
 
     .history-entry {
-      height: var(--block-size);
       flex-shrink: 0;
       display: flex;
-      align-items: center;
+      flex-direction: row;
       justify-content: center;
+      gap: var(--block-gap);
+      opacity: 0.45;
+    }
+
+    .history-tile {
+      width: var(--block-size);
+      height: var(--block-size);
+      border-radius: var(--block-radius);
+      background-color: var(--color-secondary);
+      color: var(--color-secondary-text);
       font-family: var(--font-serif);
       font-size: 1.4rem;
       font-weight: 700;
-      letter-spacing: 0.12em;
-      opacity: 0.45;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-md);
     }
 
     /* ============================================================
@@ -978,8 +989,15 @@
       const entry = document.createElement('div');
       entry.className = 'history-entry';
       if (isStart) entry.classList.add('history-start');
-      entry.textContent = word.toUpperCase();
       entry.setAttribute('aria-label', word);
+
+      word.toUpperCase().split('').forEach(letter => {
+        const tile = document.createElement('div');
+        tile.className = 'history-tile';
+        tile.textContent = letter;
+        entry.appendChild(tile);
+      });
+
       historyContainer.prepend(entry);
 
       // Scroll to top so newest entry (just below tiles) is always visible
