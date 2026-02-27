@@ -276,12 +276,12 @@
       top: max(12px, env(safe-area-inset-top));
       right: 12px;
       z-index: 1000;
-      width: 32px;
-      height: 32px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
-      border: 1.5px solid var(--color-ladder-primary);
+      border: 1.5px solid var(--color-primary-text);
       background: transparent;
-      color: var(--color-ladder-primary);
+      color: var(--color-primary-text);
       font-family: var(--font-serif);
       font-size: 0.9rem;
       font-weight: 700;
@@ -289,11 +289,11 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      opacity: 0.7;
-      transition: opacity 0.2s;
+      opacity: 0.6;
+      transition: opacity 0.2s, transform 0.1s;
     }
 
-    #help-btn:hover, #help-btn:active { opacity: 1; }
+    #help-btn:hover, #help-btn:active { opacity: 1; transform: scale(1.05); }
 
     /* ============================================================
        SECTION: HELP MODAL
@@ -336,7 +336,7 @@
       font-size: 1.5rem;
       font-weight: 700;
       margin-bottom: 20px;
-      color: var(--color-ladder-text);
+      color: var(--color-primary-text);
     }
 
     #help-modal .instruction-step {
@@ -344,7 +344,7 @@
       align-items: flex-start;
       gap: 16px;
       text-align: left;
-      margin-bottom: 18px;
+      margin-bottom: 20px;
     }
 
     #help-modal .step-num {
@@ -364,7 +364,7 @@
     #help-modal .step-text {
       font-size: 0.9rem;
       line-height: 1.45;
-      color: var(--color-ladder-text);
+      color: var(--color-primary-text);
       opacity: 0.85;
     }
 
@@ -379,7 +379,7 @@
       font-weight: 700;
       font-size: 1rem;
       cursor: pointer;
-      box-shadow: var(--shadow-md);
+      box-shadow: var(--shadow-block);
       transition: transform 0.1s;
     }
 
@@ -1428,8 +1428,7 @@
        SECTION: GAME CONTROLS
     ============================================================ */
     function disableGameControls() {
-      submitBtn.disabled = true;
-      submitBtn.style.opacity = '0.4';
+      undoBtn.disabled = true;
       giveUpBtn.disabled = true;
     }
 
@@ -1551,8 +1550,7 @@
       giveUpBar.style.width = '0%';
 
       // Re-enable game controls
-      submitBtn.disabled = false;
-      submitBtn.style.opacity = '';
+      undoBtn.disabled = false;
       giveUpBtn.disabled = false;
 
       // Re-initialize game UI
