@@ -1265,7 +1265,14 @@
         historyContainer.style.transform  = 'translateY(0)';
 
         updateUndoButton();
-        if (onWin) onWin();
+        if (onWin) {
+          onWin();
+        } else if (gameState.playerPath.length - 1 >= 50) {
+          gameState.gaveUp = true;
+          DailyStatus.markCompleted('ladder');
+          const steps = gameState.playerPath.length - 1;
+          setTimeout(() => showResults({ solved: false, lost: true, steps, delta: steps - OPTIMAL_STEPS, playerPath: gameState.playerPath.slice() }), 500);
+        }
       }, LIFT_PEAK_MS);
 
       tilesContainer.addEventListener('animationend', () => {
@@ -1554,7 +1561,7 @@
     /* ============================================================
        SECTION: RESULTS SCREEN
     ============================================================ */
-    async function showResults({ solved, steps, delta, playerPath, skipAnimation = false }) {
+    async function showResults({ solved, steps, delta, playerPath, skipAnimation = false, lost = false }) {
       disableGameControls();
 
       const resultsScreen = document.getElementById('results-screen');
@@ -1578,6 +1585,10 @@
         if (delta > 0 || DEBUG) {
           buttonRow += `<button class="btn-secondary" id="try-again-btn" type="button">try again</button>`;
         }
+      } else if (lost) {
+        titleText = 'You Lost';
+        subtitleText = `${steps} steps — optimal is ${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''}`;
+        buttonRow += `<button class="btn-secondary" id="try-again-btn" type="button">try again</button>`;
       } else {
         titleText = 'Gave Up';
         const remaining = steps > 0
@@ -1595,8 +1606,8 @@
         return `<div class="optimal-word revealed ${isStart ? 'optimal-start' : ''} ${isEnd ? 'optimal-end' : ''}">${w}</div>`;
       }).join('');
 
-      // Gave up: also show optimal path (animated on first view, instant on revisit)
-      const optimalSection = !solved ? `
+      // Gave up (not lost): also show optimal path (animated on first view, instant on revisit)
+      const optimalSection = !solved && !lost ? `
         <div class="results-section-label">Optimal path (${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''})</div>
         <div class="results-optimal-path" id="results-optimal-path">${skipAnimation ? OPTIMAL_PATH.map((w, i) => `<div class="optimal-word revealed ${i === 0 ? 'optimal-start' : ''} ${i === OPTIMAL_PATH.length - 1 ? 'optimal-end' : ''}">${w}</div>`).join('') : ''}</div>` : '';
 
@@ -1620,8 +1631,8 @@
       const shareBtn = resultsScreen.querySelector('#share-btn');
       if (shareBtn) shareBtn.addEventListener('click', () => shareResult({ solved, steps, delta }));
 
-      // Animate optimal path on first give-up view
-      if (!solved && !skipAnimation) {
+      // Animate optimal path on first give-up view (not lost)
+      if (!solved && !lost && !skipAnimation) {
         await animateOptimalPath(resultsScreen.querySelector('#results-optimal-path'));
       }
 
