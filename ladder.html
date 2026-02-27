@@ -293,14 +293,16 @@
       80% { transform: translateX(4px); }
     }
 
-    @keyframes tile-pop {
-      0% { transform: translateY(0); opacity: 1; }
-      60% { transform: translateY(-28px); opacity: 0.6; }
-      100% { transform: translateY(-28px); opacity: 0; }
+    @keyframes tile-stamp {
+      0%   { transform: translateY(0); }
+      35%  { transform: translateY(-14px); }   /* lift */
+      58%  { transform: translateY(3px); }     /* press / contact */
+      78%  { transform: translateY(0); }       /* settle */
+      100% { transform: translateY(0); }
     }
 
-    .tiles-shaking { animation: tile-shake 0.4s ease-in-out; }
-    .tiles-popping { animation: tile-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+    .tiles-shaking  { animation: tile-shake  0.4s ease-in-out; }
+    .tiles-stamping { animation: tile-stamp  0.45s ease forwards; }
 
     /* History start entry — slightly muted to indicate it's the origin, not a step */
     .history-entry.history-start {
@@ -993,27 +995,47 @@
 
     /* ============================================================
        SECTION: STAMP ANIMATION
-       Snap history up by one slot so the new entry sits behind the tiles,
-       then animate it sliding down into place — like stamping paper and
-       pulling it away to make room for the next word.
+       1. Tiles lift up (stamp raised), history entry already prepended.
+       2. At contact point (~260 ms): tiles press down, new word renders,
+          history snaps up behind tiles then slides down like paper being
+          pulled away to make room.
     ============================================================ */
-    function stampAndSlide(onStart) {
+    const STAMP_CONTACT_MS = 260; // ~58 % of 450 ms animation
+
+    function doStampAnimation(candidate, onWin) {
       const blockSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--block-size')) || 52;
       const blockGap  = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--block-gap'))  || 9;
       const slideAmt  = blockSize + blockGap;
 
-      // Snap history up so new entry is directly behind the tiles (no transition)
-      historyContainer.style.transition = 'none';
-      historyContainer.style.transform  = `translateY(-${slideAmt}px)`;
+      // Start lift animation
+      tilesContainer.classList.remove('tiles-stamping');
+      void tilesContainer.offsetWidth;
+      tilesContainer.classList.add('tiles-stamping');
 
-      // Let the snap paint, then kick off the callback and slide down
-      requestAnimationFrame(() => {
-        onStart();
+      // At stamp contact: swap tiles, snap history up, then slide it down
+      setTimeout(() => {
+        gameState.pendingTileIndex = null;
+        gameState.pendingLetter    = null;
+        gameState.currentWord      = candidate;
+        gameState.playerPath.push(candidate);
+        renderTiles(candidate);
+
+        historyContainer.style.transition = 'none';
+        historyContainer.style.transform  = `translateY(-${slideAmt}px)`;
+
         requestAnimationFrame(() => {
-          historyContainer.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-          historyContainer.style.transform  = 'translateY(0)';
+          requestAnimationFrame(() => {
+            historyContainer.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            historyContainer.style.transform  = 'translateY(0)';
+          });
         });
-      });
+
+        if (onWin) onWin();
+      }, STAMP_CONTACT_MS);
+
+      tilesContainer.addEventListener('animationend', () => {
+        tilesContainer.classList.remove('tiles-stamping');
+      }, { once: true });
     }
 
     /* ============================================================
@@ -1086,25 +1108,16 @@
         return;
       }
 
-      // Valid word — prepend history entry then slide the stack down
+      // Valid word — lift tiles, stamp down, slide history
       clearError();
-
       addToHistory(candidate);
 
-      stampAndSlide(() => {
-        // Fires after the snap-up paints, before the slide starts
-        gameState.pendingTileIndex = null;
-        gameState.pendingLetter = null;
-        gameState.currentWord = candidate;
-        gameState.playerPath.push(candidate);
-        renderTiles(candidate);
-
-        if (candidate === gameState.targetWord) {
-          gameState.completed = true;
-          DailyStatus.markCompleted('ladder');
-          setTimeout(() => showResults({ solved: true }), 450);
-        }
-      });
+      const isWin = candidate === gameState.targetWord;
+      doStampAnimation(candidate, isWin ? () => {
+        gameState.completed = true;
+        DailyStatus.markCompleted('ladder');
+        setTimeout(() => showResults({ solved: true }), 500);
+      } : null);
     }
 
     /* ============================================================
