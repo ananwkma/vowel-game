@@ -546,6 +546,98 @@
     ];
 
     /* ============================================================
+       SECTION: PUZZLE WORDS
+       Curated subset of DICTIONARY — common, recognizable words only.
+       Puzzle start/target are picked from this set, and the BFS optimal
+       path must pass through only these words so players never need an
+       obscure intermediate step to solve the puzzle.
+    ============================================================ */
+    const PUZZLE_WORDS = new Set([
+      // A
+      'ABOVE','ABUSE','ACUTE','AGAIN','AGILE','ALARM','ALERT','ALLOW','ALONE','ALOUD',
+      'ALTER','AMAZE','AMEND','AMUSE','ANGEL','ANGER','ANGRY','ANKLE','ANNOY','APPLE',
+      'APRON','ARENA','ARISE','ARMOR','AROSE','ARRAY','AVERT','AVOID','AWASH','AZURE',
+      // B
+      'BADGE','BASIC','BASIN','BEACH','BEARD','BEAST','BELLY','BELOW','BENCH','BLACK',
+      'BLADE','BLAND','BLAST','BLAZE','BLEND','BLESS','BLIND','BLOCK','BLOOD','BLOOM',
+      'BLOWN','BLUNT','BOARD','BOUND','BRACE','BRAIN','BRAKE','BRAND','BRAVE','BREAK',
+      'BREED','BRING','BRISK','BROOD','BROOK','BROOM','BROWN','BRUSH','BRUTE','BUILD',
+      'BUILT','BULGE','BUNCH','BURNT',
+      // C
+      'CAMEL','CATCH','CAUSE','CHALK','CHARM','CHART','CHASE','CHEAP','CHECK','CHEEK',
+      'CHESS','CHEST','CHILD','CHILL','CHOIR','CIVIC','CLAIM','CLASS','CLEAN','CLEAR',
+      'CLERK','CLING','CLOAK','CLOCK','CLOSE','CLOTH','CLOUD','CLOWN','COUCH','COULD',
+      'COURT','COVER','CRAFT','CRANE','CRASH','CRAVE','CRAWL','CREAK','CREEK','CREEP',
+      'CREST','CRIME','CRISP','CROOK','CROSS','CROWD','CROWN','CRUST','CURLY','CURVE',
+      // D
+      'DANCE','DREAD','DREAM','DRESS','DRINK','DRIVE','DROVE','DRUNK','DUSTY','DWARF',
+      'DWELL',
+      // E
+      'EAGER','EAGLE','EARLY','EARTH','EIGHT','ELDER','ELECT','ELITE','EMPTY','ENTRY',
+      'EQUAL','EVOKE','EXACT','EXILE','EXIST','EXTRA',
+      // F
+      'FAINT','FAIRY','FANCY','FEAST','FEVER','FIELD','FIFTH','FIGHT','FINAL','FIRST',
+      'FLAME','FLARE','FLESH','FLOCK','FLOOD','FLOOR','FLOUR','FLUTE','FORCE','FORGE',
+      'FORTH','FOUND','FRAME','FRANK','FREAK','FREED','FRESH','FRONT','FROST','FRUIT',
+      'FUNNY',
+      // G
+      'GLASS','GLEAM','GLOOM','GLOVE','GNOME','GOOSE','GRACE','GRADE','GRASP','GRATE',
+      'GRAZE','GREED','GREET','GRIEF','GROAN','GROOM','GROUP','GROVE','GRUNT','GUILE',
+      // H
+      'HEART','HEAVY','HONEY','HONOR','HORSE','HOTEL','HOUND','HUMAN',
+      // I
+      'IDEAL','INNER',
+      // J
+      'JUDGE',
+      // K
+      'KNIFE','KNOCK','KNOWN',
+      // L
+      'LANCE','LASER','LEAST','LEAVE','LEDGE','LEMON','LEVEL','LIGHT','LINEN','LODGE',
+      'LOOSE','LOVER','LUCKY','LUNGE',
+      // M
+      'MAGIC','MAKER','MAPLE','MATCH','MAYOR','MERCY','METAL','MORAL','MORPH','MOUNT',
+      'MOURN',
+      // N
+      'NIGHT','NOBLE','NORTH','NOVEL',
+      // O
+      'OLIVE','ORBIT','OUTER',
+      // P
+      'PAINT','PARTY','PATCH','PEACH','PEARL','PHASE','PIANO','PLAIN','PLANE','PLANT',
+      'PLATE','PLEAD','PLUCK','PLUME','POLAR','POWER','PRESS','PRICE','PRIDE','PRIME',
+      'PRIOR','PRIZE','PROBE','PRONE','PROOF','PROSE','PROUD','PRUNE','PULSE','PURSE',
+      // Q
+      'QUAKE','QUEEN','QUERY','QUOTA','QUOTE',
+      // R
+      'RADAR','RADIO','RAINY','RAVEN','REACH','READY','REALM','REBEL','REGAL','RISKY',
+      'ROUGH','ROWDY','RUSTY',
+      // S
+      'SAINT','SALAD','SANDY','SCARE','SCENE','SHADE','SHAME','SHAPE','SHARE','SHARK',
+      'SHEEP','SHEEN','SHEER','SHELF','SHELL','SHIFT','SHINE','SHONE','SHORE','SKULL',
+      'SLACK','SLICE','SLIDE','SLOPE','SLUMP','SMASH','SMELL','SMILE','SMOKE','SNACK',
+      'SNAIL','SNAKE','SNARE','SNEAK','SNEER','SOLAR','SOLID','SOLVE','SOUTH','SPACE',
+      'SPARE','SPEAR','SPEAK','SPELL','SPEND','SPICE','SPINE','SPOKE','SPORE','SPORT',
+      'SPRAY','STAIN','STAKE','STALE','STALL','STAMP','STAND','STARE','START','STEAL',
+      'STEAM','STEEL','STEEP','STEER','STERN','STICK','STIFF','STILL','STING','STORE',
+      'STORM','STORY','STOVE','STONE','STRAW','STRAY','STRIP','STUDY','STYLE','SUGAR',
+      'SUITE','SUNNY','SWEET','SWEAR','SWEAT','SWIFT','SWIRL','SWORD',
+      // T
+      'THICK','THINK','THORN','TIGER','TIRED','TONIC','TOTAL','TOUCH','TOUGH','TOWER',
+      'TRACE','TRACK','TRAIL','TRAIN','TRASH','TREAD','TROUT','TRUCE','TRULY','TULIP',
+      'TWINE','TWIST',
+      // U
+      'ULTRA','UNION','UNITE','UPSET','USHER',
+      // V
+      'VAULT','VENOM','VERSE','VIGOR','VIRAL','VISIT','VISTA','VIVID','VOCAL','VOUCH',
+      // W
+      'WALTZ','WASTE','WATCH','WATER','WEARY','WHEAT','WHILE','WITCH','WORST','WRATH',
+      'WRONG',
+      // Y
+      'YACHT','YEARN','YIELD','YOUNG',
+      // Z
+      'ZIPPY',
+    ]);
+
+    /* ============================================================
        SECTION: ADJACENCY MAP
        Pre-computed at startup: O(1) one-letter-change lookup
     ============================================================ */
@@ -633,32 +725,39 @@
     })();
 
     function getDailyLadderPuzzle() {
-      // Only consider 5-letter words (most ladder puzzles use 5-letter words)
-      const fiveLetterWords = Object.keys(ADJACENCY).filter(w =>
-        w.length === 5 && ADJACENCY[w].length >= 2 // Must have at least 2 neighbors
+      // Only pick puzzle endpoints from PUZZLE_WORDS (common, recognizable words)
+      // with at least 2 neighbors so there's always somewhere to go.
+      const puzzlePool = Object.keys(ADJACENCY).filter(w =>
+        w.length === 5 && ADJACENCY[w].length >= 2 && PUZZLE_WORDS.has(w)
       );
 
-      if (fiveLetterWords.length < 2) return null;
+      if (puzzlePool.length < 2) return null;
 
-      // Try up to 20 seed offsets to find a valid pair with a BFS path
-      for (let attempt = 0; attempt < 20; attempt++) {
+      // Try up to 30 seed offsets to find a valid pair where:
+      //   1. A BFS path exists with 3-7 steps (approachable but not trivial)
+      //   2. Every word in that path is a common PUZZLE_WORDS word
+      //      (so players are never blocked by an obscure intermediate)
+      for (let attempt = 0; attempt < 30; attempt++) {
         const rng = seededRandom(DATE_SEED + '_' + attempt);
-        const startIdx = Math.floor(rng() * fiveLetterWords.length);
-        const targetIdx = Math.floor(rng() * fiveLetterWords.length);
+        const startIdx = Math.floor(rng() * puzzlePool.length);
+        const targetIdx = Math.floor(rng() * puzzlePool.length);
 
-        const start = fiveLetterWords[startIdx];
-        const target = fiveLetterWords[targetIdx];
+        const start = puzzlePool[startIdx];
+        const target = puzzlePool[targetIdx];
 
         if (start === target) continue;
 
         const path = bfsShortestPath(start, target, ADJACENCY);
-        if (path && path.length >= 4 && path.length <= 10) {
-          // Require path of 3-9 steps (not trivially short, not impossibly long)
-          return { start, target, optimalPath: path };
-        }
+        if (!path || path.length < 4 || path.length > 8) continue;
+
+        // Validate every word in the optimal path is a common known word
+        const allCommon = path.every(w => PUZZLE_WORDS.has(w));
+        if (!allCommon) continue;
+
+        return { start, target, optimalPath: path };
       }
 
-      // Absolute fallback: known-good pair
+      // Absolute fallback: known-good common-word pair
       return { start: 'STONE', target: 'CRANE', optimalPath: bfsShortestPath('STONE', 'CRANE', ADJACENCY) };
     }
 
