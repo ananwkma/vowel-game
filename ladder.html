@@ -529,33 +529,45 @@
 
     .results-actions {
       display: flex;
-      flex-wrap: wrap;
-      gap: var(--spacing-sm);
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
       margin-top: var(--spacing-lg);
     }
 
-    .results-btn {
-      padding: 12px 24px;
-      border-radius: var(--block-radius);
-      font-family: var(--font-serif);
-      font-size: 0.95rem;
-      font-weight: 700;
-      border: none;
-      cursor: pointer;
-      min-width: 120px;
-    }
-
     .btn-primary {
+      padding: 12px 48px;
       background: var(--color-primary);
       color: var(--color-primary-text);
-      box-shadow: var(--shadow-md);
+      border: none;
+      border-radius: 6px;
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: var(--shadow-block);
+      letter-spacing: 0.03em;
+      transition: transform 0.1s, filter 0.15s;
     }
+    .btn-primary:hover  { filter: brightness(0.96); }
+    .btn-primary:active { transform: translateY(2px); }
 
     .btn-secondary {
-      background: transparent;
-      border: 1px solid rgba(44,43,40,0.3);
-      color: var(--color-ladder-text);
+      font-family: var(--font-serif);
+      font-size: 0.85rem;
+      color: var(--color-primary-text);
+      opacity: 0.5;
+      text-decoration: none;
+      background: none;
+      border: none;
+      border-bottom: 1px solid transparent;
+      cursor: pointer;
+      padding: 0;
+      transition: opacity 0.15s, border-color 0.15s;
+    }
+    .btn-secondary:hover {
+      opacity: 0.8;
+      border-bottom-color: rgba(28,27,24,0.4);
     }
 
     /* ============================================================
@@ -1595,7 +1607,7 @@
         }
 
         if (delta > 0) {
-          buttonRow += `<button class="results-btn btn-secondary" id="try-again-btn" type="button">Try Again</button>`;
+          buttonRow += `<button class="btn-secondary" id="try-again-btn" type="button">↩ Try Again</button>`;
         }
       } else {
         // Gave up
@@ -1612,8 +1624,8 @@
       }
 
       buttonRow += `
-        <button class="results-btn btn-primary" id="share-btn" type="button">Share</button>
-        <a href="index.html" class="results-btn btn-secondary" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">← Word Games</a>`;
+        <button class="btn-primary" id="share-btn" type="button">Share</button>
+        <a href="index.html" class="btn-secondary">← Word Games</a>`;
 
       resultsScreen.innerHTML = `
         <div class="results-title">${titleText}</div>
