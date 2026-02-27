@@ -117,7 +117,17 @@
       align-items: center;
       justify-content: center;
       width: 100%;
-      padding-bottom: 52px; /* offset title height so content feels truly centred */
+    }
+
+    #game-footer {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      gap: var(--spacing-sm);
+      width: 100%;
+      padding-top: var(--spacing-md);
+      padding-bottom: var(--spacing-sm);
     }
 
     #target-label,
@@ -267,9 +277,8 @@
        SECTION: BUTTONS
     ============================================================ */
     #undo-btn {
-      width: 100%;
+      flex: 1;
       height: 52px;
-      margin-top: var(--spacing-lg);
       background-color: var(--color-secondary);
       color: var(--color-secondary-text);
       font-family: var(--font-serif);
@@ -405,15 +414,16 @@
     #help-modal-close:active { transform: translateY(2px); }
 
     #give-up-wrapper {
+      flex: 1;
       position: relative;
-      width: 100%;
       overflow: hidden;
       border-radius: var(--block-radius);
     }
 
     #give-up-btn {
       width: 100%;
-      padding: 10px;
+      height: 52px;
+      padding: 0;
       background: transparent;
       border: 1px solid rgba(196, 131, 111, 0.4);
       color: var(--color-ladder-warning);
@@ -645,14 +655,13 @@
       <div id="error-message" role="alert" aria-live="polite"></div>
 
       <div id="history-container" aria-label="Word path history"></div>
+    </div>
 
+    <div id="game-footer">
       <button id="undo-btn" type="button" disabled>undo</button>
-
-      <div style="margin-top: var(--spacing-md); width: 100%;">
-        <div id="give-up-wrapper">
-          <button id="give-up-btn" type="button">hold to give up</button>
-          <div id="give-up-bar"></div>
-        </div>
+      <div id="give-up-wrapper">
+        <button id="give-up-btn" type="button">hold to give up</button>
+        <div id="give-up-bar"></div>
       </div>
     </div>
   </div>
