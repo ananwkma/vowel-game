@@ -997,6 +997,23 @@
     };
 
     /* ============================================================
+       SECTION: IN-PROGRESS PERSISTENCE
+       Saves playerPath after every step/undo so a refresh restores history
+    ============================================================ */
+    const LadderProgress = {
+      _key() { return `ladder_progress_${new Date().toISOString().split('T')[0]}`; },
+      save(playerPath) {
+        try { localStorage.setItem(this._key(), JSON.stringify(playerPath)); } catch(e) {}
+      },
+      load() {
+        try { const raw = localStorage.getItem(this._key()); return raw ? JSON.parse(raw) : null; } catch(e) { return null; }
+      },
+      clear() {
+        try { localStorage.removeItem(this._key()); } catch(e) {}
+      }
+    };
+
+    /* ============================================================
        SECTION: STARTUP LOG (verification)
     ============================================================ */
     console.log('[WordLadder] Today\'s puzzle:', dailyPuzzle ? dailyPuzzle.start : 'NONE', '→', dailyPuzzle ? dailyPuzzle.target : 'NONE');
@@ -1164,6 +1181,7 @@
 
         // Restore previous word
         gameState.playerPath.pop();
+        LadderProgress.save(gameState.playerPath);
         const prevWord = gameState.playerPath[gameState.playerPath.length - 1];
         gameState.currentWord  = prevWord;
         gameState.pendingTileIndex = null;
@@ -1240,6 +1258,7 @@
         gameState.pendingLetter    = null;
         gameState.currentWord      = candidate;
         gameState.playerPath.push(candidate);
+        LadderProgress.save(gameState.playerPath);
         renderTiles(candidate);
 
         historyContainer.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
@@ -1503,7 +1522,8 @@
     ============================================================ */
     function resetGame() {
       if (!dailyPuzzle) return;
-      LadderResult.clear(); // Allow a fresh attempt to overwrite the saved result
+      LadderResult.clear();
+      LadderProgress.clear();
       // Reset game state — same daily puzzle, fresh attempt
       gameState.currentWord = dailyPuzzle.start;
       gameState.pendingTileIndex = null;
@@ -1612,6 +1632,33 @@
     }
 
     /* ============================================================
+       SECTION: PROGRESS RESTORE
+    ============================================================ */
+    function restoreProgress(playerPath) {
+      // Render target tiles (same as initGame)
+      targetDisplay.innerHTML = '';
+      gameState.targetWord.toUpperCase().split('').forEach((letter, idx) => {
+        const tile = document.createElement('div');
+        tile.className = 'target-tile tile-swipe-in';
+        tile.textContent = letter;
+        tile.style.animationDelay = (idx * 0.04) + 's';
+        tile.addEventListener('animationend', () => { tile.classList.remove('tile-swipe-in'); tile.style.animationDelay = ''; }, { once: true });
+        targetDisplay.appendChild(tile);
+      });
+      targetDisplay.setAttribute('aria-label', 'Target: ' + gameState.targetWord);
+
+      // Restore state
+      gameState.playerPath  = [...playerPath];
+      gameState.currentWord = playerPath[playerPath.length - 1];
+
+      // Rebuild history — iterate oldest→newest so prepend gives newest-at-top
+      playerPath.forEach((word, i) => addToHistory(word, i === 0));
+
+      renderTiles(gameState.currentWord);
+      updateUndoButton();
+    }
+
+    /* ============================================================
        SECTION: GAME INIT
     ============================================================ */
     function initGame() {
@@ -1637,14 +1684,20 @@
       setupGiveUp();
       const saved = !DEBUG && LadderResult.load();
       if (saved) {
-        // Already played today — skip to results screen
+        // Already finished today — skip to results screen
         gameState.completed = saved.solved;
         gameState.gaveUp    = !saved.solved;
-        initGame(); // renders the (hidden-behind-results) game UI
+        initGame();
         const delta = saved.steps - OPTIMAL_STEPS;
         showResults({ solved: saved.solved, steps: saved.steps, delta, playerPath: saved.playerPath, skipAnimation: true });
       } else {
-        initGame();
+        const progress = !DEBUG && LadderProgress.load();
+        if (progress && progress.length > 1) {
+          // In-progress game — restore history
+          restoreProgress(progress);
+        } else {
+          initGame();
+        }
       }
     });
   </script>
