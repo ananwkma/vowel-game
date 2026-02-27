@@ -1277,7 +1277,7 @@
        SECTION: GIVE UP HOLD MECHANIC
     ============================================================ */
     function setupGiveUp() {
-      const HOLD_DURATION_MS = 3000;
+      const HOLD_DURATION_MS = 1500;
       let holdState = { active: false, startTime: null, timerId: null };
 
       giveUpBtn.addEventListener('pointerdown', (e) => {
@@ -1512,6 +1512,11 @@
         return `<div class="optimal-word revealed ${isStart ? 'optimal-start' : ''} ${isEnd ? 'optimal-end' : ''}">${w}</div>`;
       }).join('');
 
+      // Gave up: also show optimal path (animated on first view, instant on revisit)
+      const optimalSection = !solved ? `
+        <div class="results-section-label">Optimal path (${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''})</div>
+        <div class="results-optimal-path" id="results-optimal-path">${skipAnimation ? OPTIMAL_PATH.map((w, i) => `<div class="optimal-word revealed ${i === 0 ? 'optimal-start' : ''} ${i === OPTIMAL_PATH.length - 1 ? 'optimal-end' : ''}">${w}</div>`).join('') : ''}</div>` : '';
+
       buttonRow += `
         <button class="btn-primary" id="share-btn" type="button">Share</button>
         <a href="index.html" class="btn-secondary">← Word Games</a>`;
@@ -1521,6 +1526,7 @@
         <div class="results-steps">${subtitleText}</div>
         <div class="results-section-label">${pathLabel}</div>
         <div class="results-optimal-path">${pathHTML}</div>
+        ${optimalSection}
         <div class="results-actions">${buttonRow}</div>`;
 
       resultsScreen.hidden = false;
@@ -1530,6 +1536,11 @@
 
       const shareBtn = resultsScreen.querySelector('#share-btn');
       if (shareBtn) shareBtn.addEventListener('click', () => shareResult({ solved, steps, delta }));
+
+      // Animate optimal path on first give-up view
+      if (!solved && !skipAnimation) {
+        await animateOptimalPath(resultsScreen.querySelector('#results-optimal-path'));
+      }
 
       // Fire confetti on first optimal solve only
       if (solved && delta === 0 && !skipAnimation) {
