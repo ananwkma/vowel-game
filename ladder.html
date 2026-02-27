@@ -1264,9 +1264,11 @@
       if (isStart) entry.classList.add('history-start');
       entry.setAttribute('aria-label', word);
 
-      word.toUpperCase().split('').forEach(letter => {
+      word.toUpperCase().split('').forEach((letter, idx) => {
         const tile = document.createElement('div');
-        tile.className = 'history-tile';
+        tile.className = 'history-tile tile-swipe-in';
+        tile.style.animationDelay = (idx * 0.04) + 's';
+        tile.addEventListener('animationend', () => { tile.classList.remove('tile-swipe-in'); tile.style.animationDelay = ''; }, { once: true });
         tile.textContent = letter;
         entry.appendChild(tile);
       });
