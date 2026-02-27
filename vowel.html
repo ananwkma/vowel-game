@@ -127,6 +127,9 @@
       justify-content: center;
       padding-top: var(--spacing-md);
       padding-bottom: var(--spacing-sm);
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
     }
 
     /* ============================================================
@@ -248,8 +251,7 @@
       font-family: var(--font-serif);
       font-size: 0.9rem;
       font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
+      letter-spacing: 0.05em;
       color: var(--color-give-up-text);
       background-color: var(--color-give-up-bg);
       border: none;
@@ -683,7 +685,7 @@
       <div id="game-board"></div>
     </main>
     <footer id="game-footer">
-      <button id="give-up-btn" type="button">Give Up</button>
+      <button id="give-up-btn" type="button">give up</button>
     </footer>
   </div>
 
@@ -1741,9 +1743,9 @@
       function updateButtonText() {
         if (!btn) return;
         if (current > 0) {
-          btn.textContent = 'Give Up (' + current + ')';
+          btn.textContent = 'give up (' + current + ')';
         } else {
-          btn.textContent = 'Give Up';
+          btn.textContent = 'give up';
         }
       }
 
