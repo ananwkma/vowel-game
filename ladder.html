@@ -1512,9 +1512,7 @@
         <div class="results-section-label">Optimal path (${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''})</div>
         <div class="results-optimal-path" id="results-optimal-path">${skipAnimation ? OPTIMAL_PATH.map((w, i) => `<div class="optimal-word revealed ${i === 0 ? 'optimal-start' : ''} ${i === OPTIMAL_PATH.length - 1 ? 'optimal-end' : ''}">${w}</div>`).join('') : ''}</div>` : '';
 
-      buttonRow += `
-        <button class="btn-primary" id="share-btn" type="button">Share</button>
-        <a href="index.html" class="btn-secondary">← Word Games</a>`;
+      buttonRow += `<button class="btn-primary" id="share-btn" type="button">Share</button>`;
 
       resultsScreen.innerHTML = `
         <div class="results-title">${titleText}</div>

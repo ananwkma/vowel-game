@@ -628,20 +628,6 @@
     #results-screen .btn-share:hover  { filter: brightness(0.96); }
     #results-screen .btn-share:active { transform: translateY(2px); }
 
-    #results-screen .btn-hub {
-      font-family: var(--font-serif);
-      font-size: 0.85rem;
-      color: var(--color-vowel-text);
-      opacity: 0.5;
-      text-decoration: none;
-      border-bottom: 1px solid transparent;
-      transition: opacity 0.15s, border-color 0.15s;
-    }
-    #results-screen .btn-hub:hover {
-      opacity: 0.8;
-      border-bottom-color: rgba(28,27,24,0.4);
-    }
-
     @media (max-width: 425px) {
       :root {
         --block-size: 42px;
@@ -2282,13 +2268,7 @@
         }
       });
 
-      const hubLink = document.createElement('a');
-      hubLink.className = 'btn-hub';
-      hubLink.href = 'index.html';
-      hubLink.textContent = '← Word Games';
-
       actions.appendChild(shareBtn);
-      actions.appendChild(hubLink);
 
       screen.appendChild(label);
       screen.appendChild(time);
