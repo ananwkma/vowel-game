@@ -125,7 +125,8 @@
       flex-shrink: 0;
       display: flex;
       justify-content: center;
-      padding-bottom: 32px;
+      padding-top: var(--spacing-md);
+      padding-bottom: var(--spacing-sm);
     }
 
     /* ============================================================
@@ -242,6 +243,8 @@
        SECTION: GIVE UP BUTTON
     ============================================================ */
     #give-up-btn {
+      width: 100%;
+      height: 52px;
       font-family: var(--font-serif);
       font-size: 0.9rem;
       font-weight: 500;
@@ -251,7 +254,6 @@
       background-color: var(--color-give-up-bg);
       border: none;
       border-radius: var(--block-radius);
-      padding: 12px 28px;
       box-shadow: var(--shadow-block);
       cursor: pointer;
       transition: opacity 0.15s ease, transform 0.1s ease;
