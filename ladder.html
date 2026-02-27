@@ -141,6 +141,8 @@
       gap: var(--block-gap);
       justify-content: center;
       margin-top: var(--spacing-xl);
+      position: relative;
+      z-index: 2;
     }
 
     .tile {
@@ -177,6 +179,8 @@
       font-size: 0.85rem;
       min-height: 1.2em;
       margin-top: var(--spacing-xs);
+      position: relative;
+      z-index: 2;
     }
 
     /* ============================================================
@@ -989,14 +993,26 @@
 
     /* ============================================================
        SECTION: STAMP ANIMATION
+       Snap history up by one slot so the new entry sits behind the tiles,
+       then animate it sliding down into place — like stamping paper and
+       pulling it away to make room for the next word.
     ============================================================ */
-    function stampAnimation() {
-      return new Promise(resolve => {
-        tilesContainer.classList.add('tiles-popping');
-        tilesContainer.addEventListener('animationend', () => {
-          tilesContainer.classList.remove('tiles-popping');
-          resolve();
-        }, { once: true });
+    function stampAndSlide(onStart) {
+      const blockSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--block-size')) || 52;
+      const blockGap  = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--block-gap'))  || 9;
+      const slideAmt  = blockSize + blockGap;
+
+      // Snap history up so new entry is directly behind the tiles (no transition)
+      historyContainer.style.transition = 'none';
+      historyContainer.style.transform  = `translateY(-${slideAmt}px)`;
+
+      // Let the snap paint, then kick off the callback and slide down
+      requestAnimationFrame(() => {
+        onStart();
+        requestAnimationFrame(() => {
+          historyContainer.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+          historyContainer.style.transform  = 'translateY(0)';
+        });
       });
     }
 
@@ -1025,7 +1041,7 @@
     /* ============================================================
        SECTION: WORD SUBMISSION
     ============================================================ */
-    async function submitWord() {
+    function submitWord() {
       if (gameState.completed || gameState.gaveUp) return;
       if (gameState.pendingTileIndex === null) {
         showError('Tap a tile to change a letter');
@@ -1070,31 +1086,25 @@
         return;
       }
 
-      // Valid word — proceed with stamp animation
+      // Valid word — prepend history entry then slide the stack down
       clearError();
-      await stampAnimation();
 
-      // Update state
-      const prevWord = gameState.currentWord;
-      gameState.currentWord = candidate;
-      gameState.pendingTileIndex = null;
-      gameState.pendingLetter = null;
-      gameState.playerPath.push(candidate);
-
-      // Add the newly accepted word to history
       addToHistory(candidate);
 
-      // Check win condition (exact match)
-      if (candidate === gameState.targetWord) {
-        gameState.completed = true;
-        DailyStatus.markCompleted('ladder');
-        // Slight delay before showing results to let stamp animation settle
-        setTimeout(() => showResults({ solved: true }), 400);
-        return;
-      }
+      stampAndSlide(() => {
+        // Fires after the snap-up paints, before the slide starts
+        gameState.pendingTileIndex = null;
+        gameState.pendingLetter = null;
+        gameState.currentWord = candidate;
+        gameState.playerPath.push(candidate);
+        renderTiles(candidate);
 
-      // Render fresh tiles for the new current word
-      renderTiles(candidate);
+        if (candidate === gameState.targetWord) {
+          gameState.completed = true;
+          DailyStatus.markCompleted('ladder');
+          setTimeout(() => showResults({ solved: true }), 450);
+        }
+      });
     }
 
     /* ============================================================
