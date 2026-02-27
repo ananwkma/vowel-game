@@ -606,6 +606,45 @@
       line-height: 1.5;
     }
 
+    #results-screen .results-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      margin-top: 4px;
+    }
+
+    #results-screen .btn-share {
+      padding: 12px 48px;
+      background: var(--color-vowel-bg);
+      color: var(--color-vowel-text);
+      border: none;
+      border-radius: 6px;
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: var(--shadow-block);
+      letter-spacing: 0.03em;
+      transition: transform 0.1s, filter 0.15s;
+    }
+    #results-screen .btn-share:hover  { filter: brightness(0.96); }
+    #results-screen .btn-share:active { transform: translateY(2px); }
+
+    #results-screen .btn-hub {
+      font-family: var(--font-serif);
+      font-size: 0.85rem;
+      color: var(--color-vowel-text);
+      opacity: 0.5;
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: opacity 0.15s, border-color 0.15s;
+    }
+    #results-screen .btn-hub:hover {
+      opacity: 0.8;
+      border-bottom-color: rgba(28,27,24,0.4);
+    }
+
     @media (max-width: 425px) {
       :root {
         --block-size: 42px;
@@ -2224,11 +2263,42 @@
       tomorrow.className = 'results-tomorrow';
       tomorrow.textContent = 'Come back tomorrow for a new puzzle';
 
+      const actions = document.createElement('div');
+      actions.className = 'results-actions';
+
+      const shareBtn = document.createElement('button');
+      shareBtn.className = 'btn-share';
+      shareBtn.textContent = 'Share';
+      shareBtn.addEventListener('click', () => {
+        const today = new Date().toISOString().split('T')[0];
+        let text = `VOWEL ${today} | ${timeString}`;
+        if (isNewBest) text += ' 🏆 New personal best!';
+        else if (prevBest !== null) text += ` | Best: ${PersonalBest.format(prevBest)}`;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(() => {
+            const orig = shareBtn.textContent;
+            shareBtn.textContent = 'Copied!';
+            setTimeout(() => { shareBtn.textContent = orig; }, 1500);
+          }).catch(() => { prompt('Copy this result:', text); });
+        } else {
+          prompt('Copy this result:', text);
+        }
+      });
+
+      const hubLink = document.createElement('a');
+      hubLink.className = 'btn-hub';
+      hubLink.href = 'index.html';
+      hubLink.textContent = '← Word Games';
+
+      actions.appendChild(shareBtn);
+      actions.appendChild(hubLink);
+
       screen.appendChild(label);
       screen.appendChild(time);
       screen.appendChild(rank);
       screen.appendChild(divider);
       screen.appendChild(tomorrow);
+      screen.appendChild(actions);
       board.appendChild(screen);
 
       document.getElementById('give-up-btn').style.display = 'none';
