@@ -32,12 +32,12 @@ See .planning/milestones/v1.2-ROADMAP.md
 
 ### 🚧 v2.0 Word Game Collection (In Progress)
 
-**Milestone Goal:** Expand from a single VOWEL game into a four-game collection with a unified portal hub, Word Ladder, Letter Hunt, and Cipher.
+**Milestone Goal:** Expand from a single VOWEL game into a four-game collection with a unified portal hub, Word Ladder, Cipher, and Letter Hunt.
 
 - [x] **Phase 14: Hub + VOWEL Migration** — Portal hub with card navigation; VOWEL relocated to vowel.html with shared design tokens and hash-based routing (completed 2026-02-26)
 - [ ] **Phase 15: Word Ladder** — Daily start-to-target word puzzle with BFS optimal path, path history, and personal best
-- [ ] **Phase 16: Letter Hunt** — Daily word-search grid with Canvas lasso selection, mystery category reveal, and two-phase timed scoring
-- [ ] **Phase 17: Cipher** — Daily famous quote encoded as a number substitution cipher; players tap number blocks and type letters to decode the quote
+- [ ] **Phase 16: Cipher** — Daily famous quote encoded as a number substitution cipher; players tap number blocks and type letters to decode the quote
+- [ ] **Phase 17: Letter Hunt** — Daily word-search grid with Canvas lasso selection, mystery category reveal, and two-phase timed scoring
 
 ## Phase Details
 
@@ -74,9 +74,25 @@ Plans:
 - [ ] 15-02-PLAN.md — Tile interaction, word submission validation, stamp animation, path history, give-up hold
 - [ ] 15-03-PLAN.md — Results screen (win/give-up), optimal path animation, confetti, share, try again, hub integration
 
-### Phase 16: Letter Hunt
-**Goal**: Players can play a daily word-search puzzle — circling hidden words with a lasso — with a mystery category that reveals itself mid-game and separate scores for the easy and hard phases
+### Phase 16: Cipher
+**Goal**: Players decode a daily famous quote presented as a number substitution cipher — each unique letter maps to a unique number — by selecting number blocks and typing the corresponding letters until the full quote is revealed
 **Depends on**: Phase 15
+**Requirements**: CIPH-01, CIPH-02, CIPH-03, CIPH-04, CIPH-05
+**Success Criteria** (what must be TRUE):
+  1. Every player on the same day sees the same famous quote encoded with the same number-to-letter mapping (daily seed)
+  2. Player can tap a number block to select it, then type a letter to assign it; that letter fills in for every occurrence of that number across the entire quote
+  3. Correctly solved letters are visually distinguished from unsolved number blocks and incorrectly guessed letters
+  4. When all numbers are correctly decoded, the full quote is revealed and the game is won
+  5. Completed state is written to the hub's daily status so the Cipher card shows as done
+**Plans**: 2 plans
+
+Plans:
+- [ ] 16-01-PLAN.md — cipher.html skeleton, CSS, quote corpus, daily-seeded engine, DOM rendering; disabled Cipher hub card
+- [ ] 16-02-PLAN.md — Block selection, letter assignment, win detection, win screen, hub integration (enable Cipher card)
+
+### Phase 17: Letter Hunt
+**Goal**: Players can play a daily word-search puzzle — circling hidden words with a lasso — with a mystery category that reveals itself mid-game and separate scores for the easy and hard phases
+**Depends on**: Phase 16
 **Requirements**: HUNT-01, HUNT-02, HUNT-03, HUNT-04, HUNT-05
 **Success Criteria** (what must be TRUE):
   1. User can play today's Letter Hunt puzzle and every player on the same day sees the same grid and words
@@ -98,25 +114,9 @@ Plans:
 | 13. Local Verification | v1.2 | 2/2 | Complete | 2026-02-25 |
 | 14. Hub + VOWEL Migration | v2.0 | Complete    | 2026-02-26 | 2026-02-25 |
 | 15. Word Ladder | v2.0 | 1/3 | In progress | - |
-| 16. Letter Hunt | v2.0 | 0/TBD | Not started | - |
-| 17. Cipher | v2.0 | 0/2 | Not started | - |
-
-### Phase 17: Cipher
-**Goal**: Players decode a daily famous quote presented as a number substitution cipher — each unique letter maps to a unique number — by selecting number blocks and typing the corresponding letters until the full quote is revealed
-**Depends on**: Phase 16
-**Requirements**: CIPH-01, CIPH-02, CIPH-03, CIPH-04, CIPH-05
-**Success Criteria** (what must be TRUE):
-  1. Every player on the same day sees the same famous quote encoded with the same number-to-letter mapping (daily seed)
-  2. Player can tap a number block to select it, then type a letter to assign it; that letter fills in for every occurrence of that number across the entire quote
-  3. Correctly solved letters are visually distinguished from unsolved number blocks and incorrectly guessed letters
-  4. When all numbers are correctly decoded, the full quote is revealed and the game is won
-  5. Completed state is written to the hub's daily status so the Cipher card shows as done
-**Plans**: 2 plans
-
-Plans:
-- [ ] 17-01-PLAN.md — cipher.html skeleton, CSS, quote corpus, daily-seeded engine, DOM rendering; disabled Cipher hub card
-- [ ] 17-02-PLAN.md — Block selection, letter assignment, win detection, win screen, hub integration (enable Cipher card)
+| 16. Cipher | v2.0 | 0/2 | Not started | - |
+| 17. Letter Hunt | v2.0 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-19*
-*Last updated: 2026-02-27 — Phase 17 planned (2 plans: engine + interaction)*
+*Last updated: 2026-02-27 — Cipher moved to Phase 16, Letter Hunt to Phase 17*
