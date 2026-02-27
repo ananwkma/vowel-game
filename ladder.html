@@ -569,6 +569,10 @@
     }
 
     .btn-primary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
       padding: 12px 48px;
       background: var(--color-primary);
       color: var(--color-primary-text);
@@ -579,7 +583,8 @@
       font-weight: 700;
       cursor: pointer;
       box-shadow: var(--shadow-block);
-      letter-spacing: 0.03em;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
       transition: transform 0.1s, filter 0.15s;
     }
     .btn-primary:hover  { filter: brightness(0.96); }
@@ -1457,9 +1462,9 @@
         navigator.clipboard.writeText(text).then(() => {
           const shareBtn = document.getElementById('share-btn');
           if (shareBtn) {
-            const original = shareBtn.textContent;
+            const original = shareBtn.innerHTML;
             shareBtn.textContent = 'Copied!';
-            setTimeout(() => { shareBtn.textContent = original; }, 1500);
+            setTimeout(() => { shareBtn.innerHTML = original; }, 1500);
           }
         }).catch(() => {
           prompt('Copy this result:', text);
@@ -1527,7 +1532,7 @@
           subtitleText = `Solved in ${steps} step${steps !== 1 ? 's' : ''} (+${delta} from optimal)`;
         }
         if (delta > 0 || DEBUG) {
-          buttonRow += `<button class="btn-secondary" id="try-again-btn" type="button">↩ Try Again</button>`;
+          buttonRow += `<button class="btn-secondary" id="try-again-btn" type="button">try again</button>`;
         }
       } else {
         titleText = 'Gave Up';
@@ -1535,7 +1540,7 @@
           ? `after ${steps} step${steps !== 1 ? 's' : ''}`
           : 'at the start';
         subtitleText = `${remaining} — optimal is ${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''}`;
-        buttonRow += `<button class="btn-secondary" id="try-again-btn" type="button">↩ Try Again</button>`;
+        buttonRow += `<button class="btn-secondary" id="try-again-btn" type="button">try again</button>`;
       }
 
       // Player path display
@@ -1551,7 +1556,8 @@
         <div class="results-section-label">Optimal path (${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''})</div>
         <div class="results-optimal-path" id="results-optimal-path">${skipAnimation ? OPTIMAL_PATH.map((w, i) => `<div class="optimal-word revealed ${i === 0 ? 'optimal-start' : ''} ${i === OPTIMAL_PATH.length - 1 ? 'optimal-end' : ''}">${w}</div>`).join('') : ''}</div>` : '';
 
-      buttonRow += `<button class="btn-primary" id="share-btn" type="button">Share</button>`;
+      const shareIcon = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="2.5" r="2" fill="currentColor"/><circle cx="3" cy="8" r="2" fill="currentColor"/><circle cx="12" cy="13.5" r="2" fill="currentColor"/><line x1="3" y1="8" x2="12" y2="2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="3" y1="8" x2="12" y2="13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+      buttonRow += `<button class="btn-primary" id="share-btn" type="button">Share ${shareIcon}</button>`;
 
       resultsScreen.innerHTML = `
         <div class="results-game-title">Ladder</div>

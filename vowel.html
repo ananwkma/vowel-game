@@ -612,6 +612,10 @@
     }
 
     #results-screen .btn-share {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
       padding: 12px 48px;
       background: var(--color-vowel-bg);
       color: var(--color-vowel-text);
@@ -622,7 +626,8 @@
       font-weight: 700;
       cursor: pointer;
       box-shadow: var(--shadow-block);
-      letter-spacing: 0.03em;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
       transition: transform 0.1s, filter 0.15s;
     }
     #results-screen .btn-share:hover  { filter: brightness(0.96); }
@@ -2251,7 +2256,8 @@
 
       const shareBtn = document.createElement('button');
       shareBtn.className = 'btn-share';
-      shareBtn.textContent = 'Share';
+      const shareIcon = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="2.5" r="2" fill="currentColor"/><circle cx="3" cy="8" r="2" fill="currentColor"/><circle cx="12" cy="13.5" r="2" fill="currentColor"/><line x1="3" y1="8" x2="12" y2="2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="3" y1="8" x2="12" y2="13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+      shareBtn.innerHTML = `Share ${shareIcon}`;
       shareBtn.addEventListener('click', () => {
         const today = new Date().toISOString().split('T')[0];
         const pips = puzzleState.outcomes.map(o => o === 'solved' ? '🟢' : '🔴').join('');
@@ -2259,9 +2265,9 @@
         if (isNewBest) text += ' 🏆';
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(text).then(() => {
-            const orig = shareBtn.textContent;
+            const orig = shareBtn.innerHTML;
             shareBtn.textContent = 'Copied!';
-            setTimeout(() => { shareBtn.textContent = orig; }, 1500);
+            setTimeout(() => { shareBtn.innerHTML = orig; }, 1500);
           }).catch(() => { prompt('Copy this result:', text); });
         } else {
           prompt('Copy this result:', text);
