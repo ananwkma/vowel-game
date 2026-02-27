@@ -843,6 +843,8 @@
     }
 
     const ADJACENCY = buildAdjacencyMap(DICTIONARY);
+    // Common-word-only graph: guarantees at least one all-common path exists for every puzzle
+    const COMMON_ADJACENCY = buildAdjacencyMap([...PUZZLE_WORDS]);
 
     /* ============================================================
        SECTION: BFS SHORTEST PATH
@@ -897,19 +899,21 @@
     })();
 
     function getDailyLadderPuzzle() {
-      // Only pick puzzle endpoints from PUZZLE_WORDS (common, recognizable words)
-      // with at least 2 neighbors so there's always somewhere to go.
+      // Only pick puzzle endpoints from PUZZLE_WORDS that also have at least one
+      // common-word neighbor — ensures both ends are reachable within common words.
       const puzzlePool = Object.keys(ADJACENCY).filter(w =>
-        w.length === 5 && ADJACENCY[w].length >= 2 && PUZZLE_WORDS.has(w)
+        w.length === 5 && PUZZLE_WORDS.has(w) &&
+        COMMON_ADJACENCY[w] && COMMON_ADJACENCY[w].length >= 1
       );
 
       if (puzzlePool.length < 2) return null;
 
-      // Try up to 30 seed offsets to find a valid pair where:
-      //   1. A BFS path exists with 3-7 steps (approachable but not trivial)
-      //   2. Every word in that path is a common PUZZLE_WORDS word
-      //      (so players are never blocked by an obscure intermediate)
-      for (let attempt = 0; attempt < 30; attempt++) {
+      // Try up to 50 seed offsets to find a valid pair where:
+      //   1. Optimal BFS path (full dict) has 3-7 steps — sets difficulty
+      //   2. A path exists through COMMON_ADJACENCY (common words only) —
+      //      guarantees players can always solve without hitting obscure words.
+      //      Optimal path may still use uncommon words for a shorter route.
+      for (let attempt = 0; attempt < 50; attempt++) {
         const rng = seededRandom(DATE_SEED + '_' + attempt);
         const startIdx = Math.floor(rng() * puzzlePool.length);
         const targetIdx = Math.floor(rng() * puzzlePool.length);
@@ -922,9 +926,9 @@
         const path = bfsShortestPath(start, target, ADJACENCY);
         if (!path || path.length < 4 || path.length > 8) continue;
 
-        // Validate every word in the optimal path is a common known word
-        const allCommon = path.every(w => PUZZLE_WORDS.has(w));
-        if (!allCommon) continue;
+        // Require at least one all-common-word solution path
+        const commonPath = bfsShortestPath(start, target, COMMON_ADJACENCY);
+        if (!commonPath) continue;
 
         return { start, target, optimalPath: path };
       }
