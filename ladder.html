@@ -534,6 +534,10 @@
       text-transform: uppercase;
     }
 
+    .results-title--warning {
+      color: var(--color-ladder-warning);
+    }
+
     .results-steps {
       font-size: 1rem;
       opacity: 0.75;
@@ -1615,9 +1619,10 @@
       const shareIcon = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="2.5" r="2" fill="currentColor"/><circle cx="3" cy="8" r="2" fill="currentColor"/><circle cx="12" cy="13.5" r="2" fill="currentColor"/><line x1="3" y1="8" x2="12" y2="2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="3" y1="8" x2="12" y2="13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
       buttonRow += `<button class="btn-primary" id="share-btn" type="button">share ${shareIcon}</button>`;
 
+      const titleClass = (!solved && !lost) ? 'results-title results-title--warning' : 'results-title';
       resultsScreen.innerHTML = `
         <div class="results-game-title">Ladder</div>
-        <div class="results-title">${titleText}</div>
+        <div class="${titleClass}">${titleText}</div>
         <div class="results-steps">${subtitleText}</div>
         <div class="results-section-label">${pathLabel}</div>
         <div class="results-optimal-path">${pathHTML}</div>
