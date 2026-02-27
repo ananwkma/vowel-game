@@ -728,83 +728,118 @@
     ============================================================ */
     const PUZZLE_WORDS = new Set([
       // A
-      'ABOVE','ABUSE','ACUTE','AGAIN','AGILE','ALARM','ALERT','ALLOW','ALONE','ALOUD',
-      'ALTER','AMAZE','AMEND','AMUSE','ANGEL','ANGER','ANGRY','ANKLE','ANNOY','APPLE',
-      'APRON','ARENA','ARISE','ARMOR','AROSE','ARRAY','AVERT','AVOID','AWASH','AZURE',
+      'ABOUT','ABOVE','ABUSE','ACTOR','ACUTE','ADULT','AFTER','AGAIN','AGILE','AGREE',
+      'AISLE','ALARM','ALBUM','ALERT','ALIVE','ALLEY','ALLOW','ALONE','ALOUD','ALTER',
+      'AMAZE','AMEND','AMUSE','ANGEL','ANGER','ANGRY','ANKLE','ANNOY','APPLE','APPLY',
+      'APRON','ARENA','ARGUE','ARISE','ARMOR','AROSE','ARRAY','ASKED','ASSET','AVERT',
+      'AVOID','AWASH','AWFUL','AZURE',
       // B
-      'BADGE','BASIC','BASIN','BEACH','BEARD','BEAST','BELLY','BELOW','BENCH','BLACK',
-      'BLADE','BLAND','BLAST','BLAZE','BLEND','BLESS','BLIND','BLOCK','BLOOD','BLOOM',
-      'BLOWN','BLUNT','BOARD','BOUND','BRACE','BRAIN','BRAKE','BRAND','BRAVE','BREAK',
-      'BREED','BRING','BRISK','BROOD','BROOK','BROOM','BROWN','BRUSH','BRUTE','BUILD',
-      'BUILT','BULGE','BUNCH','BURNT',
+      'BADGE','BADLY','BASIC','BASIN','BEACH','BEARD','BEAST','BELLY','BELOW','BENCH',
+      'BLACK','BLADE','BLAND','BLAST','BLAZE','BLEND','BLESS','BLIND','BLOCK','BLOOD',
+      'BLOOM','BLOWN','BLUES','BLUNT','BOARD','BONUS','BOOKS','BOOST','BORED','BOUND',
+      'BOXER','BRACE','BRAIN','BRAKE','BRAND','BRAVE','BREAK','BREED','BRIDE','BRIEF',
+      'BRING','BRISK','BROKE','BROOD','BROOK','BROOM','BROWN','BRUSH','BRUTE','BUILD',
+      'BUILT','BULGE','BUNCH','BURNT','BUYER',
       // C
-      'CAMEL','CATCH','CAUSE','CHALK','CHARM','CHART','CHASE','CHEAP','CHECK','CHEEK',
-      'CHESS','CHEST','CHILD','CHILL','CHOIR','CIVIC','CLAIM','CLASS','CLEAN','CLEAR',
-      'CLERK','CLING','CLOAK','CLOCK','CLOSE','CLOTH','CLOUD','CLOWN','COUCH','COULD',
-      'COURT','COVER','CRAFT','CRANE','CRASH','CRAVE','CRAWL','CREAK','CREEK','CREEP',
-      'CREST','CRIME','CRISP','CROOK','CROSS','CROWD','CROWN','CRUST','CURLY','CURVE',
+      'CABIN','CABLE','CAMEL','CARRY','CATCH','CAUSE','CHAIN','CHAIR','CHALK','CHARM',
+      'CHART','CHASE','CHEAP','CHECK','CHEEK','CHEER','CHESS','CHEST','CHILD','CHILL',
+      'CHIPS','CHOIR','CHUNK','CIVIC','CIVIL','CLAIM','CLASS','CLEAN','CLEAR','CLERK',
+      'CLIFF','CLING','CLOAK','CLOCK','CLONE','CLOSE','CLOTH','CLOUD','CLOWN','COACH',
+      'COLOR','COUCH','COULD','COUNT','COURT','COVER','CRAFT','CRANE','CRASH','CRAVE',
+      'CRAWL','CREAK','CREAM','CREEK','CREEP','CREST','CRIME','CRISP','CROOK','CROPS',
+      'CROSS','CROWD','CROWN','CRUEL','CRUST','CURLY','CURVE',
       // D
-      'DANCE','DREAD','DREAM','DRESS','DRINK','DRIVE','DROVE','DRUNK','DUSTY','DWARF',
-      'DWELL',
+      'DAILY','DANCE','DEALT','DEBUT','DECAY','DEPOT','DEPTH','DIRTY','DISCO','DITCH',
+      'DIZZY','DOUGH','DRAIN','DRAMA','DRAPE','DREAD','DREAM','DRESS','DRINK','DRIVE',
+      'DROVE','DRUMS','DRUNK','DUSTY','DWARF','DWELL','DYING',
       // E
-      'EAGER','EAGLE','EARLY','EARTH','EIGHT','ELDER','ELECT','ELITE','EMPTY','ENTRY',
-      'EQUAL','EVOKE','EXACT','EXILE','EXIST','EXTRA',
+      'EAGER','EAGLE','EARLY','EARTH','EERIE','EIGHT','ELBOW','ELDER','ELECT','ELITE',
+      'EMPTY','ENEMY','ENJOY','ENTER','ENTRY','ENVOY','EQUAL','ERODE','ERROR','ESSAY',
+      'EVERY','EVOKE','EXACT','EXILE','EXIST','EXTRA',
       // F
-      'FAINT','FAIRY','FANCY','FEAST','FEVER','FIELD','FIFTH','FIGHT','FINAL','FIRST',
-      'FLAME','FLARE','FLESH','FLOCK','FLOOD','FLOOR','FLOUR','FLUTE','FORCE','FORGE',
-      'FORTH','FOUND','FRAME','FRANK','FREAK','FREED','FRESH','FRONT','FROST','FRUIT',
-      'FUNNY',
+      'FABLE','FAINT','FAIRY','FALLS','FALSE','FANCY','FATAL','FAULT','FAVOR','FEAST',
+      'FEVER','FIELD','FIFTH','FIGHT','FILES','FILMS','FINAL','FIRST','FLAIR','FLAME',
+      'FLARE','FLASH','FLESH','FLICK','FLING','FLINT','FLOAT','FLOCK','FLOOD','FLOOR',
+      'FLOUR','FLUNG','FLUTE','FOCUS','FORCE','FORGE','FORTH','FORTY','FOUND','FRAIL',
+      'FRAME','FRANK','FRAUD','FREAK','FREED','FRESH','FRONT','FROST','FROTH','FROZE',
+      'FRUIT','FULLY','FUNNY','FUZZY',
       // G
-      'GLASS','GLEAM','GLOOM','GLOVE','GNOME','GOOSE','GRACE','GRADE','GRASP','GRATE',
-      'GRAZE','GREED','GREET','GRIEF','GROAN','GROOM','GROUP','GROVE','GRUNT','GUILE',
+      'GAMES','GHOST','GIFTS','GIVEN','GLARE','GLASS','GLEAM','GLIDE','GLINT','GLOAT',
+      'GLOBE','GLOOM','GLOSS','GLOVE','GNASH','GNOME','GOOSE','GRACE','GRADE','GRASP',
+      'GRATE','GRAVY','GRAZE','GREED','GREET','GRIEF','GRILL','GRIPS','GROAN','GROOM',
+      'GROUP','GROUT','GROVE','GROWN','GRUEL','GRUNT','GUILD','GUILE','GUSTO',
       // H
-      'HEART','HEAVY','HONEY','HONOR','HORSE','HOTEL','HOUND','HUMAN',
+      'HABIT','HANDY','HAVEN','HAZEL','HEART','HEAVY','HEDGE','HERBS','HINGE','HIPPO',
+      'HITCH','HOLES','HOLLY','HOMES','HONEY','HONOR','HOOKS','HORSE','HOTEL','HOUND',
+      'HUMAN','HUMOR','HURRY','HUSKY','HUTCH',
       // I
-      'IDEAL','INNER',
+      'IDEAL','IDIOM','INDEX','INFER','INNER','INPUT','INTRO','IRONY','IVORY',
       // J
-      'JUDGE',
+      'JELLY','JOINT','JOKER','JOLLY','JOUST','JUDGE','JUMPY','JUROR',
       // K
-      'KNIFE','KNOCK','KNOWN',
+      'KHAKI','KNACK','KNAVE','KNEEL','KNELT','KNIFE','KNOCK','KNOWN',
       // L
-      'LANCE','LASER','LEAST','LEAVE','LEDGE','LEMON','LEVEL','LIGHT','LINEN','LODGE',
-      'LOOSE','LOVER','LUCKY','LUNGE',
+      'LABEL','LABOR','LANCE','LAPSE','LARGE','LASER','LATCH','LATER','LAYER','LEAFY',
+      'LEAST','LEAVE','LEDGE','LEMON','LEVEL','LIGHT','LINEN','LITHE','LOANS','LOCAL',
+      'LODGE','LOFTY','LOGIC','LOOSE','LORRY','LOVER','LUCID','LUCKY','LUNGE','LUSTY',
+      'LYING','LYRIC',
       // M
-      'MAGIC','MAKER','MAPLE','MATCH','MAYOR','MERCY','METAL','MORAL','MORPH','MOUNT',
-      'MOURN',
+      'MAGIC','MAKER','MANGO','MANIC','MANLY','MANOR','MAPLE','MARCH','MARSH','MATCH',
+      'MAYOR','MEANT','MEDIA','MELON','MERCY','MERIT','MESSY','METAL','METRO','MICRO',
+      'MIGHT','MIRTH','MIXER','MOCHA','MODEL','MOLDY','MONEY','MORAL','MORPH','MOSSY',
+      'MOTIF','MOUND','MOUNT','MOURN','MUDDY','MURKY','MUTED',
       // N
-      'NIGHT','NOBLE','NORTH','NOVEL',
+      'NASTY','NAVAL','NICER','NIGHT','NOBLE','NOISY','NORTH','NOTCH','NOVEL','NUDGE',
+      'NURSE',
       // O
-      'OLIVE','ORBIT','OUTER',
+      'OASIS','OCEAN','OFFER','OFTEN','ONSET','OPTIC','ORBIT','OUGHT','OUNCE','OUTER',
+      'OVERT','OWNER','OXIDE','OZONE',
       // P
-      'PAINT','PARTY','PATCH','PEACH','PEARL','PHASE','PIANO','PLAIN','PLANE','PLANT',
-      'PLATE','PLEAD','PLUCK','PLUME','POLAR','POWER','PRESS','PRICE','PRIDE','PRIME',
-      'PRIOR','PRIZE','PROBE','PRONE','PROOF','PROSE','PROUD','PRUNE','PULSE','PURSE',
+      'PAINT','PANIC','PAPER','PARTY','PASTA','PATCH','PEACE','PEACH','PEARL','PEDAL',
+      'PERCH','PHASE','PIANO','PILOT','PINCH','PITCH','PIXEL','PLACE','PLAID','PLAIN',
+      'PLANE','PLANK','PLANT','PLATE','PLAZA','PLEAD','PLUCK','PLUMB','PLUME','PLUMP',
+      'PLUNK','POINT','POKER','POLAR','POLKA','POUCH','POWER','PRANK','PRAWN','PRESS',
+      'PRICE','PRIDE','PRIME','PRINT','PRIOR','PRIVY','PRIZE','PROBE','PRONE','PROOF',
+      'PROSE','PROUD','PROXY','PRUNE','PSALM','PULSE','PUNCH','PURSE',
       // Q
-      'QUAKE','QUEEN','QUERY','QUOTA','QUOTE',
+      'QUAKE','QUEEN','QUERY','QUEUE','QUICK','QUILL','QUIRK','QUITE','QUOTA','QUOTE',
       // R
-      'RADAR','RADIO','RAINY','RAVEN','REACH','READY','REALM','REBEL','REGAL','RISKY',
-      'ROUGH','ROWDY','RUSTY',
+      'RABBI','RADAR','RADIO','RAINY','RANCH','RANGE','RAPID','RATIO','RAVEN','REACH',
+      'READY','REALM','REBEL','REGAL','REPAY','RESIN','RIDER','RIDGE','RIGHT','RIGID',
+      'RISKY','RIVET','ROAST','ROBOT','RODEO','ROUGE','ROUGH','ROUND','ROWDY','ROYAL',
+      'RUGBY','RULER','RURAL','RUSTY',
       // S
-      'SAINT','SALAD','SANDY','SCARE','SCENE','SHADE','SHAME','SHAPE','SHARE','SHARK',
-      'SHEEP','SHEEN','SHEER','SHELF','SHELL','SHIFT','SHINE','SHONE','SHORE','SKULL',
-      'SLACK','SLICE','SLIDE','SLOPE','SLUMP','SMASH','SMELL','SMILE','SMOKE','SNACK',
-      'SNAIL','SNAKE','SNARE','SNEAK','SNEER','SOLAR','SOLID','SOLVE','SOUTH','SPACE',
-      'SPARE','SPEAR','SPEAK','SPELL','SPEND','SPICE','SPINE','SPOKE','SPORE','SPORT',
-      'SPRAY','STAIN','STAKE','STALE','STALL','STAMP','STAND','STARE','START','STEAL',
-      'STEAM','STEEL','STEEP','STEER','STERN','STICK','STIFF','STILL','STING','STORE',
-      'STORM','STORY','STOVE','STONE','STRAW','STRAY','STRIP','STUDY','STYLE','SUGAR',
-      'SUITE','SUNNY','SWEET','SWEAR','SWEAT','SWIFT','SWIRL','SWORD',
+      'SAINT','SALAD','SANDY','SAUCE','SAUNA','SCARE','SCENE','SCORE','SCOUT','SEDAN',
+      'SEIZE','SENSE','SERVE','SEVER','SHACK','SHADE','SHAFT','SHAKY','SHALL','SHAME',
+      'SHAPE','SHARK','SHAWL','SHEEP','SHEEN','SHEER','SHELF','SHELL','SHIFT','SHINE',
+      'SHONE','SHORE','SHORT','SHOUT','SHOWN','SIGHT','SILKY','SINEW','SIXTY','SKILL',
+      'SKULL','SLACK','SLASH','SLEEK','SLEET','SLICE','SLICK','SLIDE','SLING','SLOPE',
+      'SLUMP','SMALL','SMASH','SMEAR','SMELL','SMILE','SMOKE','SNACK','SNAIL','SNAKE',
+      'SNARE','SNEAK','SNEER','SNIFF','SNOOP','SNORE','SNORT','SOBER','SOLAR','SOLID',
+      'SOLVE','SONIC','SOUTH','SPACE','SPARE','SPEAK','SPEAR','SPELL','SPEND','SPICE',
+      'SPINE','SPOKE','SPORE','SPORT','SPRAY','SPREE','SQUAD','SQUAT','STAGE','STAID',
+      'STAIN','STAKE','STALE','STALK','STALL','STAMP','STAND','STANK','STARE','STARK',
+      'START','STASH','STAVE','STEAL','STEAM','STEEL','STEEP','STEER','STERN','STICK',
+      'STIFF','STILL','STING','STOIC','STOOP','STORE','STORM','STORY','STOVE','STONE',
+      'STRAP','STRAW','STRAY','STRIP','STRUT','STUCK','STUDY','STUMP','STUNG','STUNK',
+      'STYLE','SUGAR','SUITE','SUNNY','SUPER','SWEAR','SWEAT','SWEET','SWEPT','SWIFT',
+      'SWIPE','SWIRL','SWORD','SWOOP','SYRUP',
       // T
-      'THICK','THINK','THORN','TIGER','TIRED','TONIC','TOTAL','TOUCH','TOUGH','TOWER',
-      'TRACE','TRACK','TRAIL','TRAIN','TRASH','TREAD','TROUT','TRUCE','TRULY','TULIP',
-      'TWINE','TWIST',
+      'TACIT','TAUNT','TEETH','TEPID','TERSE','TESTY','THEFT','THEME','THICK','THINK',
+      'THORN','THOSE','THREE','THREW','THUMP','TIGER','TIPSY','TIRED','TOKEN','TONIC',
+      'TORSO','TOTAL','TOUCH','TOUGH','TOWEL','TOWER','TOXIC','TRACE','TRACK','TRAIL',
+      'TRAIN','TRAIT','TRAMP','TRASH','TRAWL','TREAD','TREND','TRIPE','TROLL','TROOP',
+      'TROUT','TRUCE','TRULY','TUBER','TULIP','TUMOR','TUNIC','TUTOR','TWINE','TWIRL',
+      'TWIST',
       // U
-      'ULTRA','UNION','UNITE','UPSET','USHER',
+      'ULTRA','UNFIT','UNIFY','UNION','UNITE','UPSET','USHER',
       // V
-      'VAULT','VENOM','VERSE','VIGOR','VIRAL','VISIT','VISTA','VIVID','VOCAL','VOUCH',
+      'VALID','VALOR','VALVE','VAPOR','VAULT','VENOM','VERGE','VERSE','VIGOR','VIRAL',
+      'VISIT','VISTA','VIVID','VOCAL','VOTER','VOUCH',
       // W
-      'WALTZ','WASTE','WATCH','WATER','WEARY','WHEAT','WHILE','WITCH','WORST','WRATH',
-      'WRONG',
+      'WAGER','WAGON','WAIST','WALTZ','WASTE','WATCH','WATER','WEARY','WEIGH','WHACK',
+      'WHIFF','WHIRL','WHISK','WHEAT','WHILE','WIRED','WITCH','WITTY','WOMAN','WORLD',
+      'WORRY','WORST','WOVEN','WRATH','WRING','WRIST','WRONG',
       // Y
       'YACHT','YEARN','YIELD','YOUNG',
       // Z
@@ -909,8 +944,8 @@
       if (puzzlePool.length < 2) return null;
 
       // Try up to 50 seed offsets to find a valid pair where:
-      //   1. Optimal BFS path (full dict) has 3-7 steps — sets difficulty
-      //   2. A path exists through COMMON_ADJACENCY (common words only) —
+      //   1. Optimal BFS path (full dict) has 4-6 steps — sets difficulty
+      //   2. A path exists through COMMON_ADJACENCY (common words only) <=10 steps —
       //      guarantees players can always solve without hitting obscure words.
       //      Optimal path may still use uncommon words for a shorter route.
       for (let attempt = 0; attempt < 50; attempt++) {
@@ -924,17 +959,18 @@
         if (start === target) continue;
 
         const path = bfsShortestPath(start, target, ADJACENCY);
-        if (!path || path.length < 4 || path.length > 8) continue;
+        if (!path || path.length < 5 || path.length > 7) continue;
 
-        // Require at least one all-common-word solution path
+        // Require at least one all-common-word solution path, max 10 steps (11 words)
         const commonPath = bfsShortestPath(start, target, COMMON_ADJACENCY);
-        if (!commonPath) continue;
+        if (!commonPath || commonPath.length > 11) continue;
 
         return { start, target, optimalPath: path };
       }
 
-      // Absolute fallback: known-good common-word pair
-      return { start: 'STONE', target: 'CRANE', optimalPath: bfsShortestPath('STONE', 'CRANE', ADJACENCY) };
+      // Absolute fallback: verified common-word pair, 4 steps
+      // Path: SCARE->STARE->STALE->STALL->STILL (all common words)
+      return { start: 'SCARE', target: 'STILL', optimalPath: bfsShortestPath('SCARE', 'STILL', ADJACENCY) };
     }
 
     const DEBUG = new URLSearchParams(window.location.search).get('debug') === '1';
