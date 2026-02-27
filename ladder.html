@@ -817,6 +817,7 @@
        SECTION: STARTUP LOG (verification)
     ============================================================ */
     console.log('[WordLadder] Today\'s puzzle:', dailyPuzzle ? dailyPuzzle.start : 'NONE', '→', dailyPuzzle ? dailyPuzzle.target : 'NONE');
+    console.log('[WordLadder] Optimal path:', OPTIMAL_PATH ? OPTIMAL_PATH.join(' → ') : 'NONE', '(' + OPTIMAL_STEPS + ' steps)');
     console.log('[WordLadder] Optimal steps:', OPTIMAL_STEPS);
     console.log('[WordLadder] ADJACENCY sample:', Object.keys(ADJACENCY).slice(0, 3));
 
