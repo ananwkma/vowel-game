@@ -70,26 +70,23 @@
       top: max(12px, env(safe-area-inset-top));
       left: 12px;
       z-index: 1000;
-      padding: 8px 16px;
+      padding: 6px 2px;
       background-color: transparent;
-      color: var(--color-vowel-bg);
+      color: var(--color-primary-text);
       text-decoration: none;
       font-family: var(--font-serif);
-      font-size: 0.875rem;
-      font-weight: 600;
-      border-radius: var(--block-radius);
-      transition: background-color var(--transition-fast);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      opacity: 0.7;
+      transition: opacity var(--transition-fast);
       -webkit-user-select: none;
       user-select: none;
     }
 
-    #back-link:hover {
-      background-color: rgba(212, 165, 116, 0.1);
-    }
-
-    #back-link:active {
-      background-color: rgba(212, 165, 116, 0.2);
-    }
+    #back-link:hover { opacity: 1; }
+    #back-link:active { opacity: 0.5; }
 
     /* ============================================================
        SECTION: LAYOUT
@@ -672,7 +669,7 @@
 </head>
 <body>
   <!-- Back to hub — fixed top-left, stays visible during gameplay -->
-  <a href="index.html" id="back-link" aria-label="Back to Word Games hub">← Back</a>
+  <a href="index.html" id="back-link" aria-label="Back to Word Games hub">LEXICON</a>
   <div id="app">
     <header id="game-header">
       <h1 id="game-title">Vowel</h1>
