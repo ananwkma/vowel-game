@@ -997,6 +997,8 @@
       return { start: 'STONE', target: 'CRANE', optimalPath: bfsShortestPath('STONE', 'CRANE', ADJACENCY) };
     }
 
+    const DEBUG = new URLSearchParams(window.location.search).get('debug') === '1';
+
     const dailyPuzzle = getDailyLadderPuzzle();
     const OPTIMAL_PATH = dailyPuzzle ? dailyPuzzle.optimalPath : null;
     const OPTIMAL_STEPS = OPTIMAL_PATH ? OPTIMAL_PATH.length - 1 : 0;
@@ -1631,7 +1633,7 @@
             </div>`;
         }
 
-        if (delta > 0) {
+        if (delta > 0 || DEBUG) {
           buttonRow += `<button class="btn-secondary" id="try-again-btn" type="button">↩ Try Again</button>`;
         }
       } else {
@@ -1709,7 +1711,7 @@
     ============================================================ */
     document.addEventListener('DOMContentLoaded', () => {
       setupGiveUp();
-      const saved = LadderResult.load();
+      const saved = !DEBUG && LadderResult.load();
       if (saved) {
         // Already played today — skip to results screen
         gameState.completed = saved.solved;
