@@ -1048,6 +1048,26 @@
     };
 
     /* ============================================================
+       SECTION: LADDER RESULT PERSISTENCE
+       Saves today's result so revisiting the page shows results, not the game
+    ============================================================ */
+    const LadderResult = {
+      _key() { return `ladder_result_${new Date().toISOString().split('T')[0]}`; },
+      save({ solved, steps }) {
+        try { localStorage.setItem(this._key(), JSON.stringify({ solved, steps })); } catch(e) {}
+      },
+      load() {
+        try {
+          const raw = localStorage.getItem(this._key());
+          return raw ? JSON.parse(raw) : null;
+        } catch(e) { return null; }
+      },
+      clear() {
+        try { localStorage.removeItem(this._key()); } catch(e) {}
+      }
+    };
+
+    /* ============================================================
        SECTION: STARTUP LOG (verification)
     ============================================================ */
     console.log('[WordLadder] Today\'s puzzle:', dailyPuzzle ? dailyPuzzle.start : 'NONE', '→', dailyPuzzle ? dailyPuzzle.target : 'NONE');
@@ -1377,7 +1397,8 @@
       doStampAnimation(candidate, isWin ? () => {
         gameState.completed = true;
         DailyStatus.markCompleted('ladder');
-        setTimeout(() => showResults({ solved: true }), 500);
+        const steps = gameState.playerPath.length - 1;
+        setTimeout(() => showResults({ solved: true, steps, delta: steps - OPTIMAL_STEPS }), 500);
       } : null);
     }
 
@@ -1432,8 +1453,8 @@
       gameState.gaveUp = true;
       updateUndoButton();
       DailyStatus.markCompleted('ladder');
-      // showResults handles give-up animation and results display
-      showResults({ solved: false });
+      const steps = gameState.playerPath.length - 1;
+      showResults({ solved: false, steps, delta: steps - OPTIMAL_STEPS });
     }
 
     /* ============================================================
@@ -1548,6 +1569,7 @@
     ============================================================ */
     function resetGame() {
       if (!dailyPuzzle) return;
+      LadderResult.clear(); // Allow a fresh attempt to overwrite the saved result
       // Reset game state — same daily puzzle, fresh attempt
       gameState.currentWord = dailyPuzzle.start;
       gameState.pendingTileIndex = null;
@@ -1578,12 +1600,15 @@
     /* ============================================================
        SECTION: RESULTS SCREEN
     ============================================================ */
-    async function showResults({ solved }) {
+    async function showResults({ solved, steps, delta, skipAnimation = false }) {
       disableGameControls();
 
       const resultsScreen = document.getElementById('results-screen');
-      const steps = gameState.playerPath.length - 1; // Steps taken (start not counted)
-      const delta = steps - OPTIMAL_STEPS;           // How far from optimal
+
+      // Save result so revisiting shows results screen instead of the game
+      if (!skipAnimation) {
+        LadderResult.save({ solved, steps });
+      }
 
       // Build results screen HTML
       let titleText, subtitleText, extraContent = '', buttonRow = '';
@@ -1612,15 +1637,17 @@
       } else {
         // Gave up
         titleText = 'Gave Up';
-        const remaining = gameState.playerPath.length > 1
-          ? `after ${gameState.playerPath.length - 1} step${gameState.playerPath.length - 1 !== 1 ? 's' : ''}`
+        const remaining = steps > 0
+          ? `after ${steps} step${steps !== 1 ? 's' : ''}`
           : 'at the start';
         subtitleText = `${remaining} — optimal path was ${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''}`;
 
-        // Optimal path will be animated — add empty container
+        // Show optimal path — animated on first view, instant on revisit
         extraContent = `
           <div class="results-section-label">Optimal path (${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''})</div>
-          <div class="results-optimal-path" id="results-optimal-path"></div>`;
+          <div class="results-optimal-path" id="results-optimal-path">${skipAnimation ? OPTIMAL_PATH.map((w, i) => `<div class="optimal-word revealed ${i === 0 ? 'optimal-start' : ''} ${i === OPTIMAL_PATH.length - 1 ? 'optimal-end' : ''}">${w}</div>`).join('') : ''}</div>`;
+
+        buttonRow += `<button class="btn-secondary" id="try-again-btn" type="button">↩ Try Again</button>`;
       }
 
       buttonRow += `
@@ -1648,14 +1675,14 @@
         shareBtn.addEventListener('click', () => shareResult({ solved, steps, delta }));
       }
 
-      // If give-up: animate optimal path after showing screen
-      if (!solved) {
+      // If give-up: animate optimal path on first view only
+      if (!solved && !skipAnimation) {
         const optimalContainer = resultsScreen.querySelector('#results-optimal-path');
         await animateOptimalPath(optimalContainer);
       }
 
-      // If optimal solve: fire confetti
-      if (solved && delta === 0) {
+      // If optimal solve: fire confetti on first view only
+      if (solved && delta === 0 && !skipAnimation) {
         fireConfetti();
       }
     }
@@ -1681,8 +1708,18 @@
        SECTION: DOMCONTENTLOADED — boot the game
     ============================================================ */
     document.addEventListener('DOMContentLoaded', () => {
-      initGame();
       setupGiveUp();
+      const saved = LadderResult.load();
+      if (saved) {
+        // Already played today — skip to results screen
+        gameState.completed = saved.solved;
+        gameState.gaveUp    = !saved.solved;
+        initGame(); // renders the (hidden-behind-results) game UI
+        const delta = saved.steps - OPTIMAL_STEPS;
+        showResults({ solved: saved.solved, steps: saved.steps, delta, skipAnimation: true });
+      } else {
+        initGame();
+      }
     });
   </script>
 </body>
