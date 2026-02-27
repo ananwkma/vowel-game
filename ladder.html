@@ -1042,8 +1042,8 @@
       gameState.pendingLetter = null;
       gameState.playerPath.push(candidate);
 
-      // Add previous word to history (the "stamp" leaves this mark)
-      addToHistory(prevWord);
+      // Add the newly accepted word to history
+      addToHistory(candidate);
 
       // Check win condition (exact match)
       if (candidate === gameState.targetWord) {
