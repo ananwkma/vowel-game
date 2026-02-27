@@ -1003,8 +1003,8 @@
       wordList: WORDS.filter(w => w.length <= 7),
 
       // Difficulty-based pools
-      words1: WORDS.filter(w => (w.match(/[AEIOU]/g) || []).length === 1),
-      words2: WORDS.filter(w => (w.match(/[AEIOU]/g) || []).length === 2),
+      words1: WORDS.filter(w => w.length <= 7 && (w.match(/[AEIOU]/g) || []).length === 1),
+      words2: WORDS.filter(w => w.length <= 7 && (w.match(/[AEIOU]/g) || []).length === 2),
 
       // Track recently used words to prevent immediate repeats
       // Keep last 20 to ensure good variety across sessions
