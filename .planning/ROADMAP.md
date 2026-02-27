@@ -76,10 +76,13 @@ Plans:
 - [ ] 15-03-PLAN.md — Results screen (win/give-up), optimal path animation, confetti, share, try again, hub integration
 
 ### Phase 16: Ladder Polish
-**Goal**: Fix known bugs and UX issues in Word Ladder identified after launch
+**Goal**: Puzzle engine produces consistently playable Word Ladder puzzles with 4–6 step difficulty, a guaranteed common-word solution path of ≤10 steps, and a working fallback pair
 **Depends on**: Phase 15
-**Requirements**: TBD
-**Plans**: TBD
+**Requirements**: LADR-POLISH-01, LADR-POLISH-02, LADR-POLISH-03, LADR-POLISH-04
+**Plans**: 1 plan
+
+Plans:
+- [ ] 16-01-PLAN.md — Expand PUZZLE_WORDS (~437→667 words), tighten step range to 4–6, add common-path ≤10 step cap, replace broken STONE→CRANE fallback with SCARE→STILL
 
 ### Phase 17: Cipher
 **Goal**: Players decode a daily famous quote presented as a number substitution cipher — each unique letter maps to a unique number — by selecting number blocks and typing the corresponding letters until the full quote is revealed
@@ -121,10 +124,10 @@ Plans:
 | 13. Local Verification | v1.2 | 2/2 | Complete | 2026-02-25 |
 | 14. Hub + VOWEL Migration | v2.0 | Complete    | 2026-02-26 | 2026-02-25 |
 | 15. Word Ladder | v2.0 | 1/3 | In progress | - |
-| 16. Ladder Polish | v2.0 | 0/TBD | Not started | - |
+| 16. Ladder Polish | v2.0 | 0/1 | Not started | - |
 | 17. Cipher | v2.0 | 0/2 | Not started | - |
 | 18. Letter Hunt | v2.0 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-19*
-*Last updated: 2026-02-27 — Phase 16 = Ladder Polish (new); Cipher → 17; Letter Hunt → 18*
+*Last updated: 2026-02-27 — Phase 16 = Ladder Polish (planned, 1 plan)*
