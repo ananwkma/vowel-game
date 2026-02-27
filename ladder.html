@@ -101,12 +101,17 @@
       padding-bottom: var(--spacing-xl);
     }
 
-    #target-label {
+    #target-label,
+    #current-label {
       font-size: 0.65rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       opacity: 0.5;
       font-family: var(--font-serif);
+    }
+
+    #current-label {
+      margin-top: calc(var(--spacing-xl) + var(--spacing-xl)); /* 64px — wide visual gap from target */
     }
 
     #target-display {
@@ -140,7 +145,7 @@
       flex-direction: row;
       gap: var(--block-gap);
       justify-content: center;
-      margin-top: var(--spacing-xl);
+      margin-top: var(--spacing-xs);
       position: relative;
       z-index: 2;
     }
@@ -166,8 +171,11 @@
     .tile.selected {
       background-color: var(--color-ladder-primary);
       color: #000;
-      border-color: transparent;
       box-shadow: var(--shadow-md);
+    }
+
+    .tile--matched {
+      border-color: var(--color-success);
     }
 
     /* ============================================================
@@ -423,6 +431,7 @@
     <div id="target-label">TARGET</div>
     <div id="target-display" aria-label="Target word"></div>
 
+    <div id="current-label">YOUR WORD</div>
     <div id="tiles-container" role="group" aria-label="Current word tiles"></div>
     <div id="error-message" role="alert" aria-live="polite"></div>
 
@@ -894,20 +903,28 @@
       tileElements.length = 0;
       const letters = word.toUpperCase().split('');
 
+      const targetLetters = gameState.targetWord ? gameState.targetWord.toUpperCase().split('') : [];
+
       letters.forEach((letter, idx) => {
         const tile = document.createElement('div');
         tile.className = 'tile';
         tile.setAttribute('data-index', idx);
         tile.setAttribute('role', 'button');
-        tile.setAttribute('aria-label', 'Tile ' + (idx + 1) + ': ' + letter);
 
         // Show pending letter if this tile is being edited
+        let displayLetter = letter;
         if (idx === gameState.pendingTileIndex && gameState.pendingLetter) {
-          tile.textContent = gameState.pendingLetter;
+          displayLetter = gameState.pendingLetter;
           tile.classList.add('selected');
-        } else {
-          tile.textContent = letter;
-          if (idx === gameState.pendingTileIndex) tile.classList.add('selected');
+        } else if (idx === gameState.pendingTileIndex) {
+          tile.classList.add('selected');
+        }
+        tile.textContent = displayLetter;
+        tile.setAttribute('aria-label', 'Tile ' + (idx + 1) + ': ' + displayLetter);
+
+        // Green border when this position already matches the target
+        if (targetLetters[idx] && displayLetter === targetLetters[idx]) {
+          tile.classList.add('tile--matched');
         }
 
         tile.addEventListener('click', () => selectTile(idx));
