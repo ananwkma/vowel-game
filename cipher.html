@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cipher - Lexicon</title>
+    <link rel="stylesheet" href="styles/design-tokens.css">
+    <style>
+        :root {
+            --cipher-block-size: 38px;
+            --color-medium-charcoal: #5A5956;
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-primary-text);
+            font-family: var(--font-serif);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding-top: 80px;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #back-link {
+            position: fixed;
+            top: max(12px, env(safe-area-inset-top));
+            left: 12px;
+            z-index: 6000;
+            padding: 6px 2px;
+            background-color: transparent;
+            color: var(--color-primary-text);
+            text-decoration: none;
+            font-family: var(--font-serif);
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            opacity: 0.7;
+            transition: opacity var(--transition-fast);
+        }
+
+        #back-link:hover {
+            opacity: 1;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 600px;
+            padding: 0 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #game-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 32px;
+            letter-spacing: 0.05em;
+            text-align: center;
+        }
+
+        #quote-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 6px; /* Row gap 12px, Column gap 6px */
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 24px;
+        }
+
+        .word-group {
+            display: inline-flex;
+            flex-wrap: nowrap;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .cipher-block {
+            width: var(--cipher-block-size);
+            height: var(--cipher-block-size);
+            border-radius: 5px;
+            font-family: var(--font-serif);
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color var(--transition-fast), color var(--transition-fast);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .cipher-block.unsolved {
+            background-color: var(--color-secondary); /* #2C2B28 charcoal */
+            color: var(--color-secondary-text); /* #F8F7F4 off-white */
+        }
+
+        .cipher-block.guessed {
+            background-color: var(--color-medium-charcoal);
+            color: var(--color-secondary-text);
+        }
+
+        .cipher-block.selected {
+            outline: 3px solid var(--color-primary); /* #D4A574 amber */
+            outline-offset: 2px;
+            z-index: 10;
+        }
+
+        .punct-mark {
+            font-size: 1.1rem;
+            font-weight: 700;
+            opacity: 0.7;
+            margin-left: 1px;
+            display: inline-block;
+        }
+
+        #quote-author {
+            margin-top: 24px;
+            text-align: center;
+            font-style: italic;
+            opacity: 0.5;
+            font-size: 0.75rem;
+            width: 100%;
+        }
+
+        #hidden-input {
+            position: fixed;
+            top: -100px;
+            left: -100px;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Test block styles */
+        .test-container {
+            margin-top: 40px;
+            padding: 20px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            display: none; /* Hide in production */
+        }
+    </style>
+</head>
+<body>
+    <a id="back-link" href="index.html">LEXICON</a>
+
+    <div id="app">
+        <h1 id="game-title">Cipher</h1>
+
+        <div id="quote-display">
+            <!-- Rendered by JS -->
+        </div>
+
+        <div id="quote-author">
+            <!-- Rendered by JS -->
+        </div>
+    </div>
+
+    <input type="text" id="hidden-input" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="characters">
+
+    <script>
+        /* ============================================================
+           SECTION: SEEDED PRNG
+           Consistent with Lexicon collection (vowel.html, ladder.html)
+        ============================================================ */
+        function seededRandom(seedStr) {
+            let h = 0;
+            for (let i = 0; i < seedStr.length; i++) {
+                h = Math.imul(31, h) + seedStr.charCodeAt(i) | 0;
+            }
+            let s = h >>> 0;
+            return function() {
+                s += 0x6D2B79F5;
+                let t = Math.imul(s ^ s >>> 15, 1 | s);
+                t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+                return ((t ^ t >>> 14) >>> 0) / 4294967296;
+            };
+        }
+
+        const DATE_SEED = (() => {
+            const today = new Date().toISOString().split('T')[0];
+            return today + '_cipher_v1';
+        })();
+
+        /* ============================================================
+           SECTION: QUOTE CORPUS
+        ============================================================ */
+        const QUOTES = [
+            { text: "To be or not to be, that is the question.", author: "William Shakespeare" },
+            { text: "I think, therefore I am.", author: "René Descartes" },
+            { text: "The only thing we have to fear is fear itself.", author: "Franklin D. Roosevelt" },
+            { text: "In the end, we will remember not the words of our enemies, but the silence of our friends.", author: "Martin Luther King Jr." },
+            { text: "Be the change that you wish to see in the world.", author: "Mahatma Gandhi" },
+            { text: "Stay hungry, stay foolish.", author: "Steve Jobs" },
+            { text: "Knowledge is power.", author: "Francis Bacon" },
+            { text: "The unexamined life is not worth living.", author: "Socrates" },
+            { text: "I have a dream.", author: "Martin Luther King Jr." },
+            { text: "Houston, we have a problem.", author: "Jim Lovell" },
+            { text: "Life is what happens when you're busy making other plans.", author: "John Lennon" },
+            { text: "The journey of a thousand miles begins with one step.", author: "Lao Tzu" },
+            { text: "That's one small step for man, one giant leap for mankind.", author: "Neil Armstrong" },
+            { text: "Well done is better than well said.", author: "Benjamin Franklin" },
+            { text: "Whatever you are, be a good one.", author: "Abraham Lincoln" },
+            { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
+            { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
+            { text: "To err is human, to forgive divine.", author: "Alexander Pope" },
+            { text: "Not all those who wander are lost.", author: "J.R.R. Tolkien" },
+            { text: "Peace begins with a smile.", author: "Mother Teresa" },
+            { text: "The purpose of our lives is to be happy.", author: "Dalai Lama" },
+            { text: "Genius is one percent inspiration and ninety-nine percent perspiration.", author: "Thomas Edison" }
+        ];
+
+        /* ============================================================
+           SECTION: GAME ENGINE
+        ============================================================ */
+        let gameState = {
+            quote: null,
+            letterToNum: {},
+            cipherMap: {}, // num -> letter
+            guesses: {},    // num -> guessed letter
+            selectedNumber: null,
+            won: false
+        };
+
+        function initGame() {
+            const rng = seededRandom(DATE_SEED);
+            
+            // 1. Pick quote
+            const quoteIndex = Math.floor(rng() * QUOTES.length);
+            gameState.quote = QUOTES[quoteIndex];
+
+            // 2. Extract unique letters (uppercase)
+            const uniqueLetters = [...new Set(gameState.quote.text.toUpperCase().replace(/[^A-Z]/g, '').split(''))].sort();
+            
+            // 3. Shuffle number assignments 1..N
+            const numbers = uniqueLetters.map((_, i) => i + 1);
+            for (let i = numbers.length - 1; i > 0; i--) {
+                const j = Math.floor(rng() * (i + 1));
+                [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+            }
+
+            // 4. Build mapping
+            uniqueLetters.forEach((letter, i) => {
+                gameState.letterToNum[letter] = numbers[i];
+                gameState.cipherMap[numbers[i]] = letter;
+            });
+
+            // 5. Render
+            buildQuoteDOM();
+        }
+
+        function buildQuoteDOM() {
+            const display = document.getElementById('quote-display');
+            const authorLabel = document.getElementById('quote-author');
+            display.innerHTML = '';
+            
+            authorLabel.textContent = "— " + gameState.quote.author;
+            
+            // Split by words, preserving punctuation
+            const words = gameState.quote.text.split(' ');
+            
+            words.forEach(wordStr => {
+                const wordGroup = document.createElement('div');
+                wordGroup.className = 'word-group';
+                
+                // Process each character in the word
+                let i = 0;
+                while (i < wordStr.length) {
+                    const char = wordStr[i].toUpperCase();
+                    
+                    if (/[A-Z]/.test(char)) {
+                        const num = gameState.letterToNum[char];
+                        const block = document.createElement('div');
+                        block.className = 'cipher-block unsolved';
+                        block.dataset.number = num;
+                        block.textContent = num;
+                        
+                        // Interaction placeholder (Plan 02)
+                        block.addEventListener('click', () => selectNumber(num));
+                        
+                        wordGroup.appendChild(block);
+                    } else {
+                        const punct = document.createElement('span');
+                        punct.className = 'punct-mark';
+                        punct.textContent = wordStr[i];
+                        wordGroup.appendChild(punct);
+                    }
+                    i++;
+                }
+                
+                display.appendChild(wordGroup);
+            });
+        }
+
+        function selectNumber(num) {
+            if (gameState.won) return;
+            
+            // Deselect previous
+            document.querySelectorAll('.cipher-block.selected').forEach(b => b.classList.remove('selected'));
+            
+            gameState.selectedNumber = num;
+            
+            // Select all with this number
+            document.querySelectorAll(`.cipher-block[data-number="${num}"]`).forEach(b => {
+                b.classList.add('selected');
+            });
+            
+            // Focus input
+            document.getElementById('hidden-input').focus();
+        }
+
+        // Boot
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>

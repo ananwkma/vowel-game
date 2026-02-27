@@ -191,6 +191,25 @@
         <h2>Hunt</h2>
       </div>
 
+      <div class="game-card disabled" id="card-cipher" aria-disabled="true">
+        <div class="card-preview">
+          <!-- Numbered blocks: charcoal with amber selection -->
+          <svg viewBox="0 0 124 80" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10"  y="10" width="24" height="24" rx="3" fill="#2C2B28"/>
+            <rect x="40"  y="10" width="24" height="24" rx="3" fill="#D4A574"/>
+            <rect x="70"  y="10" width="24" height="24" rx="3" fill="#2C2B28"/>
+            <rect x="10"  y="40" width="24" height="24" rx="3" fill="#2C2B28"/>
+            <rect x="40"  y="40" width="24" height="24" rx="3" fill="#2C2B28"/>
+            <rect x="70"  y="40" width="24" height="24" rx="3" fill="#2C2B28"/>
+            <!-- Subtle indicators of numbers/letters -->
+            <rect x="17"  y="17" width="10" height="3"  rx="1" fill="#F8F7F4" opacity="0.3"/>
+            <rect x="47"  y="17" width="10" height="3"  rx="1" fill="#1C1B18" opacity="0.4"/>
+            <rect x="77"  y="17" width="10" height="3"  rx="1" fill="#F8F7F4" opacity="0.3"/>
+          </svg>
+        </div>
+        <h2>Cipher</h2>
+      </div>
+
     </div>
   </div>
 
@@ -202,7 +221,7 @@
     try {
       const status = JSON.parse(localStorage.getItem('wordGames_dailyStatus') || '{}');
       const today = new Date().toISOString().split('T')[0];
-      ['vowel', 'ladder', 'hunt'].forEach(function(gameId) {
+      ['vowel', 'ladder', 'hunt', 'cipher'].forEach(function(gameId) {
         const record = status[gameId];
         if (record && record.completed && record.dateKey === today) {
           const card = document.getElementById('card-' + gameId);
