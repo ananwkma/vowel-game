@@ -1276,7 +1276,7 @@
         updateUndoButton();
         if (onWin) {
           onWin();
-        } else if (gameState.playerPath.length - 1 >= 50) {
+        } else if (gameState.playerPath.length - 1 >= (DEBUG ? 10 : 50)) {
           gameState.gaveUp = true;
           DailyStatus.markCompleted('ladder');
           const steps = gameState.playerPath.length - 1;
