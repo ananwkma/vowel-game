@@ -5,7 +5,7 @@
 - ✅ **v1.0 MVP** — Phases 1–5 (shipped 2026-02-23)
 - ✅ **v1.1 Score, Streaks & Mobile Polish** — Phases 6–9 (shipped 2026-02-24)
 - ✅ **v1.2 Daily Leaderboard & Backend Stats** — Phases 10–13 (shipped 2026-02-25)
-- 🚧 **v2.0 Word Game Collection** — Phases 14–17 (in progress)
+- 🚧 **v2.0 Word Game Collection** — Phases 14–18 (in progress)
 
 ## Phases
 
@@ -36,8 +36,9 @@ See .planning/milestones/v1.2-ROADMAP.md
 
 - [x] **Phase 14: Hub + VOWEL Migration** — Portal hub with card navigation; VOWEL relocated to vowel.html with shared design tokens and hash-based routing (completed 2026-02-26)
 - [ ] **Phase 15: Word Ladder** — Daily start-to-target word puzzle with BFS optimal path, path history, and personal best
-- [ ] **Phase 16: Cipher** — Daily famous quote encoded as a number substitution cipher; players tap number blocks and type letters to decode the quote
-- [ ] **Phase 17: Letter Hunt** — Daily word-search grid with Canvas lasso selection, mystery category reveal, and two-phase timed scoring
+- [ ] **Phase 16: Ladder Polish** — Bug fixes and UX improvements to Word Ladder identified post-launch
+- [ ] **Phase 17: Cipher** — Daily famous quote encoded as a number substitution cipher; players tap number blocks and type letters to decode the quote
+- [ ] **Phase 18: Letter Hunt** — Daily word-search grid with Canvas lasso selection, mystery category reveal, and two-phase timed scoring
 
 ## Phase Details
 
@@ -74,9 +75,15 @@ Plans:
 - [ ] 15-02-PLAN.md — Tile interaction, word submission validation, stamp animation, path history, give-up hold
 - [ ] 15-03-PLAN.md — Results screen (win/give-up), optimal path animation, confetti, share, try again, hub integration
 
-### Phase 16: Cipher
-**Goal**: Players decode a daily famous quote presented as a number substitution cipher — each unique letter maps to a unique number — by selecting number blocks and typing the corresponding letters until the full quote is revealed
+### Phase 16: Ladder Polish
+**Goal**: Fix known bugs and UX issues in Word Ladder identified after launch
 **Depends on**: Phase 15
+**Requirements**: TBD
+**Plans**: TBD
+
+### Phase 17: Cipher
+**Goal**: Players decode a daily famous quote presented as a number substitution cipher — each unique letter maps to a unique number — by selecting number blocks and typing the corresponding letters until the full quote is revealed
+**Depends on**: Phase 16
 **Requirements**: CIPH-01, CIPH-02, CIPH-03, CIPH-04, CIPH-05
 **Success Criteria** (what must be TRUE):
   1. Every player on the same day sees the same famous quote encoded with the same number-to-letter mapping (daily seed)
@@ -87,10 +94,10 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 16-01-PLAN.md — cipher.html skeleton, CSS, quote corpus, daily-seeded engine, DOM rendering; disabled Cipher hub card
-- [ ] 16-02-PLAN.md — Block selection, letter assignment, win detection, win screen, hub integration (enable Cipher card)
+- [ ] 17-01-PLAN.md — cipher.html skeleton, CSS, quote corpus, daily-seeded engine, DOM rendering; disabled Cipher hub card
+- [ ] 17-02-PLAN.md — Block selection, letter assignment, win detection, win screen, hub integration (enable Cipher card)
 
-### Phase 17: Letter Hunt
+### Phase 18: Letter Hunt
 **Goal**: Players can play a daily word-search puzzle — circling hidden words with a lasso — with a mystery category that reveals itself mid-game and separate scores for the easy and hard phases
 **Depends on**: Phase 16
 **Requirements**: HUNT-01, HUNT-02, HUNT-03, HUNT-04, HUNT-05
@@ -114,9 +121,10 @@ Plans:
 | 13. Local Verification | v1.2 | 2/2 | Complete | 2026-02-25 |
 | 14. Hub + VOWEL Migration | v2.0 | Complete    | 2026-02-26 | 2026-02-25 |
 | 15. Word Ladder | v2.0 | 1/3 | In progress | - |
-| 16. Cipher | v2.0 | 0/2 | Not started | - |
-| 17. Letter Hunt | v2.0 | 0/TBD | Not started | - |
+| 16. Ladder Polish | v2.0 | 0/TBD | Not started | - |
+| 17. Cipher | v2.0 | 0/2 | Not started | - |
+| 18. Letter Hunt | v2.0 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-19*
-*Last updated: 2026-02-27 — Cipher moved to Phase 16, Letter Hunt to Phase 17*
+*Last updated: 2026-02-27 — Phase 16 = Ladder Polish (new); Cipher → 17; Letter Hunt → 18*

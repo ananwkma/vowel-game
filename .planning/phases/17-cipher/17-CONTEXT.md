@@ -70,5 +70,5 @@ Build cipher.html: a daily famous quote encoded as a number substitution cipher.
 
 ---
 
-*Phase: 16-cipher*
+*Phase: 17-cipher*
 *Context gathered: 2026-02-27*
