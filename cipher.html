@@ -689,9 +689,11 @@
             }
         });
 
+        initGame();
+
         function initGame() {
             const rng = seededRandom(DATE_SEED);
-            
+
             // 1. Pick quote
             const quoteIndex = Math.floor(rng() * QUOTES.length);
             gameState.quote = QUOTES[quoteIndex];
