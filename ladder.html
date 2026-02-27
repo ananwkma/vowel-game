@@ -748,29 +748,27 @@
     ============================================================ */
     function buildAdjacencyMap(words) {
       const adjacency = {};
-      const byLength = {};
+      const buckets = {};  // pattern like "C*ANE" -> [words sharing that pattern]
 
-      words.forEach(word => {
+      for (const word of words) {
         const upper = word.toUpperCase();
-        const len = upper.length;
-        if (!byLength[len]) byLength[len] = [];
-        byLength[len].push(upper);
-        adjacency[upper] = []; // Initialize all words
-      });
+        adjacency[upper] = [];
+        for (let i = 0; i < upper.length; i++) {
+          const pattern = upper.slice(0, i) + '*' + upper.slice(i + 1);
+          if (!buckets[pattern]) buckets[pattern] = [];
+          buckets[pattern].push(upper);
+        }
+      }
 
-      words.forEach(word => {
-        const upper = word.toUpperCase();
-        const candidates = byLength[upper.length] || [];
-        candidates.forEach(candidate => {
-          if (candidate === upper) return;
-          let diffs = 0;
-          for (let i = 0; i < upper.length; i++) {
-            if (upper[i] !== candidate[i]) diffs++;
-            if (diffs > 1) break; // Early exit
+      // Every word in a bucket differs from every other by exactly that one letter
+      for (const group of Object.values(buckets)) {
+        for (let i = 0; i < group.length; i++) {
+          for (let j = i + 1; j < group.length; j++) {
+            adjacency[group[i]].push(group[j]);
+            adjacency[group[j]].push(group[i]);
           }
-          if (diffs === 1) adjacency[upper].push(candidate);
-        });
-      });
+        }
+      }
 
       return adjacency;
     }
