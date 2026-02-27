@@ -163,7 +163,7 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      border: 2px solid transparent;
+      border: 3px solid rgba(255, 255, 255, 0.15); /* subtle gleam — signals tappable */
       box-shadow: var(--shadow-md);
       transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
     }
@@ -171,11 +171,27 @@
     .tile.selected {
       background-color: var(--color-ladder-primary);
       color: #000;
+      border-color: rgba(255, 255, 255, 0.0); /* clear on selected so matched green shows */
       box-shadow: var(--shadow-md);
     }
 
     .tile--matched {
       border-color: var(--color-success);
+      box-shadow: var(--shadow-md), 0 0 0 2px rgba(139, 175, 124, 0.35); /* outer glow */
+    }
+
+    /* ============================================================
+       SECTION: TILE HINT
+    ============================================================ */
+    #tile-hint {
+      font-size: 0.65rem;
+      font-family: var(--font-serif);
+      letter-spacing: 0.08em;
+      font-style: italic;
+      opacity: 0.4;
+      margin-top: var(--spacing-xs);
+      position: relative;
+      z-index: 2;
     }
 
     /* ============================================================
@@ -431,6 +447,7 @@
 
     <div id="current-label">YOUR WORD</div>
     <div id="tiles-container" role="group" aria-label="Current word tiles"></div>
+    <div id="tile-hint" aria-hidden="true">tap a letter to change it</div>
     <div id="error-message" role="alert" aria-live="polite"></div>
 
     <div id="history-container" aria-label="Word path history"></div>
