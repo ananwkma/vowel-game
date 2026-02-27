@@ -1055,8 +1055,8 @@
     ============================================================ */
     const LadderResult = {
       _key() { return `ladder_result_${new Date().toISOString().split('T')[0]}`; },
-      save({ solved, steps }) {
-        try { localStorage.setItem(this._key(), JSON.stringify({ solved, steps })); } catch(e) {}
+      save({ solved, steps, playerPath }) {
+        try { localStorage.setItem(this._key(), JSON.stringify({ solved, steps, playerPath })); } catch(e) {}
       },
       load() {
         try {
@@ -1400,7 +1400,7 @@
         gameState.completed = true;
         DailyStatus.markCompleted('ladder');
         const steps = gameState.playerPath.length - 1;
-        setTimeout(() => showResults({ solved: true, steps, delta: steps - OPTIMAL_STEPS }), 500);
+        setTimeout(() => showResults({ solved: true, steps, delta: steps - OPTIMAL_STEPS, playerPath: gameState.playerPath.slice() }), 500);
       } : null);
     }
 
@@ -1456,7 +1456,7 @@
       updateUndoButton();
       DailyStatus.markCompleted('ladder');
       const steps = gameState.playerPath.length - 1;
-      showResults({ solved: false, steps, delta: steps - OPTIMAL_STEPS });
+      showResults({ solved: false, steps, delta: steps - OPTIMAL_STEPS, playerPath: gameState.playerPath.slice() });
     }
 
     /* ============================================================
@@ -1602,18 +1602,18 @@
     /* ============================================================
        SECTION: RESULTS SCREEN
     ============================================================ */
-    async function showResults({ solved, steps, delta, skipAnimation = false }) {
+    async function showResults({ solved, steps, delta, playerPath, skipAnimation = false }) {
       disableGameControls();
 
       const resultsScreen = document.getElementById('results-screen');
 
       // Save result so revisiting shows results screen instead of the game
       if (!skipAnimation) {
-        LadderResult.save({ solved, steps });
+        LadderResult.save({ solved, steps, playerPath });
       }
 
       // Build results screen HTML
-      let titleText, subtitleText, extraContent = '', buttonRow = '';
+      let titleText, subtitleText, buttonRow = '';
 
       if (solved) {
         if (delta === 0) {
@@ -1623,34 +1623,25 @@
           titleText = 'Solved!';
           subtitleText = `Solved in ${steps} step${steps !== 1 ? 's' : ''} (+${delta} from optimal)`;
         }
-
-        // Show optimal path immediately (non-animated — player already solved)
-        if (OPTIMAL_PATH) {
-          extraContent = `
-            <div class="results-section-label">Optimal path (${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''})</div>
-            <div class="results-optimal-path" id="results-optimal-path">
-              ${OPTIMAL_PATH.map((w, i) => `<div class="optimal-word revealed ${i === 0 ? 'optimal-start' : ''} ${i === OPTIMAL_PATH.length - 1 ? 'optimal-end' : ''}">${w}</div>`).join('')}
-            </div>`;
-        }
-
         if (delta > 0 || DEBUG) {
           buttonRow += `<button class="btn-secondary" id="try-again-btn" type="button">↩ Try Again</button>`;
         }
       } else {
-        // Gave up
         titleText = 'Gave Up';
         const remaining = steps > 0
           ? `after ${steps} step${steps !== 1 ? 's' : ''}`
           : 'at the start';
-        subtitleText = `${remaining} — optimal path was ${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''}`;
-
-        // Show optimal path — animated on first view, instant on revisit
-        extraContent = `
-          <div class="results-section-label">Optimal path (${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''})</div>
-          <div class="results-optimal-path" id="results-optimal-path">${skipAnimation ? OPTIMAL_PATH.map((w, i) => `<div class="optimal-word revealed ${i === 0 ? 'optimal-start' : ''} ${i === OPTIMAL_PATH.length - 1 ? 'optimal-end' : ''}">${w}</div>`).join('') : ''}</div>`;
-
+        subtitleText = `${remaining} — optimal is ${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''}`;
         buttonRow += `<button class="btn-secondary" id="try-again-btn" type="button">↩ Try Again</button>`;
       }
+
+      // Player path display
+      const pathLabel = solved ? `Your path (${steps} step${steps !== 1 ? 's' : ''})` : 'Your path so far';
+      const pathHTML = (playerPath || []).map((w, i) => {
+        const isStart = i === 0;
+        const isEnd   = solved && i === playerPath.length - 1;
+        return `<div class="optimal-word revealed ${isStart ? 'optimal-start' : ''} ${isEnd ? 'optimal-end' : ''}">${w}</div>`;
+      }).join('');
 
       buttonRow += `
         <button class="btn-primary" id="share-btn" type="button">Share</button>
@@ -1659,31 +1650,19 @@
       resultsScreen.innerHTML = `
         <div class="results-title">${titleText}</div>
         <div class="results-steps">${subtitleText}</div>
-        ${extraContent}
+        <div class="results-section-label">${pathLabel}</div>
+        <div class="results-optimal-path">${pathHTML}</div>
         <div class="results-actions">${buttonRow}</div>`;
 
-      // Show results screen
       resultsScreen.hidden = false;
 
-      // Wire Try Again if present
       const tryAgainBtn = resultsScreen.querySelector('#try-again-btn');
-      if (tryAgainBtn) {
-        tryAgainBtn.addEventListener('click', resetGame);
-      }
+      if (tryAgainBtn) tryAgainBtn.addEventListener('click', resetGame);
 
-      // Wire Share button
       const shareBtn = resultsScreen.querySelector('#share-btn');
-      if (shareBtn) {
-        shareBtn.addEventListener('click', () => shareResult({ solved, steps, delta }));
-      }
+      if (shareBtn) shareBtn.addEventListener('click', () => shareResult({ solved, steps, delta }));
 
-      // If give-up: animate optimal path on first view only
-      if (!solved && !skipAnimation) {
-        const optimalContainer = resultsScreen.querySelector('#results-optimal-path');
-        await animateOptimalPath(optimalContainer);
-      }
-
-      // If optimal solve: fire confetti on first view only
+      // Fire confetti on first optimal solve only
       if (solved && delta === 0 && !skipAnimation) {
         fireConfetti();
       }
@@ -1718,7 +1697,7 @@
         gameState.gaveUp    = !saved.solved;
         initGame(); // renders the (hidden-behind-results) game UI
         const delta = saved.steps - OPTIMAL_STEPS;
-        showResults({ solved: saved.solved, steps: saved.steps, delta, skipAnimation: true });
+        showResults({ solved: saved.solved, steps: saved.steps, delta, playerPath: saved.playerPath, skipAnimation: true });
       } else {
         initGame();
       }
