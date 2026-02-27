@@ -575,7 +575,7 @@
       gap: 8px;
       padding: 12px 48px;
       background: var(--color-primary);
-      color: var(--color-primary-text);
+      color: #ffffff;
       border: none;
       border-radius: 6px;
       font-family: var(--font-serif);
@@ -606,6 +606,17 @@
     .btn-secondary:hover {
       opacity: 0.8;
       border-bottom-color: rgba(28,27,24,0.4);
+    }
+
+    /* ============================================================
+       SECTION: TILE SWIPE-IN ANIMATION
+    ============================================================ */
+    @keyframes tileSwipeIn {
+      from { opacity: 0; transform: translateX(-24px) scale(0.92); }
+      to   { opacity: 1; transform: translateX(0)     scale(1);    }
+    }
+    .tile-swipe-in {
+      animation: tileSwipeIn 0.32s ease-out both;
     }
 
     /* ============================================================
@@ -1044,6 +1055,9 @@
           tile.classList.add('tile--matched');
         }
 
+        tile.classList.add('tile-swipe-in');
+        tile.style.animationDelay = (idx * 0.04) + 's';
+        tile.addEventListener('animationend', () => { tile.classList.remove('tile-swipe-in'); tile.style.animationDelay = ''; }, { once: true });
         tile.addEventListener('click', () => selectTile(idx));
         tilesContainer.appendChild(tile);
         tileElements[idx] = tile;
@@ -1592,10 +1606,12 @@
     ============================================================ */
     function initGame() {
       targetDisplay.innerHTML = '';
-      gameState.targetWord.toUpperCase().split('').forEach(letter => {
+      gameState.targetWord.toUpperCase().split('').forEach((letter, idx) => {
         const tile = document.createElement('div');
-        tile.className = 'target-tile';
+        tile.className = 'target-tile tile-swipe-in';
         tile.textContent = letter;
+        tile.style.animationDelay = (idx * 0.04) + 's';
+        tile.addEventListener('animationend', () => { tile.classList.remove('tile-swipe-in'); tile.style.animationDelay = ''; }, { once: true });
         targetDisplay.appendChild(tile);
       });
       targetDisplay.setAttribute('aria-label', 'Target: ' + gameState.targetWord);
