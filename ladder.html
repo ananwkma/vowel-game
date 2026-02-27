@@ -303,14 +303,12 @@
 
     @keyframes tile-stamp {
       0%   { transform: translateY(0); }
-      35%  { transform: translateY(-14px); }   /* lift */
-      58%  { transform: translateY(3px); }     /* press / contact */
-      78%  { transform: translateY(0); }       /* settle */
-      100% { transform: translateY(0); }
+      40%  { transform: translateY(-14px); }   /* peak lift — grey entry visible below */
+      100% { transform: translateY(0); }       /* settle back to position */
     }
 
     .tiles-shaking  { animation: tile-shake  0.4s ease-in-out; }
-    .tiles-stamping { animation: tile-stamp  0.45s ease forwards; }
+    .tiles-stamping { animation: tile-stamp  0.4s ease-in-out forwards; }
 
     /* History start entry — slightly muted to indicate it's the origin, not a step */
     .history-entry.history-start {
@@ -1012,24 +1010,30 @@
 
     /* ============================================================
        SECTION: STAMP ANIMATION
-       1. Tiles lift up (stamp raised), history entry already prepended.
-       2. At contact point (~260 ms): tiles press down, new word renders,
-          history snaps up behind tiles then slides down like paper being
-          pulled away to make room.
+       Sequence:
+         0 ms      — snap history up so grey entry hides behind tiles,
+                     then start tile lift animation (old word rises).
+         ~160 ms   — tiles at peak lift, grey entry visible below them;
+                     render new word into tiles + slide history down.
+         160–400 ms — tiles settle back showing new word; history pulls away.
     ============================================================ */
-    const STAMP_CONTACT_MS = 260; // ~58 % of 450 ms animation
+    const LIFT_PEAK_MS = 160; // 40 % of 400 ms animation
 
     function doStampAnimation(candidate, onWin) {
       const blockSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--block-size')) || 52;
       const blockGap  = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--block-gap'))  || 9;
       const slideAmt  = blockSize + blockGap;
 
-      // Start lift animation
+      // Snap history up immediately so grey entry is behind tiles from frame 0
+      historyContainer.style.transition = 'none';
+      historyContainer.style.transform  = `translateY(-${slideAmt}px)`;
+
+      // Start lift animation (old word rises, revealing grey entry below)
       tilesContainer.classList.remove('tiles-stamping');
       void tilesContainer.offsetWidth;
       tilesContainer.classList.add('tiles-stamping');
 
-      // At stamp contact: swap tiles, snap history up, then slide it down
+      // At peak lift: swap to new word, then pull history down
       setTimeout(() => {
         gameState.pendingTileIndex = null;
         gameState.pendingLetter    = null;
@@ -1037,18 +1041,11 @@
         gameState.playerPath.push(candidate);
         renderTiles(candidate);
 
-        historyContainer.style.transition = 'none';
-        historyContainer.style.transform  = `translateY(-${slideAmt}px)`;
-
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            historyContainer.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-            historyContainer.style.transform  = 'translateY(0)';
-          });
-        });
+        historyContainer.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        historyContainer.style.transform  = 'translateY(0)';
 
         if (onWin) onWin();
-      }, STAMP_CONTACT_MS);
+      }, LIFT_PEAK_MS);
 
       tilesContainer.addEventListener('animationend', () => {
         tilesContainer.classList.remove('tiles-stamping');
