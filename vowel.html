@@ -418,14 +418,10 @@
        SECTION: HELP BUTTON
        Top-right "?" button for instructions.
     ============================================================ */
-    #game-header {
-      position: relative;
-    }
-
     #help-btn {
-      position: absolute;
-      top: 0;
-      right: 0;
+      position: fixed;
+      top: max(12px, env(safe-area-inset-top));
+      right: 12px;
       width: 28px;
       height: 28px;
       border-radius: 50%;
