@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Word Games</title>
+  <title>Lexicon</title>
   <link rel="stylesheet" href="styles/design-tokens.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -30,6 +30,8 @@
     #hub-title {
       font-size: 2rem;
       text-align: center;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
       color: var(--color-primary-text);
       margin-bottom: var(--spacing-sm);
     }
@@ -112,40 +114,30 @@
 </head>
 <body>
   <div id="hub-container">
-    <h1 id="hub-title" data-collection-name="Word Games">Word Games</h1>
+    <h1 id="hub-title" data-collection-name="Lexicon">Lexicon</h1>
     <p id="hub-tagline">Daily puzzles await</p>
 
     <div id="hub-grid">
 
       <a href="vowel.html" class="game-card" id="card-vowel" data-game="vowel">
         <div class="card-preview">
-          <!-- Five rows of blocks: amber = vowel, dark = consonant -->
-          <svg viewBox="0 0 124 140" xmlns="http://www.w3.org/2000/svg">
-            <rect x="0"   y="0"   width="20" height="20" rx="3" fill="#2C2B28"/>
-            <rect x="26"  y="0"   width="20" height="20" rx="3" fill="#D4A574"/>
-            <rect x="52"  y="0"   width="20" height="20" rx="3" fill="#2C2B28"/>
-            <rect x="78"  y="0"   width="20" height="20" rx="3" fill="#2C2B28"/>
-            <rect x="104" y="0"   width="20" height="20" rx="3" fill="#D4A574"/>
-            <rect x="0"   y="30"  width="20" height="20" rx="3" fill="#D4A574"/>
-            <rect x="26"  y="30"  width="20" height="20" rx="3" fill="#2C2B28"/>
-            <rect x="52"  y="30"  width="20" height="20" rx="3" fill="#2C2B28"/>
-            <rect x="78"  y="30"  width="20" height="20" rx="3" fill="#D4A574"/>
-            <rect x="104" y="30"  width="20" height="20" rx="3" fill="#2C2B28"/>
-            <rect x="0"   y="60"  width="20" height="20" rx="3" fill="#2C2B28"/>
-            <rect x="26"  y="60"  width="20" height="20" rx="3" fill="#2C2B28"/>
-            <rect x="52"  y="60"  width="20" height="20" rx="3" fill="#D4A574"/>
-            <rect x="78"  y="60"  width="20" height="20" rx="3" fill="#2C2B28"/>
-            <rect x="104" y="60"  width="20" height="20" rx="3" fill="#2C2B28"/>
-            <rect x="0"   y="90"  width="20" height="20" rx="3" fill="#D4A574"/>
-            <rect x="26"  y="90"  width="20" height="20" rx="3" fill="#2C2B28"/>
-            <rect x="52"  y="90"  width="20" height="20" rx="3" fill="#D4A574"/>
-            <rect x="78"  y="90"  width="20" height="20" rx="3" fill="#2C2B28"/>
-            <rect x="104" y="90"  width="20" height="20" rx="3" fill="#2C2B28"/>
-            <rect x="0"   y="120" width="20" height="20" rx="3" fill="#2C2B28"/>
-            <rect x="26"  y="120" width="20" height="20" rx="3" fill="#D4A574"/>
-            <rect x="52"  y="120" width="20" height="20" rx="3" fill="#2C2B28"/>
-            <rect x="78"  y="120" width="20" height="20" rx="3" fill="#2C2B28"/>
-            <rect x="104" y="120" width="20" height="20" rx="3" fill="#D4A574"/>
+          <!-- Three rows of blocks: amber = vowel, dark = consonant -->
+          <svg viewBox="0 0 124 80" xmlns="http://www.w3.org/2000/svg">
+            <rect x="0"   y="0"  width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="26"  y="0"  width="20" height="20" rx="3" fill="#D4A574"/>
+            <rect x="52"  y="0"  width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="78"  y="0"  width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="104" y="0"  width="20" height="20" rx="3" fill="#D4A574"/>
+            <rect x="0"   y="30" width="20" height="20" rx="3" fill="#D4A574"/>
+            <rect x="26"  y="30" width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="52"  y="30" width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="78"  y="30" width="20" height="20" rx="3" fill="#D4A574"/>
+            <rect x="104" y="30" width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="0"   y="60" width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="26"  y="60" width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="52"  y="60" width="20" height="20" rx="3" fill="#D4A574"/>
+            <rect x="78"  y="60" width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="104" y="60" width="20" height="20" rx="3" fill="#2C2B28"/>
           </svg>
         </div>
         <h2>Vowel</h2>
@@ -153,33 +145,23 @@
 
       <a class="game-card" id="card-ladder" href="ladder.html">
         <div class="card-preview">
-          <!-- Five rows: green (target), dark (current), then three light grey (history) -->
-          <svg viewBox="0 0 124 140" xmlns="http://www.w3.org/2000/svg">
-            <rect x="0"   y="0"   width="20" height="20" rx="3" fill="#8BAF7C"/>
-            <rect x="26"  y="0"   width="20" height="20" rx="3" fill="#8BAF7C"/>
-            <rect x="52"  y="0"   width="20" height="20" rx="3" fill="#8BAF7C"/>
-            <rect x="78"  y="0"   width="20" height="20" rx="3" fill="#8BAF7C"/>
-            <rect x="104" y="0"   width="20" height="20" rx="3" fill="#8BAF7C"/>
-            <rect x="0"   y="30"  width="20" height="20" rx="3" fill="#2C2B28"/>
-            <rect x="26"  y="30"  width="20" height="20" rx="3" fill="#2C2B28"/>
-            <rect x="52"  y="30"  width="20" height="20" rx="3" fill="#2C2B28"/>
-            <rect x="78"  y="30"  width="20" height="20" rx="3" fill="#2C2B28"/>
-            <rect x="104" y="30"  width="20" height="20" rx="3" fill="#2C2B28"/>
-            <rect x="0"   y="60"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="26"  y="60"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="52"  y="60"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="78"  y="60"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="104" y="60"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="0"   y="90"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="26"  y="90"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="52"  y="90"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="78"  y="90"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="104" y="90"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="0"   y="120" width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="26"  y="120" width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="52"  y="120" width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="78"  y="120" width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="104" y="120" width="20" height="20" rx="3" fill="#D8D5CE"/>
+          <!-- Three rows: green (target), dark (current), light grey (history) -->
+          <svg viewBox="0 0 124 80" xmlns="http://www.w3.org/2000/svg">
+            <rect x="0"   y="0"  width="20" height="20" rx="3" fill="#8BAF7C"/>
+            <rect x="26"  y="0"  width="20" height="20" rx="3" fill="#8BAF7C"/>
+            <rect x="52"  y="0"  width="20" height="20" rx="3" fill="#8BAF7C"/>
+            <rect x="78"  y="0"  width="20" height="20" rx="3" fill="#8BAF7C"/>
+            <rect x="104" y="0"  width="20" height="20" rx="3" fill="#8BAF7C"/>
+            <rect x="0"   y="30" width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="26"  y="30" width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="52"  y="30" width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="78"  y="30" width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="104" y="30" width="20" height="20" rx="3" fill="#2C2B28"/>
+            <rect x="0"   y="60" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="26"  y="60" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="52"  y="60" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="78"  y="60" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="104" y="60" width="20" height="20" rx="3" fill="#D8D5CE"/>
           </svg>
         </div>
         <h2>Ladder</h2>
@@ -187,33 +169,23 @@
 
       <div class="game-card disabled" id="card-hunt" aria-disabled="true">
         <div class="card-preview">
-          <!-- Five rows of neutral grey blocks (placeholder) -->
-          <svg viewBox="0 0 124 140" xmlns="http://www.w3.org/2000/svg">
-            <rect x="0"   y="0"   width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="26"  y="0"   width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="52"  y="0"   width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="78"  y="0"   width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="104" y="0"   width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="0"   y="30"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="26"  y="30"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="52"  y="30"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="78"  y="30"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="104" y="30"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="0"   y="60"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="26"  y="60"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="52"  y="60"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="78"  y="60"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="104" y="60"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="0"   y="90"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="26"  y="90"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="52"  y="90"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="78"  y="90"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="104" y="90"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="0"   y="120" width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="26"  y="120" width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="52"  y="120" width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="78"  y="120" width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="104" y="120" width="20" height="20" rx="3" fill="#D8D5CE"/>
+          <!-- Three rows of neutral grey blocks (placeholder) -->
+          <svg viewBox="0 0 124 80" xmlns="http://www.w3.org/2000/svg">
+            <rect x="0"   y="0"  width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="26"  y="0"  width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="52"  y="0"  width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="78"  y="0"  width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="104" y="0"  width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="0"   y="30" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="26"  y="30" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="52"  y="30" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="78"  y="30" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="104" y="30" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="0"   y="60" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="26"  y="60" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="52"  y="60" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="78"  y="60" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="104" y="60" width="20" height="20" rx="3" fill="#D8D5CE"/>
           </svg>
         </div>
         <h2>Hunt</h2>
