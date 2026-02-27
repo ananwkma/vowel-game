@@ -19,9 +19,17 @@ Requirements for the Word Game Collection milestone. Each maps to roadmap phases
 
 - [x] **LADR-01**: User can play a daily Word Ladder puzzle — one start→target word pair per day, same for all players
 - [x] **LADR-02**: User's word entry is only accepted if it differs from the previous word by exactly one letter and is a valid dictionary word
-- [ ] **LADR-03**: User can see a path history showing their chain of words from start toward the target as they play
+- [x] **LADR-03**: User can see a path history showing their chain of words from start toward the target as they play
 - [ ] **LADR-04**: User's personal best (fewest steps) for each daily puzzle is persisted in localStorage
 - [x] **LADR-05**: After completing or giving up, user can see the optimal shortest path computed by BFS
+
+### Cipher
+
+- [ ] **CIPH-01**: Every player on the same day sees the same famous quote encoded with the same number-to-letter mapping (daily seed)
+- [ ] **CIPH-02**: Player can tap a number block to select it, then type a letter to assign it; that letter fills in for every occurrence of that number across the entire quote
+- [ ] **CIPH-03**: Correctly solved letters are visually distinguished from unsolved number blocks and incorrectly guessed letters
+- [ ] **CIPH-04**: When all numbers are correctly decoded, the full quote is revealed and the game is won
+- [ ] **CIPH-05**: Completed state is written to the hub's daily status so the Cipher card shows as done
 
 ### Letter Hunt
 
