@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Results Screen Comparison</title>
+  <link rel="stylesheet" href="styles/design-tokens.css">
+  <style>
+    :root {
+      --shadow-block: var(--shadow-md);
+      --color-success: #8BAF7C;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-serif);
+      background: #E0DED9;
+      color: var(--color-primary-text);
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+      align-items: center;
+    }
+
+    .compare-label {
+      font-family: monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #666;
+      text-align: center;
+      margin-bottom: -24px;
+    }
+
+    /* ── Shared mock results screen shell ─────────────────────── */
+    .mock-results {
+      background: var(--color-bg);
+      width: 100%;
+      max-width: 390px;
+      min-height: 560px;
+      border-radius: 16px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 32px 40px;
+      gap: 6px;
+      text-align: center;
+    }
+
+    /* ── Shared content styles ────────────────────────────────── */
+    .results-title {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .results-steps {
+      font-size: 1rem;
+      opacity: 0.75;
+      margin-bottom: 4px;
+    }
+
+    .results-section-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      opacity: 0.5;
+      margin-top: 16px;
+    }
+
+    .results-optimal-path {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .optimal-word {
+      font-size: 1rem;
+      letter-spacing: 0.12em;
+      font-weight: 500;
+    }
+    .optimal-word.optimal-start { font-weight: 700; }
+    .optimal-word.optimal-end   { font-weight: 700; color: var(--color-success); }
+    .optimal-word::after {
+      content: '↓';
+      display: block;
+      font-size: 0.65rem;
+      opacity: 0.4;
+      line-height: 1.2;
+    }
+    .optimal-word:last-child::after { content: ''; }
+
+    /* ── Option A: stacked ghost secondary ────────────────────── */
+    .actions-a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      margin-top: 28px;
+    }
+
+    .a-share {
+      width: 100%;
+      padding: 14px 24px;
+      background: var(--color-primary);
+      color: var(--color-primary-text);
+      border: none;
+      border-radius: var(--block-radius);
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: var(--shadow-block);
+      letter-spacing: 0.03em;
+      transition: filter 0.15s, transform 0.1s;
+    }
+    .a-share:hover { filter: brightness(0.96); transform: translateY(-1px); }
+
+    .a-hub {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 20px;
+      background: transparent;
+      border: 1px solid rgba(44,43,40,0.25);
+      border-radius: var(--block-radius);
+      font-family: var(--font-serif);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--color-primary-text);
+      opacity: 0.6;
+      text-decoration: none;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .a-hub:hover { opacity: 0.9; }
+
+    /* ── Option D: centered serif button + plain link ─────────── */
+    .actions-d {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+      margin-top: 28px;
+    }
+
+    .d-share {
+      padding: 12px 48px;
+      background: var(--color-primary);
+      color: var(--color-primary-text);
+      border: none;
+      border-radius: 6px;
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: var(--shadow-block);
+      letter-spacing: 0.03em;
+      transition: transform 0.1s;
+    }
+    .d-share:active { transform: translateY(2px); }
+    .d-share:hover  { filter: brightness(0.96); }
+
+    .d-hub {
+      font-family: var(--font-serif);
+      font-size: 0.85rem;
+      color: var(--color-primary-text);
+      opacity: 0.5;
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: opacity 0.15s, border-color 0.15s;
+    }
+    .d-hub:hover {
+      opacity: 0.8;
+      border-bottom-color: rgba(28,27,24,0.4);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="compare-label">Option A — Full-width amber + ghost pill</div>
+
+  <div class="mock-results">
+    <div class="results-title">Solved!</div>
+    <div class="results-steps">4 steps &mdash; 1 over optimal</div>
+
+    <div class="results-section-label">Optimal path (3 steps)</div>
+    <div class="results-optimal-path">
+      <div class="optimal-word optimal-start">CRANE</div>
+      <div class="optimal-word">CRONE</div>
+      <div class="optimal-word">PRONE</div>
+      <div class="optimal-word optimal-end">PRUNE</div>
+    </div>
+
+    <div class="actions-a">
+      <button class="a-share">Share</button>
+      <a href="#" class="a-hub">← Word Games</a>
+    </div>
+  </div>
+
+  <div class="compare-label">Option D — Centered serif button + plain text link</div>
+
+  <div class="mock-results">
+    <div class="results-title">Solved!</div>
+    <div class="results-steps">4 steps &mdash; 1 over optimal</div>
+
+    <div class="results-section-label">Optimal path (3 steps)</div>
+    <div class="results-optimal-path">
+      <div class="optimal-word optimal-start">CRANE</div>
+      <div class="optimal-word">CRONE</div>
+      <div class="optimal-word">PRONE</div>
+      <div class="optimal-word optimal-end">PRUNE</div>
+    </div>
+
+    <div class="actions-d">
+      <button class="d-share">Share</button>
+      <a href="#" class="d-hub">← Word Games</a>
+    </div>
+  </div>
+
+</body>
+</html>
