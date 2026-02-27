@@ -106,6 +106,15 @@
             color: var(--color-secondary-text);
         }
 
+        .cipher-block.correct {
+            background-color: var(--color-success); /* #8BAF7C sage */
+            color: var(--color-primary-text);
+        }
+
+        .cipher-block.reveal-transition {
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
         .cipher-block.selected {
             outline: 3px solid var(--color-primary); /* #D4A574 amber */
             outline-offset: 2px;
@@ -127,6 +136,133 @@
             opacity: 0.5;
             font-size: 0.75rem;
             width: 100%;
+        }
+
+        /* Results Screen */
+        #results-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--color-bg);
+            z-index: 9000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            text-align: center;
+        }
+
+        #results-screen.visible {
+            display: flex;
+        }
+
+        #results-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: 0.05em;
+        }
+
+        #results-title.solved {
+            color: var(--color-success);
+        }
+
+        #results-title.revealed {
+            color: var(--color-warning); /* dusty rose */
+        }
+
+        #results-quote {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 8px;
+            max-width: 500px;
+        }
+
+        #results-author {
+            font-style: italic;
+            opacity: 0.7;
+            margin-bottom: 32px;
+        }
+
+        .results-actions {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px;
+            border-radius: 8px;
+            border: none;
+            font-family: var(--font-serif);
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: opacity var(--transition-fast), transform var(--transition-fast);
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: var(--color-primary-text);
+        }
+
+        .btn-secondary {
+            background-color: var(--color-secondary);
+            color: var(--color-secondary-text);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Give Up Button */
+        #give-up-container {
+            margin-top: 48px;
+            width: 100%;
+            max-width: 200px;
+            position: relative;
+        }
+
+        #give-up-btn {
+            width: 100%;
+            padding: 12px;
+            background: none;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 8px;
+            color: var(--color-primary-text);
+            font-family: var(--font-serif);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            opacity: 0.4;
+            transition: opacity 0.3s;
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+            touch-action: none;
+        }
+
+        #give-up-btn:hover {
+            opacity: 0.7;
+        }
+
+        #give-up-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 100%;
+            background-color: var(--color-warning);
+            opacity: 0.2;
+            width: 0%;
+            transition: width 0.1s linear;
+            pointer-events: none;
         }
 
         #hidden-input {
@@ -160,6 +296,21 @@
 
         <div id="quote-author">
             <!-- Rendered by JS -->
+        </div>
+
+        <div id="give-up-container">
+            <button id="give-up-btn">Hold to Reveal</button>
+            <div id="give-up-bar"></div>
+        </div>
+    </div>
+
+    <div id="results-screen">
+        <h1 id="results-title">Solved</h1>
+        <p id="results-quote"></p>
+        <p id="results-author"></p>
+        <div class="results-actions">
+            <button id="share-btn" class="btn btn-primary">SHARE</button>
+            <a href="index.html" class="btn btn-secondary">LEXICON</a>
         </div>
     </div>
 
@@ -218,6 +369,39 @@
         ];
 
         /* ============================================================
+           SECTION: PERSISTENCE
+        ============================================================ */
+        const CipherProgress = {
+            _key() { return `cipher_progress_${new Date().toISOString().split('T')[0]}`; },
+            save(guesses) {
+                try { localStorage.setItem(this._key(), JSON.stringify(guesses)); } catch(e) {}
+            },
+            load() {
+                try {
+                    const raw = localStorage.getItem(this._key());
+                    return raw ? JSON.parse(raw) : null;
+                } catch(e) { return null; }
+            }
+        };
+
+        const DailyStatus = {
+            KEY: 'wordGames_dailyStatus',
+            markCompleted(gameId) {
+                const today = new Date().toISOString().split('T')[0];
+                let status = {};
+                try {
+                    status = JSON.parse(localStorage.getItem(this.KEY) || '{}');
+                } catch(e) {}
+                status[gameId] = { completed: true, dateKey: today, timestamp: Date.now() };
+                try {
+                    localStorage.setItem(this.KEY, JSON.stringify(status));
+                } catch(e) {
+                    console.warn('[DailyStatus] Save error:', e);
+                }
+            }
+        };
+
+        /* ============================================================
            SECTION: GAME ENGINE
         ============================================================ */
         let gameState = {
@@ -254,6 +438,16 @@
 
             // 5. Render
             buildQuoteDOM();
+
+            // 6. Load Progress
+            const saved = CipherProgress.load();
+            if (saved) {
+                Object.keys(saved).forEach(numStr => {
+                    const num = parseInt(numStr);
+                    const letter = saved[numStr];
+                    assignLetter(num, letter, false); // false = don't save during batch load
+                });
+            }
         }
 
         function buildQuoteDOM() {
@@ -282,8 +476,8 @@
                         block.dataset.number = num;
                         block.textContent = num;
                         
-                        // Interaction placeholder (Plan 02)
-                        block.addEventListener('click', () => selectNumber(num));
+                        // Interaction
+                        block.addEventListener('click', () => selectBlock(num));
                         
                         wordGroup.appendChild(block);
                     } else {
@@ -299,7 +493,7 @@
             });
         }
 
-        function selectNumber(num) {
+        function selectBlock(num) {
             if (gameState.won) return;
             
             // Deselect previous
@@ -313,11 +507,278 @@
             });
             
             // Focus input
-            document.getElementById('hidden-input').focus();
+            const hiddenInput = document.getElementById('hidden-input');
+            hiddenInput.value = '';
+            hiddenInput.focus();
         }
 
-        // Boot
-        document.addEventListener('DOMContentLoaded', initGame);
+        // Hidden input captures typed letter
+        document.getElementById('hidden-input').addEventListener('input', (e) => {
+            if (gameState.selectedNumber === null || gameState.won) return;
+            
+            const char = e.target.value.slice(-1).toUpperCase();
+            e.target.value = '';
+            
+            if (char && /[A-Z]/.test(char)) {
+                assignLetter(gameState.selectedNumber, char);
+            }
+        });
+
+        function assignLetter(num, letter, shouldSave = true) {
+            if (gameState.won) return;
+
+            // 1. Duplicate Clearing
+            // If this letter is already assigned to another number, clear that number
+            Object.keys(gameState.guesses).forEach(nStr => {
+                const n = parseInt(nStr);
+                if (n !== num && gameState.guesses[n] === letter) {
+                    delete gameState.guesses[n];
+                    // Update DOM for the cleared number
+                    document.querySelectorAll(`.cipher-block[data-number="${n}"]`).forEach(block => {
+                        block.textContent = n;
+                        block.classList.remove('guessed');
+                        block.classList.add('unsolved');
+                    });
+                }
+            });
+
+            // 2. Update Guesses
+            gameState.guesses[num] = letter;
+
+            // 3. Update DOM for current number
+            document.querySelectorAll(`.cipher-block[data-number="${num}"]`).forEach(block => {
+                block.textContent = letter;
+                block.classList.remove('unsolved');
+                block.classList.add('guessed');
+            });
+
+            // 4. Persistence
+            if (shouldSave) {
+                CipherProgress.save(gameState.guesses);
+            }
+
+            // 5. Win Detection
+            checkWin();
+        }
+
+        function checkWin() {
+            // Only check if ALL numbers have a guess
+            const totalNumbers = Object.keys(gameState.cipherMap).length;
+            const totalGuesses = Object.keys(gameState.guesses).length;
+
+            if (totalGuesses < totalNumbers) return;
+
+            const isWon = Object.keys(gameState.cipherMap).every(num => {
+                return gameState.guesses[num] === gameState.cipherMap[num];
+            });
+
+            if (isWon) {
+                gameState.won = true;
+                DailyStatus.markCompleted('cipher');
+                showResults({ solved: true });
+            }
+        }
+
+        /* ============================================================
+           SECTION: GIVE-UP & REVEAL
+        ============================================================ */
+        let giveUpTimer = null;
+        let giveUpStart = 0;
+        const HOLD_DURATION = 3000;
+
+        function initGiveUp() {
+            const btn = document.getElementById('give-up-btn');
+            const bar = document.getElementById('give-up-bar');
+
+            const startHold = (e) => {
+                if (gameState.won) return;
+                e.preventDefault();
+                giveUpStart = Date.now();
+                btn.style.opacity = '1';
+                
+                giveUpTimer = setInterval(() => {
+                    const elapsed = Date.now() - giveUpStart;
+                    const percent = Math.min(100, (elapsed / HOLD_DURATION) * 100);
+                    bar.style.width = percent + '%';
+
+                    if (elapsed >= HOLD_DURATION) {
+                        stopHold();
+                        handleGiveUp();
+                    }
+                }, 50);
+            };
+
+            const stopHold = () => {
+                clearInterval(giveUpTimer);
+                giveUpTimer = null;
+                bar.style.width = '0%';
+                btn.style.opacity = '0.4';
+            };
+
+            btn.addEventListener('pointerdown', startHold);
+            window.addEventListener('pointerup', stopHold);
+            window.addEventListener('pointercancel', stopHold);
+        }
+
+        async function handleGiveUp() {
+            if (gameState.won) return;
+            gameState.won = true; // Disable further input
+            
+            // Hide give-up button
+            document.getElementById('give-up-container').style.display = 'none';
+            
+            await animatedDecode();
+            
+            DailyStatus.markCompleted('cipher');
+            showResults({ solved: false });
+        }
+
+        async function animatedDecode() {
+            const blocks = Array.from(document.querySelectorAll('.cipher-block'));
+            const totalDuration = 1500;
+            const delayPerBlock = totalDuration / blocks.length;
+
+            for (let i = 0; i < blocks.length; i++) {
+                const block = blocks[i];
+                const num = parseInt(block.dataset.number);
+                const correctLetter = gameState.cipherMap[num];
+
+                // Update state
+                gameState.guesses[num] = correctLetter;
+
+                // Update UI with animation
+                block.textContent = correctLetter;
+                block.classList.remove('unsolved', 'guessed', 'selected');
+                block.classList.add('correct', 'reveal-transition');
+                
+                // Optional: brief highlight
+                block.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    block.style.transform = 'scale(1)';
+                }, 200);
+
+                await new Promise(resolve => setTimeout(resolve, delayPerBlock));
+            }
+        }
+
+        /* ============================================================
+           SECTION: RESULTS & SHARING
+        ============================================================ */
+        function showResults(options) {
+            const screen = document.getElementById('results-screen');
+            const title = document.getElementById('results-title');
+            const quoteEl = document.getElementById('results-quote');
+            const authorEl = document.getElementById('results-author');
+
+            title.textContent = options.solved ? 'Solved' : 'Revealed';
+            title.className = options.solved ? 'solved' : 'revealed';
+
+            quoteEl.textContent = `"${gameState.quote.text}"`;
+            authorEl.textContent = `— ${gameState.quote.author}`;
+
+            screen.classList.add('visible');
+
+            if (options.solved) {
+                spawnConfetti();
+            }
+
+            // Hide main app content
+            document.getElementById('app').style.opacity = '0.1';
+            document.getElementById('app').style.pointerEvents = 'none';
+        }
+
+        function spawnConfetti() {
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.position = 'fixed';
+                confetti.style.width = '10px';
+                confetti.style.height = '10px';
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 50%, 50%)`;
+                confetti.style.top = '-10px';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.zIndex = '9999';
+                confetti.style.borderRadius = '50%';
+                document.body.appendChild(confetti);
+
+                const duration = 2000 + Math.random() * 3000;
+                const animation = confetti.animate([
+                    { transform: 'translateY(0) rotate(0)', opacity: 1 },
+                    { transform: `translateY(100vh) rotate(${Math.random() * 720}deg)`, opacity: 0 }
+                ], {
+                    duration: duration,
+                    easing: 'cubic-bezier(0, 0, 0.2, 1)'
+                });
+
+                animation.onfinish = () => confetti.remove();
+            }
+        }
+
+        document.getElementById('share-btn').addEventListener('click', () => {
+            const status = gameState.won ? "solved" : "revealed";
+            const text = `Lexicon Cipher: ${status} today's puzzle!\n\n"${gameState.quote.text}" — ${gameState.quote.author}\n\nPlay at: ${window.location.href}`;
+            
+            if (navigator.share) {
+                navigator.share({ title: 'Lexicon Cipher', text: text });
+            } else {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Results copied to clipboard!');
+                });
+            }
+        });
+
+        function initGame() {
+            const rng = seededRandom(DATE_SEED);
+            
+            // 1. Pick quote
+            const quoteIndex = Math.floor(rng() * QUOTES.length);
+            gameState.quote = QUOTES[quoteIndex];
+
+            // 2. Extract unique letters (uppercase)
+            const uniqueLetters = [...new Set(gameState.quote.text.toUpperCase().replace(/[^A-Z]/g, '').split(''))].sort();
+            
+            // 3. Shuffle number assignments 1..N
+            const numbers = uniqueLetters.map((_, i) => i + 1);
+            for (let i = numbers.length - 1; i > 0; i--) {
+                const j = Math.floor(rng() * (i + 1));
+                [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+            }
+
+            // 4. Build mapping
+            uniqueLetters.forEach((letter, i) => {
+                gameState.letterToNum[letter] = numbers[i];
+                gameState.cipherMap[numbers[i]] = letter;
+            });
+
+            // 5. Render
+            buildQuoteDOM();
+
+            // 6. Give up button
+            initGiveUp();
+
+            // 7. Load Progress
+            const saved = CipherProgress.load();
+            if (saved) {
+                Object.keys(saved).forEach(numStr => {
+                    const num = parseInt(numStr);
+                    const letter = saved[numStr];
+                    assignLetter(num, letter, false); // false = don't save during batch load
+                });
+            }
+
+            // Check if already won today in daily status
+            const statusRaw = localStorage.getItem(DailyStatus.KEY);
+            const status = statusRaw ? JSON.parse(statusRaw) : {};
+            const today = new Date().toISOString().split('T')[0];
+            
+            if (status.cipher && status.cipher.dateKey === today && status.cipher.completed) {
+                if (gameState.won) {
+                    showResults({ solved: true });
+                } else {
+                    // It was revealed
+                    showResults({ solved: false });
+                }
+            }
+        }
     </script>
 </body>
 </html>

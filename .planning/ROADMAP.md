@@ -35,9 +35,9 @@ See .planning/milestones/v1.2-ROADMAP.md
 **Milestone Goal:** Expand from a single VOWEL game into a four-game collection with a unified portal hub, Word Ladder, Cipher, and Letter Hunt.
 
 - [x] **Phase 14: Hub + VOWEL Migration** — Portal hub with card navigation; VOWEL relocated to vowel.html with shared design tokens and hash-based routing (completed 2026-02-26)
-- [ ] **Phase 15: Word Ladder** — Daily start-to-target word puzzle with BFS optimal path, path history, and personal best
-- [ ] **Phase 16: Ladder Polish** — Bug fixes and UX improvements to Word Ladder identified post-launch
-- [ ] **Phase 17: Cipher** — Daily famous quote encoded as a number substitution cipher; players tap number blocks and type letters to decode the quote
+- [x] **Phase 15: Word Ladder** — Daily start-to-target word puzzle with BFS optimal path, path history, and results reveal (completed 2026-02-27)
+- [x] **Phase 16: Ladder Polish** — Bug fixes and UX improvements to Word Ladder identified post-launch (completed 2026-02-27)
+- [x] **Phase 17: Cipher** — Daily famous quote encoded as a number substitution cipher; players tap number blocks and type letters to decode the quote (completed 2026-02-27)
 - [ ] **Phase 18: Letter Hunt** — Daily word-search grid with Canvas lasso selection, mystery category reveal, and two-phase timed scoring
 
 ## Phase Details
@@ -72,17 +72,22 @@ Plans:
 
 Plans:
 - [x] 15-01-PLAN.md — HTML skeleton, CSS layout, dictionary engine (adjacency map, BFS, daily puzzle seed)
-- [ ] 15-02-PLAN.md — Tile interaction, word submission validation, stamp animation, path history, give-up hold
-- [ ] 15-03-PLAN.md — Results screen (win/give-up), optimal path animation, confetti, share, try again, hub integration
+- [x] 15-02-PLAN.md — Tile interaction, word submission validation, stamp animation, path history, give-up hold
+- [x] 15-03-PLAN.md — Results screen (win/give-up), optimal path animation, confetti, share, try again, hub integration
 
 ### Phase 16: Ladder Polish
 **Goal**: Puzzle engine produces consistently playable Word Ladder puzzles with 4–6 step difficulty, a guaranteed common-word solution path of ≤10 steps, and a working fallback pair
 **Depends on**: Phase 15
 **Requirements**: LADR-POLISH-01, LADR-POLISH-02, LADR-POLISH-03, LADR-POLISH-04
+**Success Criteria** (what must be TRUE):
+  1. Word Ladder puzzles are consistently 4-6 steps in optimal length (path.length 5-7)
+  2. Every puzzle has a guaranteed common-word solution path of ≤ 10 steps (commonPath.length <= 11)
+  3. Fallback puzzle (SCARE -> STILL) is valid and playable
+  4. Puzzle variety is increased due to expanded word pool (~437 to ~667 words)
 **Plans**: 1 plan
 
 Plans:
-- [ ] 16-01-PLAN.md — Expand PUZZLE_WORDS (~437→667 words), tighten step range to 4–6, add common-path ≤10 step cap, replace broken STONE→CRANE fallback with SCARE→STILL
+- [x] 16-01-PLAN.md — Expand PUZZLE_WORDS (~437→667 words), tighten step range to 4–6, add common-path ≤10 step cap, replace broken STONE→CRANE fallback with SCARE→STILL
 
 ### Phase 17: Cipher
 **Goal**: Players decode a daily famous quote presented as a number substitution cipher — each unique letter maps to a unique number — by selecting number blocks and typing the corresponding letters until the full quote is revealed
@@ -97,8 +102,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 17-01-PLAN.md — cipher.html skeleton, CSS, quote corpus, daily-seeded engine, DOM rendering; disabled Cipher hub card
-- [ ] 17-02-PLAN.md — Block selection, letter assignment, win detection, win screen, hub integration (enable Cipher card)
+- [x] 17-01-PLAN.md — cipher.html skeleton, CSS, quote corpus, daily-seeded engine, DOM rendering; disabled Cipher hub card
+- [x] 17-02-PLAN.md — Block selection, letter assignment, win detection, win screen, hub integration (enable Cipher card)
 
 ### Phase 18: Letter Hunt
 **Goal**: Players can play a daily word-search puzzle — circling hidden words with a lasso — with a mystery category that reveals itself mid-game and separate scores for the easy and hard phases
@@ -122,12 +127,12 @@ Plans:
 | 11. Backend Implementation | v1.2 | 3/3 | Complete | 2026-02-24 |
 | 12. Frontend Integration | v1.2 | 1/1 | Complete | 2026-02-25 |
 | 13. Local Verification | v1.2 | 2/2 | Complete | 2026-02-25 |
-| 14. Hub + VOWEL Migration | v2.0 | Complete    | 2026-02-26 | 2026-02-25 |
-| 15. Word Ladder | v2.0 | 1/3 | In progress | - |
-| 16. Ladder Polish | v2.0 | 0/1 | Not started | - |
-| 17. Cipher | v2.0 | 0/2 | Not started | - |
+| 14. Hub + VOWEL Migration | v2.0 | 3/3 | Complete | 2026-02-26 |
+| 15. Word Ladder | v2.0 | 3/3 | Complete | 2026-02-27 |
+| 16. Ladder Polish | v2.0 | Complete    | 2026-02-27 | 2026-02-27 |
+| 17. Cipher | v2.0 | 2/2 | Complete | 2026-02-27 |
 | 18. Letter Hunt | v2.0 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-19*
-*Last updated: 2026-02-27 — Phase 16 = Ladder Polish (planned, 1 plan)*
+*Last updated: 2026-02-27 — Phase 17 = Cipher (completed)*
