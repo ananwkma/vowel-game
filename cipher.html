@@ -489,10 +489,15 @@
         }
 
         const DEBUG = new URLSearchParams(window.location.search).has('debug');
+        const urlParams = new URLSearchParams(window.location.search);
+        const _overrideDate = urlParams.get('date'); // e.g. ?date=2026-03-01
 
         const DATE_SEED = (() => {
-            const today = new Date().toISOString().split('T')[0];
-            return today + '_cipher_v1';
+            const targetDate = _overrideDate ? new Date(_overrideDate) : new Date();
+            const year = targetDate.getUTCFullYear();
+            const month = String(targetDate.getUTCMonth() + 1).padStart(2, '0');
+            const day = String(targetDate.getUTCDate()).padStart(2, '0');
+            return `${year}-${month}-${day}_cipher_v1`;
         })();
 
         /* ============================================================
@@ -520,7 +525,27 @@
             { text: "Not all those who wander are lost.", author: "J.R.R. Tolkien" },
             { text: "Peace begins with a smile.", author: "Mother Teresa" },
             { text: "The purpose of our lives is to be happy.", author: "Dalai Lama" },
-            { text: "No pain, no gain.", author: "Proverb" }
+            { text: "No pain, no gain.", author: "Proverb" },
+            { text: "Imagination is more important than knowledge.", author: "Albert Einstein" },
+            { text: "In the middle of difficulty lies opportunity.", author: "Albert Einstein" },
+            { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius" },
+            { text: "Happiness is not something ready made. It comes from your own actions.", author: "Dalai Lama" },
+            { text: "The journey of a thousand miles begins with one step.", author: "Lao Tzu" },
+            { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
+            { text: "In the end, it is not the years in your life that count. It is the life in your years.", author: "Abraham Lincoln" },
+            { text: "The best time to plant a tree was twenty years ago. The second best time is now.", author: "Chinese Proverb" },
+            { text: "You miss one hundred percent of the shots you do not take.", author: "Wayne Gretzky" },
+            { text: "It is never too late to be what you might have been.", author: "George Eliot" },
+            { text: "Strive not to be a success, but rather to be of value.", author: "Albert Einstein" },
+            { text: "The mind is everything. What you think you become.", author: "Buddha" },
+            { text: "Whether you think you can or you think you cannot, you are right.", author: "Henry Ford" },
+            { text: "I have not failed. I have just found ten thousand ways that will not work.", author: "Thomas Edison" },
+            { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+            { text: "Ask not what your country can do for you; ask what you can do for your country.", author: "John F. Kennedy" },
+            { text: "The greatest glory in living lies not in never falling, but in rising every time we fall.", author: "Nelson Mandela" },
+            { text: "Our lives begin to end the day we become silent about things that matter.", author: "Martin Luther King Jr." },
+            { text: "Spread love everywhere you go. Let no one ever come to you without leaving happier.", author: "Mother Teresa" },
+            { text: "When you reach the end of your rope, tie a knot in it and hang on.", author: "Franklin D. Roosevelt" }
         ];
 
         /* ============================================================
