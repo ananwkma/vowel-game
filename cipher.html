@@ -583,8 +583,13 @@
                         block.dataset.number = num;
                         block.textContent = num;
                         
-                        // Interaction
-                        block.addEventListener('click', () => selectBlock(num));
+                        // Interaction — use pointerdown so selection fires before
+                        // any keystroke the user types while still holding the button.
+                        // click fires on mouseup, which is after keydown/input.
+                        block.addEventListener('pointerdown', (e) => {
+                            e.preventDefault();
+                            selectBlock(num);
+                        });
                         
                         wordGroup.appendChild(block);
                     } else {
