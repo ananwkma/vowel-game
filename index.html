@@ -191,29 +191,29 @@
         <h2>Cipher</h2>
       </a>
 
-      <div class="game-card disabled" id="card-hunt" aria-disabled="true">
+      <a href="hunt.html" class="game-card" id="card-hunt" aria-label="Play Letter Hunt">
         <div class="card-preview">
-          <!-- Three rows of neutral grey blocks (placeholder) -->
+          <!-- Hunt grid preview: sage green and amber cells on grey background -->
           <svg viewBox="0 0 124 80" xmlns="http://www.w3.org/2000/svg">
-            <rect x="0"   y="0"  width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="0"   y="0"  width="20" height="20" rx="3" fill="#8BAF7C"/>
             <rect x="26"  y="0"  width="20" height="20" rx="3" fill="#D8D5CE"/>
             <rect x="52"  y="0"  width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="78"  y="0"  width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="78"  y="0"  width="20" height="20" rx="3" fill="#8BAF7C"/>
             <rect x="104" y="0"  width="20" height="20" rx="3" fill="#D8D5CE"/>
             <rect x="0"   y="30" width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="26"  y="30" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="26"  y="30" width="20" height="20" rx="3" fill="#D4A574"/>
             <rect x="52"  y="30" width="20" height="20" rx="3" fill="#D8D5CE"/>
             <rect x="78"  y="30" width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="104" y="30" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="104" y="30" width="20" height="20" rx="3" fill="#8BAF7C"/>
             <rect x="0"   y="60" width="20" height="20" rx="3" fill="#D8D5CE"/>
             <rect x="26"  y="60" width="20" height="20" rx="3" fill="#D8D5CE"/>
-            <rect x="52"  y="60" width="20" height="20" rx="3" fill="#D8D5CE"/>
+            <rect x="52"  y="60" width="20" height="20" rx="3" fill="#8BAF7C"/>
             <rect x="78"  y="60" width="20" height="20" rx="3" fill="#D8D5CE"/>
             <rect x="104" y="60" width="20" height="20" rx="3" fill="#D8D5CE"/>
           </svg>
         </div>
         <h2>Hunt</h2>
-      </div>
+      </a>
 
     </div>
   </div>
@@ -222,7 +222,7 @@
   (function() {
     // Propagate ?debug to all game links
     if (new URLSearchParams(location.search).has('debug')) {
-      ['card-vowel', 'card-ladder', 'card-cipher'].forEach(function(id) {
+      ['card-vowel', 'card-ladder', 'card-cipher', 'card-hunt'].forEach(function(id) {
         var card = document.getElementById(id);
         if (card && card.href) card.href = card.href.split('?')[0] + '?debug';
       });

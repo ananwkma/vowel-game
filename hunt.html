@@ -1172,6 +1172,9 @@
       }
 
       rs.style.display = 'flex';
+
+      // Confetti on win (not on give-up / revealed)
+      if (solved) spawnConfetti();
     }
 
     /* ============================================================
@@ -1433,9 +1436,6 @@
       gameState.phase = 'done';
       if (gameState.hardTimerInterval) stopHardTimer();
       if (gameState.easyTimerInterval) stopEasyTimer();
-      // Plan 03 will call showResults and HuntResult.save and DailyStatus.markCompleted here
-      // For now, log to console so Plan 02 can be tested
-      console.log('[Hunt] Game ended. gaveUp:', gaveUp, 'wordsFound:', gameState.wordsFound.length);
       showResults({ solved: !gaveUp });
     }
 
@@ -1505,35 +1505,54 @@
     }
 
     /* ============================================================
+       SECTION: CONFETTI
+       CSS-based fixed-position div confetti — matches ladder.html pattern
+    ============================================================ */
+    function spawnConfetti() {
+      const colors = ['#D4A574', '#E8C99A', '#C49060', '#F5F0E8', '#8BAF7C', '#1C1B18'];
+      for (let i = 0; i < 100; i++) {
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const confetti = document.createElement('div');
+        confetti.style.cssText = `position:fixed;width:10px;height:10px;background:${color};top:-10px;left:${Math.random()*100}vw;z-index:9999;border-radius:50%;`;
+        document.body.appendChild(confetti);
+        const anim = confetti.animate([
+          { transform: 'translateY(0) rotate(0)', opacity: 1 },
+          { transform: `translateY(100vh) rotate(${Math.random()*720}deg)`, opacity: 0 }
+        ], { duration: 2000 + Math.random() * 3000, easing: 'cubic-bezier(0,0,0.2,1)' });
+        anim.onfinish = () => confetti.remove();
+      }
+    }
+
+    /* ============================================================
        SECTION: SHARE
     ============================================================ */
     function setupShare() {
       document.getElementById('results-share-btn').addEventListener('click', async () => {
         if (!dailyPuzzle) return;
+        const today = new Date().toISOString().split('T')[0];
         const easyTime = formatTime(gameState.easyElapsed);
-        const hardTime = gameState.hardElapsed > 0 ? formatTime(gameState.hardElapsed) : '—';
-        const solved = gameState.wordsFound.length === 6 && gameState.wordsFound.every(f => !f.usedHint || true);
-        const pips = dailyPuzzle.words.map((w, i) => {
+        const hardTime = gameState.hardElapsed > 0 ? formatTime(gameState.hardElapsed) : '--:--';
+        const pipEmoji = dailyPuzzle.words.map(w => {
           const found = gameState.wordsFound.find(f => f.word === w.word);
           if (!found) return '⬜';
-          return found.usedHint ? '🟠' : '🟢';
+          return found.usedHint ? '🔴' : '🟢';
         }).join('');
-        const date = new Date().toISOString().split('T')[0];
-        const text = `Letter Hunt ${date}\n${pips}\nEasy: ${easyTime} | Hard: ${hardTime}\nlexicon.games`;
+        const text = `Lexicon Hunt ${today}\n${dailyPuzzle.category}\n${pipEmoji}\nEasy: ${easyTime}  Hard: ${hardTime}`;
 
         try {
           if (navigator.share) {
             await navigator.share({ text });
-          } else {
+          } else if (navigator.clipboard && navigator.clipboard.writeText) {
             await navigator.clipboard.writeText(text);
-            document.getElementById('results-share-btn').textContent = 'Copied!';
-            setTimeout(() => {
-              document.getElementById('results-share-btn').textContent = 'Share';
-            }, 2000);
+            const btn = document.getElementById('results-share-btn');
+            const orig = btn.textContent;
+            btn.textContent = 'Copied!';
+            setTimeout(() => { btn.textContent = orig; }, 1500);
+          } else {
+            prompt('Copy result:', text);
           }
         } catch(e) {
-          // Fallback
-          try { await navigator.clipboard.writeText(text); } catch(err) {}
+          try { prompt('Copy result:', text); } catch(err) {}
         }
       });
     }
