@@ -219,10 +219,16 @@
   </div>
 
   <script>
-  // localStorage namespace:
-  // - wordGames_dailyStatus: { vowel: { completed, dateKey, timestamp }, ... } — shared hub key
-  // - vowel_*, ladder_*, hunt_* prefixes: game-specific state (owned by each game)
   (function() {
+    // Propagate ?debug to all game links
+    if (new URLSearchParams(location.search).has('debug')) {
+      ['card-vowel', 'card-ladder', 'card-cipher'].forEach(function(id) {
+        var card = document.getElementById(id);
+        if (card && card.href) card.href = card.href.split('?')[0] + '?debug';
+      });
+    }
+
+    // Mark completed games
     try {
       const status = JSON.parse(localStorage.getItem('wordGames_dailyStatus') || '{}');
       const today = new Date().toISOString().split('T')[0];
@@ -233,9 +239,7 @@
           if (card) card.classList.add('completed');
         }
       });
-    } catch(e) {
-      // localStorage unavailable — ignore silently
-    }
+    } catch(e) {}
   })();
   </script>
 </body>

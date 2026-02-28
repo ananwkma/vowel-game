@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="styles/design-tokens.css">
     <style>
         :root {
-            --cipher-block-size: 38px;
+            --cipher-block-size: var(--block-size);
             --color-medium-charcoal: #D8D5CE;
         }
 
@@ -377,12 +377,11 @@
             pointer-events: none;
         }
 
-        /* Test block styles */
-        .test-container {
-            margin-top: 40px;
-            padding: 20px;
-            border-top: 1px solid rgba(0,0,0,0.1);
-            display: none; /* Hide in production */
+        @media (max-width: 425px) {
+            :root { --block-size: 42px; }
+        }
+        @media (max-width: 360px) {
+            :root { --block-size: 38px; }
         }
     </style>
 </head>
@@ -466,28 +465,28 @@
            SECTION: QUOTE CORPUS
         ============================================================ */
         const QUOTES = [
-            { text: "To be or not to be, that is the question.", author: "William Shakespeare" },
-            { text: "I think, therefore I am.", author: "René Descartes" },
+            { text: "Do or do not. There is no try.", author: "Yoda" },
+            { text: "To thine own self be true.", author: "William Shakespeare" },
             { text: "The only thing we have to fear is fear itself.", author: "Franklin D. Roosevelt" },
-            { text: "In the end, we will remember not the words of our enemies, but the silence of our friends.", author: "Martin Luther King Jr." },
+            { text: "Better late than never.", author: "Proverb" },
             { text: "Be the change that you wish to see in the world.", author: "Mahatma Gandhi" },
             { text: "Stay hungry, stay foolish.", author: "Steve Jobs" },
-            { text: "Knowledge is power.", author: "Francis Bacon" },
-            { text: "The unexamined life is not worth living.", author: "Socrates" },
+            { text: "Actions speak louder than words.", author: "Proverb" },
+            { text: "This too shall pass.", author: "Proverb" },
             { text: "I have a dream.", author: "Martin Luther King Jr." },
             { text: "Houston, we have a problem.", author: "Jim Lovell" },
             { text: "Life is what happens when you're busy making other plans.", author: "John Lennon" },
-            { text: "The journey of a thousand miles begins with one step.", author: "Lao Tzu" },
+            { text: "Where there is a will, there is a way.", author: "Proverb" },
             { text: "That's one small step for man, one giant leap for mankind.", author: "Neil Armstrong" },
             { text: "Well done is better than well said.", author: "Benjamin Franklin" },
-            { text: "Whatever you are, be a good one.", author: "Abraham Lincoln" },
-            { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
+            { text: "The truth will set you free.", author: "Bible, John 8:32" },
+            { text: "Every cloud has a silver lining.", author: "Proverb" },
             { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
             { text: "To err is human, to forgive divine.", author: "Alexander Pope" },
             { text: "Not all those who wander are lost.", author: "J.R.R. Tolkien" },
             { text: "Peace begins with a smile.", author: "Mother Teresa" },
             { text: "The purpose of our lives is to be happy.", author: "Dalai Lama" },
-            { text: "Genius is one percent inspiration and ninety-nine percent perspiration.", author: "Thomas Edison" }
+            { text: "No pain, no gain.", author: "Proverb" }
         ];
 
         /* ============================================================
@@ -669,7 +668,7 @@
         ============================================================ */
         let giveUpTimer = null;
         let giveUpStart = 0;
-        const HOLD_DURATION = 3000;
+        const HOLD_DURATION = 1500;
 
         function initGiveUp() {
             const btn = document.getElementById('give-up-btn');
@@ -763,7 +762,6 @@
                 <p class="results-author">— ${gameState.quote.author}</p>
                 <div class="results-actions">
                     <button class="btn-primary" id="share-btn" type="button">share ${shareIcon}</button>
-                    <a href="index.html" class="btn-secondary">LEXICON</a>
                 </div>`;
 
             screen.classList.add('visible');
@@ -808,6 +806,8 @@
         document.getElementById('help-modal').addEventListener('click', (e) => {
             if (e.target === e.currentTarget) e.currentTarget.classList.remove('visible');
         });
+
+        if (DEBUG) document.getElementById('back-link').href = 'index.html?debug';
 
         initGame();
 

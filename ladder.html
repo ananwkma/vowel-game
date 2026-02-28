@@ -1718,6 +1718,7 @@
        SECTION: DOMCONTENTLOADED — boot the game
     ============================================================ */
     document.addEventListener('DOMContentLoaded', () => {
+      if (DEBUG) document.getElementById('back-link').href = 'index.html?debug';
       setupGiveUp();
       const saved = !DEBUG && LadderResult.load();
       if (saved) {
