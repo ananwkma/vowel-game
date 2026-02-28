@@ -118,6 +118,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       gap: 8px;
       flex: 1;
     }
@@ -490,9 +491,9 @@
     }
 
     #results-screen .results-status {
-      font-size: 1.1rem;
+      font-size: 2rem;
       font-weight: 700;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       text-align: center;
     }
@@ -515,33 +516,6 @@
       color: var(--color-hunt-text);
     }
 
-    #results-screen .results-times {
-      display: flex;
-      gap: 32px;
-      justify-content: center;
-    }
-
-    #results-screen .results-time-block {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-    }
-
-    #results-screen .results-time-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      opacity: 0.5;
-      font-family: var(--font-hunt-sans);
-    }
-
-    #results-screen .results-time-value {
-      font-family: var(--font-hunt-serif);
-      font-size: 1.6rem;
-      font-weight: 700;
-    }
-
     #results-screen .results-pips {
       display: flex;
       align-items: center;
@@ -549,30 +523,32 @@
       justify-content: center;
     }
 
-    .results-words-section {
+    .results-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
       width: 100%;
       max-width: 300px;
     }
 
-    .results-words-headers {
+    .results-col {
       display: flex;
-      justify-content: space-around;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .results-col-label {
       font-size: 0.6rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       opacity: 0.5;
       font-family: var(--font-hunt-sans);
-      margin-bottom: 8px;
-      padding: 0 8px;
     }
 
-    #results-screen .results-words {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: repeat(3, auto);
-      grid-auto-flow: column;
-      gap: 8px 24px;
-      width: 100%;
+    .results-col-time {
+      font-family: var(--font-hunt-serif);
+      font-size: 1.6rem;
+      font-weight: 700;
     }
 
     #results-screen .results-word-row {
@@ -788,22 +764,15 @@
     <div class="results-status" id="results-status">Solved</div>
     <div class="results-category" id="results-category"></div>
     <div class="results-pips" id="results-pips"></div>
-    <div class="results-times" id="results-times">
-      <div class="results-time-block">
-        <span class="results-time-label">Easy</span>
-        <span class="results-time-value" id="results-time-easy">—</span>
+    <div class="results-cols">
+      <div class="results-col" id="results-col-easy">
+        <div class="results-col-label">Easy</div>
+        <div class="results-col-time" id="results-time-easy">—</div>
       </div>
-      <div class="results-time-block">
-        <span class="results-time-label">Hard</span>
-        <span class="results-time-value" id="results-time-hard">—</span>
+      <div class="results-col" id="results-col-hard">
+        <div class="results-col-label">Hard</div>
+        <div class="results-col-time" id="results-time-hard">—</div>
       </div>
-    </div>
-    <div class="results-words-section">
-      <div class="results-words-headers">
-        <span>Easy</span>
-        <span>Hard</span>
-      </div>
-      <div class="results-words" id="results-words"></div>
     </div>
     <div class="results-actions">
       <button class="btn-primary" id="results-share-btn">share <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="2.5" r="2" fill="currentColor"/><circle cx="3" cy="8" r="2" fill="currentColor"/><circle cx="12" cy="13.5" r="2" fill="currentColor"/><line x1="3" y1="8" x2="12" y2="2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="3" y1="8" x2="12" y2="13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
@@ -1218,11 +1187,11 @@
         pipsEl.appendChild(hardGroup);
       }
 
-      // Results words list
-      const wordsEl = document.getElementById('results-words');
-      wordsEl.innerHTML = '';
+      // Results words list — populate into column divs
+      const easyColEl = document.getElementById('results-col-easy');
+      const hardColEl = document.getElementById('results-col-hard');
       if (dailyPuzzle) {
-        dailyPuzzle.words.forEach(wordObj => {
+        dailyPuzzle.words.forEach((wordObj, i) => {
           const row = document.createElement('div');
           row.className = 'results-word-row';
           const pip = document.createElement('span');
@@ -1233,7 +1202,8 @@
           label.textContent = wordObj.word;
           row.appendChild(pip);
           row.appendChild(label);
-          wordsEl.appendChild(row);
+          if (i < 3) easyColEl.appendChild(row);
+          else hardColEl.appendChild(row);
         });
       }
 
