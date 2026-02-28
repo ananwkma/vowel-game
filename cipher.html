@@ -950,14 +950,24 @@
 
         if (DEBUG) document.getElementById('back-link').href = 'index.html?debug';
 
+        function hasHighLetterRepetition(text, minRatio = 0.35) {
+            const letters = text.replace(/[^a-z]/gi, '').toUpperCase();
+            if (letters.length < 15) return false; // skip very short quotes
+            const uniqueCount = new Set(letters).size;
+            const ratio = (letters.length - uniqueCount) / letters.length;
+            return ratio >= minRatio;
+        }
+
         initGame();
 
         function initGame() {
             const rng = seededRandom(DATE_SEED);
 
-            // 1. Pick quote
-            const quoteIndex = Math.floor(rng() * QUOTES.length);
-            gameState.quote = QUOTES[quoteIndex];
+            // 1. Pick quote — prefer high letter-repetition (more helpful reveals per solved letter)
+            const highRepQuotes = QUOTES.filter(q => hasHighLetterRepetition(q.text, 0.35));
+            const quotePool = highRepQuotes.length >= 5 ? highRepQuotes : QUOTES; // fallback if filter too strict
+            const quoteIndex = Math.floor(rng() * quotePool.length);
+            gameState.quote = quotePool[quoteIndex];
 
             // 2. Extract unique letters (uppercase)
             const uniqueLetters = [...new Set(gameState.quote.text.toUpperCase().replace(/[^A-Z]/g, '').split(''))].sort();
@@ -982,11 +992,44 @@
                 .join('  ');
             console.log(`[Cipher] ${gameState.quote.author}: "${gameState.quote.text}"\n[Cipher] Key: ${answerMap}`);
 
+            // 5b. Pre-reveal 2-3 letters seeded by date
+            const uniqueLettersSorted = [...new Set(gameState.quote.text.toUpperCase().replace(/[^A-Z]/g, '').split(''))].sort();
+            // Exclude the most-frequent letter (would reveal too much) and the least-frequent (not helpful)
+            const letterFreqs = uniqueLettersSorted.map(letter => ({
+                letter,
+                count: (gameState.quote.text.toUpperCase().match(new RegExp(letter, 'g')) || []).length
+            })).sort((a, b) => a.count - b.count);
+            // Pre-reveal from middle-frequency letters (not top-3 most common, not bottom-2 rarest)
+            const revealCandidates = letterFreqs.slice(2, -3).map(f => f.letter);
+            const preRevealCount = revealCandidates.length >= 3 ? 3 : revealCandidates.length >= 2 ? 2 : 0;
+            const preRevealLetters = [];
+            for (let i = 0; i < preRevealCount; i++) {
+                const idx = Math.floor(rng() * revealCandidates.length);
+                const letter = revealCandidates.splice(idx, 1)[0];
+                preRevealLetters.push(letter);
+            }
+
+            if (DEBUG) {
+                const letters = gameState.quote.text.replace(/[^a-z]/gi, '').toUpperCase();
+                const unique = new Set(letters).size;
+                const repRatio = ((letters.length - unique) / letters.length).toFixed(2);
+                console.log(`[Cipher] Quote: "${gameState.quote.text}" — ${gameState.quote.author}`);
+                console.log(`[Cipher] Letters: ${letters.length} total, ${unique} unique, repetition ratio: ${repRatio}`);
+                console.log(`[Cipher] Pre-reveal: ${preRevealLetters.join(', ')} (${preRevealCount} letters)`);
+                console.log(`[Cipher] High-rep pool: ${highRepQuotes.length}/${QUOTES.length} quotes`);
+            }
+
             // 6. Render
             buildQuoteDOM();
 
             // 6. Give up button
             initGiveUp();
+
+            // Pre-reveal letters (applied after DOM is built, before progress restore)
+            preRevealLetters.forEach(letter => {
+                const num = gameState.letterToNum[letter];
+                if (num !== undefined) assignLetter(num, letter, false);
+            });
 
             // 7. Load Progress (skipped in debug mode)
             if (!DEBUG) {
