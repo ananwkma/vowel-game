@@ -2,45 +2,1360 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Letter Hunt">
   <title>Letter Hunt — Word Games</title>
+  <!-- REQUIRED: Shared design tokens for visual consistency across all games -->
   <link rel="stylesheet" href="styles/design-tokens.css">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    /* ============================================================
+       SECTION: GOOGLE FONTS
+    ============================================================ */
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Lato:wght@400;700&display=swap');
+
+    /* ============================================================
+       SECTION: CSS VARIABLES
+       Bridge: map shared token names to hunt-specific names
+    ============================================================ */
+    :root {
+      --color-hunt-primary: var(--color-primary);       /* amber — active cells, lasso line */
+      --color-hunt-success: var(--color-success);       /* sage green — found words */
+      --color-hunt-warning: var(--color-warning);       /* dusty rose — hint-found words */
+      --color-hunt-bg: var(--color-bg);
+      --color-hunt-text: var(--color-primary-text);
+      --font-hunt-serif: var(--font-serif);
+      --font-hunt-sans: 'Lato', 'Arial', sans-serif;
+      --cell-size: 34px; /* overridden dynamically by JS */
+      --grid-size: 10;   /* overridden dynamically by JS */
+    }
+
+    /* ============================================================
+       SECTION: GLOBAL RESET & BASE
+    ============================================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
     body {
-      font-family: var(--font-serif);
-      background-color: var(--color-bg);
-      color: var(--color-primary-text);
+      font-family: var(--font-hunt-serif);
+      background-color: var(--color-hunt-bg);
+      color: var(--color-hunt-text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: var(--spacing-xl);
+      overflow-x: hidden;
     }
-    h1 { font-size: 2rem; margin-bottom: var(--spacing-md); }
-    p { font-size: 1rem; opacity: 0.65; }
+
+    /* ============================================================
+       SECTION: BACK TO HUB
+    ============================================================ */
     #back-link {
       position: fixed;
       top: max(12px, env(safe-area-inset-top));
       left: 12px;
-      z-index: 1000;
-      padding: 8px 16px;
+      z-index: 6000;
+      padding: 6px 2px;
       background-color: transparent;
-      color: var(--color-primary);
+      color: var(--color-hunt-text);
       text-decoration: none;
-      font-family: var(--font-serif);
-      font-size: 0.875rem;
-      font-weight: 600;
-      border-radius: var(--block-radius);
-      transition: background-color var(--transition-fast);
+      font-family: var(--font-hunt-serif);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      opacity: 0.7;
+      transition: opacity var(--transition-fast);
+      -webkit-user-select: none;
+      user-select: none;
     }
-    #back-link:hover { background-color: rgba(212, 165, 116, 0.1); }
+
+    #back-link:hover { opacity: 1; }
+    #back-link:active { opacity: 0.5; }
+
+    /* ============================================================
+       SECTION: LAYOUT
+    ============================================================ */
+    #app {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding-top: max(52px, calc(env(safe-area-inset-top) + 48px));
+      padding-bottom: max(24px, env(safe-area-inset-bottom));
+      gap: 12px;
+    }
+
+    #game-header {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+    }
+
+    #game-content {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    #game-footer {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* ============================================================
+       SECTION: TITLE
+    ============================================================ */
+    #game-title {
+      font-family: var(--font-hunt-serif);
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--color-hunt-text);
+      text-align: center;
+    }
+
+    #help-btn {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid rgba(28, 27, 24, 0.25);
+      background: transparent;
+      color: var(--color-hunt-text);
+      font-family: var(--font-hunt-serif);
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.65;
+      transition: opacity var(--transition-fast);
+    }
+
+    #help-btn:hover { opacity: 1; }
+
+    /* ============================================================
+       SECTION: PROGRESS INDICATOR
+    ============================================================ */
+    #pip-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      justify-content: center;
+      aria-hidden: true;
+    }
+
+    .pip-group {
+      display: flex;
+      gap: 6px;
+    }
+
+    .pip-separator {
+      width: 12px;
+    }
+
+    .pip {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: rgba(28, 27, 24, 0.18);
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .pip.solved {
+      background-color: var(--color-hunt-success); /* sage green */
+    }
+
+    .pip.hinted {
+      background-color: var(--color-hunt-warning); /* dusty rose */
+    }
+
+    .pip.pip-pop {
+      animation: pip-pop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    /* ============================================================
+       SECTION: GRID
+    ============================================================ */
+    #grid-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    #letter-grid {
+      display: grid;
+      grid-template-columns: repeat(var(--grid-size), var(--cell-size));
+      grid-template-rows: repeat(var(--grid-size), var(--cell-size));
+      gap: 2px;
+      user-select: none;
+      touch-action: none;
+    }
+
+    .grid-cell {
+      width: var(--cell-size);
+      height: var(--cell-size);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-hunt-serif);
+      font-weight: 700;
+      font-size: calc(var(--cell-size) * 0.45);
+      border-radius: 3px;
+      background: rgba(28, 27, 24, 0.06);
+      cursor: default;
+      transition: background-color 150ms ease-out, color 150ms ease-out;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    /* ============================================================
+       SECTION: CELL STATES
+    ============================================================ */
+    .grid-cell.active {
+      background-color: var(--color-hunt-primary); /* amber during drag */
+      color: white;
+    }
+
+    .grid-cell.found {
+      background-color: var(--color-hunt-success); /* sage green */
+      color: white;
+    }
+
+    .grid-cell.found-hint {
+      background-color: var(--color-hunt-warning); /* dusty rose — hint-assisted */
+      color: white;
+      opacity: 0.85;
+    }
+
+    .grid-cell.dimmed {
+      opacity: 0.45;
+    }
+
+    .grid-cell.shake {
+      animation: cell-shake 400ms ease-out forwards;
+    }
+
+    .grid-cell.hint-highlight {
+      background-color: rgba(212, 165, 116, 0.5);
+      animation: hint-pulse 800ms ease-in-out;
+    }
+
+    /* ============================================================
+       SECTION: CANVAS OVERLAY
+    ============================================================ */
+    #lasso-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* ============================================================
+       SECTION: CATEGORY DISPLAY
+    ============================================================ */
+    #category-display {
+      font-family: var(--font-hunt-serif);
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-align: center;
+      color: var(--color-hunt-text);
+      min-height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .category-stamp {
+      animation: stamp-reveal 400ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    /* ============================================================
+       SECTION: TIMERS
+    ============================================================ */
+    #timer-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      justify-content: center;
+      font-family: var(--font-hunt-serif);
+      font-size: 0.9rem;
+    }
+
+    .timer-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.5;
+      font-family: var(--font-hunt-sans);
+    }
+
+    .timer-value {
+      font-family: var(--font-hunt-serif);
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+      color: var(--color-hunt-text);
+    }
+
+    .timer-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1px;
+    }
+
+    #timer-hard-block {
+      opacity: 0.35;
+      transition: opacity 0.4s ease;
+    }
+
+    #timer-hard-block.active {
+      opacity: 1;
+    }
+
+    #timer-separator {
+      font-size: 0.7rem;
+      opacity: 0.3;
+      font-family: var(--font-hunt-sans);
+    }
+
+    /* ============================================================
+       SECTION: HINT BUTTON
+    ============================================================ */
+    .btn-hint {
+      padding: 8px 20px;
+      border: 2px solid rgba(28, 27, 24, 0.25);
+      border-radius: 20px;
+      background: transparent;
+      color: var(--color-hunt-text);
+      font-family: var(--font-hunt-serif);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: border-color var(--transition-fast), background var(--transition-fast);
+    }
+
+    .btn-hint:hover {
+      border-color: var(--color-hunt-primary);
+      background: rgba(212, 165, 116, 0.08);
+    }
+
+    .btn-hint:active {
+      background: rgba(212, 165, 116, 0.15);
+    }
+
+    /* ============================================================
+       SECTION: GIVE-UP BUTTON
+    ============================================================ */
+    .btn-giveup {
+      background: transparent;
+      border: none;
+      color: var(--color-hunt-warning);
+      font-family: var(--font-hunt-sans);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      opacity: 0.55;
+      transition: opacity var(--transition-fast);
+      padding: 4px 8px;
+    }
+
+    .btn-giveup:hover { opacity: 0.85; }
+    .btn-giveup.confirming { opacity: 1; color: var(--color-hunt-warning); }
+
+    #footer-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      justify-content: center;
+    }
+
+    /* ============================================================
+       SECTION: BUTTONS
+    ============================================================ */
+    .btn-primary {
+      display: inline-block;
+      padding: 12px 32px;
+      background-color: var(--color-hunt-primary);
+      color: white;
+      border: none;
+      border-radius: 24px;
+      font-family: var(--font-hunt-serif);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity var(--transition-fast), transform var(--transition-fast);
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:active { transform: scale(0.97); }
+
+    .btn-secondary {
+      display: inline-block;
+      padding: 10px 24px;
+      background-color: transparent;
+      color: var(--color-hunt-text);
+      border: 2px solid rgba(28, 27, 24, 0.3);
+      border-radius: 24px;
+      font-family: var(--font-hunt-serif);
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color var(--transition-fast), background var(--transition-fast);
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .btn-secondary:hover { border-color: var(--color-hunt-primary); }
+
+    /* ============================================================
+       SECTION: RESULTS SCREEN
+    ============================================================ */
+    #results-screen {
+      position: fixed;
+      inset: 0;
+      background-color: var(--color-hunt-bg);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+      padding: max(60px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+    }
+
+    #results-screen .results-title {
+      font-family: var(--font-hunt-serif);
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    #results-screen .results-status {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    #results-screen .results-status.solved {
+      color: var(--color-hunt-success);
+    }
+
+    #results-screen .results-status.revealed {
+      color: var(--color-hunt-warning);
+    }
+
+    #results-screen .results-category {
+      font-family: var(--font-hunt-serif);
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 20px;
+      color: var(--color-hunt-text);
+    }
+
+    #results-screen .results-times {
+      display: flex;
+      gap: 32px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    #results-screen .results-time-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    #results-screen .results-time-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.5;
+      font-family: var(--font-hunt-sans);
+    }
+
+    #results-screen .results-time-value {
+      font-family: var(--font-hunt-serif);
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+
+    #results-screen .results-pips {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    #results-screen .results-words {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      max-width: 300px;
+      margin-bottom: 24px;
+    }
+
+    #results-screen .results-word-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-hunt-serif);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+
+    #results-screen .word-pip {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background-color: rgba(28, 27, 24, 0.18);
+    }
+
+    #results-screen .word-pip.solved { background-color: var(--color-hunt-success); }
+    #results-screen .word-pip.hinted { background-color: var(--color-hunt-warning); }
+
+    #results-screen .results-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    /* ============================================================
+       SECTION: HELP MODAL
+    ============================================================ */
+    #help-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(28, 27, 24, 0.7);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    #help-modal-inner {
+      background: var(--color-hunt-bg);
+      border-radius: 12px;
+      padding: 28px 24px;
+      max-width: 380px;
+      width: 100%;
+      position: relative;
+    }
+
+    #help-modal h2 {
+      font-family: var(--font-hunt-serif);
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    #help-modal p, #help-modal li {
+      font-family: var(--font-hunt-sans);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      opacity: 0.8;
+      margin-bottom: 8px;
+    }
+
+    #help-modal ul {
+      padding-left: 20px;
+    }
+
+    #help-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      opacity: 0.5;
+      line-height: 1;
+      padding: 4px;
+    }
+
+    #help-close:hover { opacity: 1; }
+
+    /* ============================================================
+       SECTION: ANIMATIONS
+    ============================================================ */
+    @keyframes stamp-reveal {
+      0%   { transform: scale(3) rotate(-6deg); opacity: 0; }
+      60%  { transform: scale(0.95) rotate(1deg); opacity: 1; }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    @keyframes cell-shake {
+      0%   { transform: translateX(0); }
+      20%  { transform: translateX(-4px); }
+      40%  { transform: translateX(4px); }
+      60%  { transform: translateX(-3px); }
+      80%  { transform: translateX(3px); }
+      100% { transform: translateX(0); opacity: 0; }
+    }
+
+    @keyframes pip-pop {
+      0%   { transform: scale(0); }
+      70%  { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes hint-pulse {
+      0%   { background-color: rgba(212, 165, 116, 0.5); }
+      50%  { background-color: rgba(212, 165, 116, 0.8); }
+      100% { background-color: rgba(212, 165, 116, 0.5); }
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
-  <a href="index.html" id="back-link" aria-label="Back to Word Games hub">← Back</a>
-  <h1>Letter Hunt</h1>
-  <p>Coming soon</p>
+  <!-- BACK TO HUB -->
+  <a id="back-link" href="index.html" aria-label="Back to Lexicon hub">LEXICON</a>
+
+  <!-- MAIN APP -->
+  <div id="app">
+
+    <!-- GAME HEADER -->
+    <div id="game-header">
+      <h1 id="game-title">HUNT</h1>
+      <button id="help-btn" aria-label="How to play">?</button>
+      <div id="pip-row" aria-hidden="true">
+        <div class="pip-group" id="pip-easy">
+          <span class="pip" data-word="0"></span>
+          <span class="pip" data-word="1"></span>
+          <span class="pip" data-word="2"></span>
+        </div>
+        <div class="pip-separator"></div>
+        <div class="pip-group" id="pip-hard">
+          <span class="pip" data-word="3"></span>
+          <span class="pip" data-word="4"></span>
+          <span class="pip" data-word="5"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAME CONTENT -->
+    <div id="game-content">
+      <div id="grid-container">
+        <div id="letter-grid"></div>
+        <canvas id="lasso-canvas"></canvas>
+      </div>
+    </div>
+
+    <!-- GAME FOOTER -->
+    <div id="game-footer">
+      <div id="category-display">???</div>
+      <div id="timer-row">
+        <div class="timer-block" id="timer-easy-block">
+          <span class="timer-label">Easy</span>
+          <span class="timer-value" id="timer-easy">0:00</span>
+        </div>
+        <span id="timer-separator">/</span>
+        <div class="timer-block" id="timer-hard-block">
+          <span class="timer-label">Hard</span>
+          <span class="timer-value" id="timer-hard">—</span>
+        </div>
+      </div>
+      <div id="footer-actions">
+        <button class="btn-hint" id="hint-btn">Hint</button>
+        <button class="btn-giveup" id="giveup-btn">Give Up</button>
+      </div>
+    </div>
+
+  </div><!-- /app -->
+
+  <!-- RESULTS SCREEN -->
+  <div id="results-screen" style="display:none">
+    <div class="results-title">HUNT</div>
+    <div class="results-status" id="results-status">Solved</div>
+    <div class="results-category" id="results-category"></div>
+    <div class="results-pips" id="results-pips"></div>
+    <div class="results-times" id="results-times">
+      <div class="results-time-block">
+        <span class="results-time-label">Easy</span>
+        <span class="results-time-value" id="results-time-easy">—</span>
+      </div>
+      <div class="results-time-block">
+        <span class="results-time-label">Hard</span>
+        <span class="results-time-value" id="results-time-hard">—</span>
+      </div>
+    </div>
+    <div class="results-words" id="results-words"></div>
+    <div class="results-actions">
+      <button class="btn-primary" id="results-share-btn">Share</button>
+      <a class="btn-secondary" href="index.html">Back to Hub</a>
+    </div>
+  </div>
+
+  <!-- HELP MODAL -->
+  <div id="help-modal" style="display:none">
+    <div id="help-modal-inner">
+      <button id="help-close" aria-label="Close help">&times;</button>
+      <h2>How to Play</h2>
+      <ul>
+        <li>Find <strong>6 hidden words</strong> in the letter grid — 3 easy, 3 hard.</li>
+        <li>Drag across letters to select a word. Release to confirm.</li>
+        <li>All 6 words belong to the same <strong>mystery category</strong>.</li>
+        <li>Find all 3 easy words to <strong>reveal the category</strong>.</li>
+        <li>Then find all 3 hard words to complete the puzzle.</li>
+        <li>Each phase is timed separately. Use hints for a time penalty.</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    /* ============================================================
+       SECTION: CONSTANTS & WORD DATA
+    ============================================================ */
+    const CATEGORIES = [
+      { category: 'PLANETS',   easy: ['MARS', 'EARTH', 'VENUS'],     hard: ['SATURN', 'URANUS', 'NEPTUNE'] },
+      { category: 'METALS',    easy: ['GOLD', 'IRON', 'ZINC'],       hard: ['NICKEL', 'COBALT', 'CHROME'] },
+      { category: 'DANCES',    easy: ['WALTZ', 'TANGO', 'SALSA'],    hard: ['FOXTROT', 'LINDY', 'BOLERO'] },
+      { category: 'FRUITS',    easy: ['APPLE', 'MANGO', 'LIME'],     hard: ['PAPAYA', 'LYCHEE', 'GUAVA'] },
+      { category: 'COLORS',    easy: ['RED', 'BLUE', 'GREEN'],       hard: ['INDIGO', 'CRIMSON', 'AMBER'] },
+      { category: 'SPORTS',    easy: ['TENNIS', 'GOLF', 'BOXING'],   hard: ['FENCING', 'CURLING', 'LUGE'] },
+      { category: 'BIRDS',     easy: ['ROBIN', 'EAGLE', 'DOVE'],     hard: ['IBIS', 'GREBE', 'SHRIKE'] },
+      { category: 'TREES',     easy: ['OAK', 'PINE', 'MAPLE'],      hard: ['LARCH', 'ROWAN', 'TUPELO'] },
+      { category: 'TOOLS',     easy: ['SAW', 'DRILL', 'HAMMER'],    hard: ['CHISEL', 'CALIPER', 'REAMER'] },
+      { category: 'GEMS',      easy: ['RUBY', 'OPAL', 'JADE'],      hard: ['GARNET', 'CITRINE', 'TOPAZ'] },
+      { category: 'OCEANS',    easy: ['ARCTIC', 'PACIFIC', 'INDIAN'], hard: ['ATLANTIC', 'SOUTHERN', 'BERING'] },
+      { category: 'MONTHS',    easy: ['JUNE', 'MARCH', 'JULY'],     hard: ['OCTOBER', 'JANUARY', 'AUGUST'] },
+      { category: 'SPICES',    easy: ['SAGE', 'THYME', 'PEPPER'],   hard: ['CUMIN', 'FENNEL', 'PAPRIKA'] },
+      { category: 'CHEESES',   easy: ['BRIE', 'GOUDA', 'FETA'],     hard: ['GRUYERE', 'HAVARTI', 'COLBY'] },
+      { category: 'FLOWERS',   easy: ['ROSE', 'TULIP', 'DAISY'],    hard: ['LUPINE', 'FREESIA', 'YARROW'] },
+      { category: 'CAPITALS',  easy: ['ROME', 'PARIS', 'LIMA'],     hard: ['ANKARA', 'MUSCAT', 'NASSAU'] },
+      { category: 'ANIMALS',   easy: ['BEAR', 'WOLF', 'LION'],      hard: ['QUOKKA', 'OCELOT', 'TAPIR'] },
+      { category: 'INSECTS',   easy: ['ANT', 'BEE', 'MOTH'],        hard: ['CICADA', 'EARWIG', 'THRIPS'] },
+      { category: 'FABRICS',   easy: ['SILK', 'WOOL', 'LINEN'],     hard: ['MUSLIN', 'DAMASK', 'BURLAP'] },
+      { category: 'RIVERS',    easy: ['NILE', 'RHINE', 'CONGO'],    hard: ['DANUBE', 'GANGES', 'MEKONG'] },
+      { category: 'SHARKS',    easy: ['BULL', 'TIGER', 'MAKO'],     hard: ['NURSE', 'HAMMERHEAD', 'LEMON'] },
+      { category: 'CHEERS',    easy: ['TOAST', 'SALUT', 'SKOL'],    hard: ['PROSIT', 'SLAINTE', 'KANPAI'] },
+    ];
+
+    const DIRECTIONS = [
+      [0,  1],   // right (horizontal)
+      [1,  0],   // down (vertical)
+      [1,  1],   // diagonal down-right
+      [1, -1],   // diagonal down-left
+    ];
+
+    const HINT_PENALTY_MS = 30000; // 30-second penalty per hint
+
+    /* ============================================================
+       SECTION: SEEDED PRNG
+       Copied verbatim from ladder.html (which copied from vowel.html)
+    ============================================================ */
+    function seededRandom(seedStr) {
+      let h = 0;
+      for (let i = 0; i < seedStr.length; i++) {
+        h = Math.imul(31, h) + seedStr.charCodeAt(i) | 0;
+      }
+      let s = h >>> 0;
+      return function() {
+        s += 0x6D2B79F5;
+        let t = Math.imul(s ^ s >>> 15, 1 | s);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+
+    /* ============================================================
+       SECTION: DAILY SEED
+    ============================================================ */
+    const DATE_SEED = (() => {
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      return today + '_hunt_v1'; // game-namespaced, v1 enables future rotation
+    })();
+
+    /* ============================================================
+       SECTION: GRID GENERATION
+    ============================================================ */
+    const GRID_SIZES = [10, 8];
+
+    function chooseGridSize() {
+      const availableWidth = Math.min(window.innerWidth, 500) - 32; // 16px padding each side
+      for (const size of GRID_SIZES) {
+        const cellSize = Math.floor((availableWidth - (size - 1) * 2) / size); // gap=2px
+        if (cellSize >= 28) return { size, cellSize };
+      }
+      return { size: 8, cellSize: 36 }; // absolute fallback
+    }
+
+    function placeWords(words, gridSize, rng) {
+      const grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(null));
+      const placements = []; // {word, cells:[{row,col}]}
+
+      for (const word of words) {
+        let placed = false;
+        let attempts = 0;
+        while (!placed && attempts < 200) {
+          attempts++;
+          const dir = DIRECTIONS[Math.floor(rng() * DIRECTIONS.length)];
+          const [dr, dc] = dir;
+
+          // Constrain start position so word fits in grid
+          const maxRow = dr > 0 ? gridSize - word.length * Math.abs(dr) : (dr < 0 ? word.length - 1 : gridSize - 1);
+          const maxCol = dc > 0 ? gridSize - word.length : (dc < 0 ? word.length - 1 : gridSize - 1);
+          const minRow = dr < 0 ? word.length - 1 : 0;
+          const minCol = dc < 0 ? word.length - 1 : 0;
+
+          if (maxRow < minRow || maxCol < minCol) continue;
+
+          const row = minRow + Math.floor(rng() * (maxRow - minRow + 1));
+          const col = minCol + Math.floor(rng() * (maxCol - minCol + 1));
+
+          // Check all cells are free or already have the correct letter
+          const cells = [];
+          let conflict = false;
+          for (let i = 0; i < word.length; i++) {
+            const r = row + i * dr;
+            const c = col + i * dc;
+            if (r < 0 || r >= gridSize || c < 0 || c >= gridSize) { conflict = true; break; }
+            if (grid[r][c] !== null && grid[r][c] !== word[i]) { conflict = true; break; }
+            cells.push({ row: r, col: c });
+          }
+
+          if (!conflict) {
+            cells.forEach(({ row: r, col: c }, i) => { grid[r][c] = word[i]; });
+            placements.push({ word, cells });
+            placed = true;
+          }
+        }
+        if (!placed) return null; // signal retry with different seed attempt
+      }
+
+      // Fill remaining cells with random uppercase letters
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      for (let r = 0; r < gridSize; r++) {
+        for (let c = 0; c < gridSize; c++) {
+          if (grid[r][c] === null) grid[r][c] = letters[Math.floor(rng() * 26)];
+        }
+      }
+
+      return { grid, placements };
+    }
+
+    function getDailyPuzzle(rng) {
+      const idx = Math.floor(rng() * CATEGORIES.length);
+      const { category, easy, hard } = CATEGORIES[idx];
+      return {
+        category,
+        words: [
+          ...easy.map(w => ({ word: w, phase: 'easy' })),
+          ...hard.map(w => ({ word: w, phase: 'hard' })),
+        ],
+        rng,
+      };
+    }
+
+    /* ============================================================
+       SECTION: GAME STATE
+    ============================================================ */
+    let dailyPuzzle = null;
+    let gridData = null;       // 2D array of letters
+    let wordPlacements = [];   // [{word, cells:[{row,col}]}]
+    let currentGridSize = 10;
+    let currentCellSize = 34;
+
+    let gameState = {
+      phase: 'easy',            // 'easy' | 'hard' | 'done'
+      easyStartTime: null,
+      easyElapsed: 0,
+      hardStartTime: null,
+      hardElapsed: 0,
+      hintPenaltyEasy: 0,
+      hintPenaltyHard: 0,
+      easyTimerInterval: null,
+      hardTimerInterval: null,
+      wordsFound: [],            // [{word, usedHint}]
+      hintIndex: 0,              // round-robin index for hint rotation
+      giveUpConfirming: false,
+      giveUpTimeout: null,
+    };
+
+    /* ============================================================
+       SECTION: TIMERS
+    ============================================================ */
+    function formatTime(ms) {
+      const total = Math.floor(Math.max(0, ms) / 1000);
+      const m = Math.floor(total / 60);
+      const s = total % 60;
+      return `${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function renderEasyTimer() {
+      const elapsed = Date.now() - gameState.easyStartTime + gameState.hintPenaltyEasy;
+      document.getElementById('timer-easy').textContent = formatTime(elapsed);
+    }
+
+    function renderHardTimer() {
+      const elapsed = Date.now() - gameState.hardStartTime + gameState.hintPenaltyHard;
+      document.getElementById('timer-hard').textContent = formatTime(elapsed);
+    }
+
+    function startEasyTimer() {
+      gameState.easyStartTime = Date.now();
+      gameState.easyTimerInterval = setInterval(() => {
+        renderEasyTimer();
+      }, 100);
+    }
+
+    function stopEasyTimer() {
+      clearInterval(gameState.easyTimerInterval);
+      gameState.easyTimerInterval = null;
+      gameState.easyElapsed = Date.now() - gameState.easyStartTime + gameState.hintPenaltyEasy;
+    }
+
+    function startHardTimer() {
+      document.getElementById('timer-hard').textContent = '0:00';
+      document.getElementById('timer-hard-block').classList.add('active');
+      gameState.hardStartTime = Date.now();
+      gameState.hardTimerInterval = setInterval(() => {
+        renderHardTimer();
+      }, 100);
+    }
+
+    function stopHardTimer() {
+      clearInterval(gameState.hardTimerInterval);
+      gameState.hardTimerInterval = null;
+      gameState.hardElapsed = Date.now() - gameState.hardStartTime + gameState.hintPenaltyHard;
+    }
+
+    /* ============================================================
+       SECTION: PROGRESS (pips)
+    ============================================================ */
+    function renderPips() {
+      if (!dailyPuzzle) return;
+      dailyPuzzle.words.forEach((wordObj, i) => {
+        const pip = document.querySelector(`.pip[data-word="${i}"]`);
+        if (!pip) return;
+        const found = gameState.wordsFound.find(f => f.word === wordObj.word);
+        const wasHinted = found && found.usedHint;
+        const wasFound = !!found;
+
+        const prevSolved = pip.classList.contains('solved');
+        const prevHinted = pip.classList.contains('hinted');
+
+        pip.className = 'pip';
+        if (wasFound) {
+          pip.classList.add(wasHinted ? 'hinted' : 'solved');
+          if (!prevSolved && !prevHinted) {
+            // Newly found — trigger pop animation
+            pip.classList.add('pip-pop');
+            pip.addEventListener('animationend', () => pip.classList.remove('pip-pop'), { once: true });
+          }
+        }
+      });
+    }
+
+    /* ============================================================
+       SECTION: DAILY STATUS
+       Copied verbatim from cipher.html
+    ============================================================ */
+    const DailyStatus = {
+      KEY: 'wordGames_dailyStatus',
+      markCompleted(gameId) {
+        const today = new Date().toISOString().split('T')[0];
+        let status = {};
+        try {
+          status = JSON.parse(localStorage.getItem(this.KEY) || '{}');
+        } catch(e) {}
+        status[gameId] = { completed: true, dateKey: today, timestamp: Date.now() };
+        try {
+          localStorage.setItem(this.KEY, JSON.stringify(status));
+        } catch(e) {
+          console.warn('[DailyStatus] Save error:', e);
+        }
+      }
+    };
+
+    /* ============================================================
+       SECTION: RESULT PERSISTENCE
+    ============================================================ */
+    const HuntResult = {
+      _key() { return `hunt_result_${new Date().toISOString().split('T')[0]}`; },
+      save(data) {
+        try { localStorage.setItem(this._key(), JSON.stringify(data)); } catch(e) {}
+      },
+      load() {
+        try {
+          const raw = localStorage.getItem(this._key());
+          return raw ? JSON.parse(raw) : null;
+        } catch(e) { return null; }
+      },
+    };
+
+    /* ============================================================
+       SECTION: DOM RENDER
+    ============================================================ */
+    function renderGrid(gridSize, cellSize) {
+      const letterGrid = document.getElementById('letter-grid');
+      letterGrid.innerHTML = '';
+      letterGrid.style.setProperty('--grid-size', gridSize);
+      letterGrid.style.setProperty('--cell-size', cellSize + 'px');
+
+      for (let r = 0; r < gridSize; r++) {
+        for (let c = 0; c < gridSize; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'grid-cell';
+          cell.dataset.row = r;
+          cell.dataset.col = c;
+          cell.textContent = gridData[r][c];
+          letterGrid.appendChild(cell);
+        }
+      }
+    }
+
+    function resizeCanvas() {
+      const canvas = document.getElementById('lasso-canvas');
+      const rect = document.getElementById('letter-grid').getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+    }
+
+    function renderCategoryDisplay() {
+      const el = document.getElementById('category-display');
+      if (gameState.phase === 'easy') {
+        el.textContent = '???';
+        el.classList.remove('category-stamp');
+      } else {
+        el.textContent = dailyPuzzle ? dailyPuzzle.category : '';
+      }
+    }
+
+    /* ============================================================
+       SECTION: RESULTS SCREEN
+       (Stub — full wiring in Plan 02)
+    ============================================================ */
+    function showResults(opts = {}) {
+      const { solved = false } = opts;
+
+      // Stop all timers
+      stopEasyTimer();
+      if (gameState.phase === 'hard' || gameState.phase === 'done') {
+        stopHardTimer();
+      }
+
+      gameState.phase = 'done';
+      DailyStatus.markCompleted('hunt');
+
+      // Save result
+      HuntResult.save({
+        solved,
+        category: dailyPuzzle ? dailyPuzzle.category : '',
+        wordsFound: gameState.wordsFound,
+        easyElapsed: gameState.easyElapsed,
+        hardElapsed: gameState.hardElapsed,
+        date: new Date().toISOString().split('T')[0],
+      });
+
+      // Populate results screen
+      const rs = document.getElementById('results-screen');
+      const statusEl = document.getElementById('results-status');
+      statusEl.textContent = solved ? 'Solved' : 'Revealed';
+      statusEl.className = 'results-status ' + (solved ? 'solved' : 'revealed');
+
+      document.getElementById('results-category').textContent = dailyPuzzle ? dailyPuzzle.category : '';
+      document.getElementById('results-time-easy').textContent = formatTime(gameState.easyElapsed);
+      document.getElementById('results-time-hard').textContent = gameState.hardElapsed > 0 ? formatTime(gameState.hardElapsed) : '—';
+
+      // Results pips
+      const pipsEl = document.getElementById('results-pips');
+      pipsEl.innerHTML = '';
+      if (dailyPuzzle) {
+        const easyGroup = document.createElement('div');
+        easyGroup.className = 'pip-group';
+        const hardGroup = document.createElement('div');
+        hardGroup.className = 'pip-group';
+        const sep = document.createElement('div');
+        sep.className = 'pip-separator';
+
+        dailyPuzzle.words.forEach((wordObj, i) => {
+          const pip = document.createElement('span');
+          pip.className = 'pip';
+          const found = gameState.wordsFound.find(f => f.word === wordObj.word);
+          if (found) pip.classList.add(found.usedHint ? 'hinted' : 'solved');
+          if (i < 3) easyGroup.appendChild(pip);
+          else hardGroup.appendChild(pip);
+        });
+
+        pipsEl.appendChild(easyGroup);
+        pipsEl.appendChild(sep);
+        pipsEl.appendChild(hardGroup);
+      }
+
+      // Results words list
+      const wordsEl = document.getElementById('results-words');
+      wordsEl.innerHTML = '';
+      if (dailyPuzzle) {
+        dailyPuzzle.words.forEach(wordObj => {
+          const row = document.createElement('div');
+          row.className = 'results-word-row';
+          const pip = document.createElement('span');
+          pip.className = 'word-pip';
+          const found = gameState.wordsFound.find(f => f.word === wordObj.word);
+          if (found) pip.classList.add(found.usedHint ? 'hinted' : 'solved');
+          const label = document.createElement('span');
+          label.textContent = wordObj.word;
+          row.appendChild(pip);
+          row.appendChild(label);
+          wordsEl.appendChild(row);
+        });
+      }
+
+      rs.style.display = 'flex';
+    }
+
+    /* ============================================================
+       SECTION: DRAG SELECTION
+       (Stub — full wiring in Plan 02)
+    ============================================================ */
+    function setupDragSelection() {
+      // Implemented in Plan 02
+    }
+
+    /* ============================================================
+       SECTION: HINT SYSTEM
+       (Stub — full wiring in Plan 02)
+    ============================================================ */
+    function setupHintButton() {
+      document.getElementById('hint-btn').addEventListener('click', () => {
+        // Full hint logic implemented in Plan 02
+      });
+    }
+
+    /* ============================================================
+       SECTION: GIVE-UP
+    ============================================================ */
+    function setupGiveUp() {
+      const btn = document.getElementById('giveup-btn');
+      btn.addEventListener('click', () => {
+        if (gameState.phase === 'done') return;
+        if (!gameState.giveUpConfirming) {
+          gameState.giveUpConfirming = true;
+          btn.textContent = 'Confirm?';
+          btn.classList.add('confirming');
+          gameState.giveUpTimeout = setTimeout(() => {
+            gameState.giveUpConfirming = false;
+            btn.textContent = 'Give Up';
+            btn.classList.remove('confirming');
+          }, 3000);
+        } else {
+          clearTimeout(gameState.giveUpTimeout);
+          gameState.giveUpConfirming = false;
+          btn.classList.remove('confirming');
+          // Reveal all remaining words as found-hint for results display
+          if (dailyPuzzle) {
+            dailyPuzzle.words.forEach(wordObj => {
+              if (!gameState.wordsFound.find(f => f.word === wordObj.word)) {
+                gameState.wordsFound.push({ word: wordObj.word, usedHint: true });
+              }
+            });
+          }
+          showResults({ solved: false });
+        }
+      });
+    }
+
+    /* ============================================================
+       SECTION: HELP MODAL
+    ============================================================ */
+    function setupHelpModal() {
+      document.getElementById('help-btn').addEventListener('click', () => {
+        document.getElementById('help-modal').style.display = 'flex';
+      });
+      document.getElementById('help-close').addEventListener('click', () => {
+        document.getElementById('help-modal').style.display = 'none';
+      });
+      document.getElementById('help-modal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('help-modal')) {
+          document.getElementById('help-modal').style.display = 'none';
+        }
+      });
+    }
+
+    /* ============================================================
+       SECTION: SHARE
+    ============================================================ */
+    function setupShare() {
+      document.getElementById('results-share-btn').addEventListener('click', async () => {
+        if (!dailyPuzzle) return;
+        const easyTime = formatTime(gameState.easyElapsed);
+        const hardTime = gameState.hardElapsed > 0 ? formatTime(gameState.hardElapsed) : '—';
+        const solved = gameState.wordsFound.length === 6 && gameState.wordsFound.every(f => !f.usedHint || true);
+        const pips = dailyPuzzle.words.map((w, i) => {
+          const found = gameState.wordsFound.find(f => f.word === w.word);
+          if (!found) return '⬜';
+          return found.usedHint ? '🟠' : '🟢';
+        }).join('');
+        const date = new Date().toISOString().split('T')[0];
+        const text = `Letter Hunt ${date}\n${pips}\nEasy: ${easyTime} | Hard: ${hardTime}\nlexicon.games`;
+
+        try {
+          if (navigator.share) {
+            await navigator.share({ text });
+          } else {
+            await navigator.clipboard.writeText(text);
+            document.getElementById('results-share-btn').textContent = 'Copied!';
+            setTimeout(() => {
+              document.getElementById('results-share-btn').textContent = 'Share';
+            }, 2000);
+          }
+        } catch(e) {
+          // Fallback
+          try { await navigator.clipboard.writeText(text); } catch(err) {}
+        }
+      });
+    }
+
+    /* ============================================================
+       SECTION: DOMCONTENTLOADED — boot
+    ============================================================ */
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Check saved result
+      const saved = HuntResult.load();
+      if (saved) {
+        // Restore state from saved result
+        gameState.wordsFound = saved.wordsFound || [];
+        gameState.easyElapsed = saved.easyElapsed || 0;
+        gameState.hardElapsed = saved.hardElapsed || 0;
+        gameState.phase = 'done';
+
+        // Reconstruct dailyPuzzle for display
+        const rng = seededRandom(DATE_SEED);
+        dailyPuzzle = getDailyPuzzle(rng);
+
+        // Still render the grid so results screen has context
+        const { size: gridSize, cellSize } = chooseGridSize();
+        currentGridSize = gridSize;
+        currentCellSize = cellSize;
+        let gridResult = null;
+        for (let attempt = 0; attempt < 20 && !gridResult; attempt++) {
+          const gridRng = seededRandom(DATE_SEED + '_grid_' + attempt);
+          gridResult = placeWords(dailyPuzzle.words.map(w => w.word), gridSize, gridRng);
+        }
+        if (gridResult) {
+          gridData = gridResult.grid;
+          wordPlacements = gridResult.placements;
+        }
+
+        showResults({ solved: saved.solved });
+        setupShare();
+        setupHelpModal();
+        return;
+      }
+
+      // 2. Choose grid size
+      const { size: gridSize, cellSize } = chooseGridSize();
+      currentGridSize = gridSize;
+      currentCellSize = cellSize;
+
+      // 3. Get daily puzzle
+      const rng = seededRandom(DATE_SEED);
+      dailyPuzzle = getDailyPuzzle(rng);
+
+      // 4. Place words with retry (up to 20 attempts)
+      let gridResult = null;
+      for (let attempt = 0; attempt < 20 && !gridResult; attempt++) {
+        const gridRng = seededRandom(DATE_SEED + '_grid_' + attempt);
+        gridResult = placeWords(dailyPuzzle.words.map(w => w.word), gridSize, gridRng);
+      }
+      if (!gridResult) {
+        document.body.textContent = 'Error: grid generation failed.';
+        return;
+      }
+      gridData = gridResult.grid;
+      wordPlacements = gridResult.placements;
+
+      // 5. Render
+      renderGrid(gridSize, cellSize);
+      resizeCanvas();
+      renderPips();
+      renderCategoryDisplay();
+
+      // 6. Start easy timer
+      startEasyTimer();
+
+      // 7. Wire up UI (drag selection wired in Plan 02)
+      setupDragSelection();
+      setupHintButton();
+      setupGiveUp();
+      setupHelpModal();
+      setupShare();
+
+      // Handle resize
+      window.addEventListener('resize', () => {
+        resizeCanvas();
+      });
+    });
+  </script>
 </body>
 </html>
