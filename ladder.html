@@ -935,9 +935,15 @@
        SECTION: DAILY PUZZLE ENGINE
        Deterministic seed: same date → same puzzle for all players
     ============================================================ */
+    const urlParams = new URLSearchParams(window.location.search);
+    const _overrideDate = urlParams.get('date'); // e.g. ?date=2026-03-01
+
     const DATE_SEED = (() => {
-      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-      return today + '_ladder_v1';
+      const targetDate = _overrideDate ? new Date(_overrideDate) : new Date();
+      const year = targetDate.getUTCFullYear();
+      const month = String(targetDate.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(targetDate.getUTCDate()).padStart(2, '0');
+      return `${year}-${month}-${day}_ladder_v1`;
     })();
 
     function getDailyLadderPuzzle() {
@@ -985,6 +991,11 @@
     const dailyPuzzle = getDailyLadderPuzzle();
     const OPTIMAL_PATH = dailyPuzzle ? dailyPuzzle.optimalPath : null;
     const OPTIMAL_STEPS = OPTIMAL_PATH ? OPTIMAL_PATH.length - 1 : 0;
+
+    if (DEBUG) {
+        console.log(`[Ladder] Date: ${DATE_SEED}`);
+        console.log(`[Ladder] Optimal path (${OPTIMAL_STEPS} steps): ${OPTIMAL_PATH ? OPTIMAL_PATH.join(' → ') : 'fallback'}`);
+    }
 
     /* ============================================================
        SECTION: VALIDATION HELPERS
