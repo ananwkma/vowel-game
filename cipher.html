@@ -138,87 +138,187 @@
             width: 100%;
         }
 
+        /* Help Button */
+        #help-btn {
+            position: fixed;
+            top: max(12px, env(safe-area-inset-top));
+            right: 12px;
+            z-index: 6000;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1.5px solid var(--color-primary-text);
+            background: transparent;
+            color: var(--color-primary-text);
+            font-family: var(--font-serif);
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.6;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        #help-btn:hover, #help-btn:active { opacity: 1; transform: scale(1.05); }
+
+        /* Help Modal */
+        #help-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 7000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        #help-modal.visible { display: flex; }
+        #help-modal-content {
+            background: var(--color-bg);
+            border-radius: 12px;
+            padding: 32px 24px;
+            max-width: 400px;
+            width: 100%;
+            text-align: left;
+        }
+        #help-modal-content h2 {
+            font-size: 1.2rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin: 0 0 20px;
+            text-align: center;
+        }
+        .instruction-step {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            align-items: flex-start;
+        }
+        .step-num {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        .step-text { font-size: 0.9rem; line-height: 1.5; opacity: 0.85; }
+        #help-modal-close {
+            display: block;
+            margin: 24px auto 0;
+            padding: 10px 32px;
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-family: var(--font-serif);
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.03em;
+        }
+
         /* Results Screen */
         #results-screen {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             background-color: var(--color-bg);
-            z-index: 9000;
+            z-index: 5000;
             display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 24px;
+            padding: var(--spacing-xl) var(--spacing-lg);
+            padding-top: max(96px, calc(env(safe-area-inset-top) + 72px));
+            overflow-y: auto;
+            gap: 8px;
+            text-align: center;
+        }
+        #results-screen.visible { display: flex; }
+
+        .results-game-title {
+            position: absolute;
+            top: max(48px, env(safe-area-inset-top));
+            left: 0;
+            right: 0;
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--color-primary-text);
             text-align: center;
         }
 
-        #results-screen.visible {
-            display: flex;
-        }
-
-        #results-title {
-            font-size: 2.5rem;
+        .results-title {
+            font-size: 2rem;
             font-weight: 700;
-            margin-bottom: 16px;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
         }
+        .results-title--success { color: var(--color-success); }
+        .results-title--warning { color: var(--color-warning); }
 
-        #results-title.solved {
-            color: var(--color-success);
-        }
-
-        #results-title.revealed {
-            color: var(--color-warning); /* dusty rose */
-        }
-
-        #results-quote {
+        .results-quote {
             font-size: 1.1rem;
             line-height: 1.6;
-            margin-bottom: 8px;
             max-width: 500px;
+            opacity: 0.85;
         }
-
-        #results-author {
+        .results-author {
             font-style: italic;
-            opacity: 0.7;
-            margin-bottom: 32px;
+            opacity: 0.6;
         }
 
         .results-actions {
             display: flex;
-            gap: 12px;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 16px;
-            border-radius: 8px;
-            border: none;
-            font-family: var(--font-serif);
-            font-weight: 700;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: opacity var(--transition-fast), transform var(--transition-fast);
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin-top: var(--spacing-lg);
         }
 
         .btn-primary {
-            background-color: var(--color-primary);
-            color: var(--color-primary-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 48px;
+            background: var(--color-primary);
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-family: var(--font-serif);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            letter-spacing: 0.03em;
+            transition: transform 0.1s, filter 0.15s;
+            text-decoration: none;
         }
+        .btn-primary:hover  { filter: brightness(0.96); }
+        .btn-primary:active { transform: translateY(2px); }
 
         .btn-secondary {
-            background-color: var(--color-secondary);
-            color: var(--color-secondary-text);
+            font-family: var(--font-serif);
+            font-size: 0.85rem;
+            color: var(--color-primary-text);
+            opacity: 0.5;
+            text-decoration: none;
+            background: none;
+            border: none;
+            border-bottom: 1px solid transparent;
+            cursor: pointer;
+            transition: opacity 0.15s, border-color 0.15s;
         }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
+        .btn-secondary:hover { opacity: 0.8; border-bottom-color: currentColor; }
 
         /* Give Up Button */
         #give-up-container {
@@ -286,6 +386,7 @@
 </head>
 <body>
     <a id="back-link" href="index.html">LEXICON</a>
+    <button id="help-btn" aria-label="How to play">?</button>
 
     <div id="app">
         <h1 id="game-title">Cipher</h1>
@@ -304,15 +405,32 @@
         </div>
     </div>
 
-    <div id="results-screen">
-        <h1 id="results-title">Solved</h1>
-        <p id="results-quote"></p>
-        <p id="results-author"></p>
-        <div class="results-actions">
-            <button id="share-btn" class="btn btn-primary">SHARE</button>
-            <a href="index.html" class="btn btn-secondary">LEXICON</a>
+    <!-- Help modal -->
+    <div id="help-modal" aria-hidden="true">
+        <div id="help-modal-content">
+            <h2>How to Play</h2>
+            <div class="instruction-step">
+                <div class="step-num">1</div>
+                <div class="step-text">Each number in the quote represents a letter. Every occurrence of the same number is the same letter.</div>
+            </div>
+            <div class="instruction-step">
+                <div class="step-num">2</div>
+                <div class="step-text"><strong>Tap a number block</strong> to select it (all matching numbers highlight), then <strong>type a letter</strong> to assign it.</div>
+            </div>
+            <div class="instruction-step">
+                <div class="step-num">3</div>
+                <div class="step-text">You can reassign any number at any time. Assigning a letter to one number automatically frees it from any other number.</div>
+            </div>
+            <div class="instruction-step">
+                <div class="step-num">4</div>
+                <div class="step-text">When every number is correctly decoded, the quote is revealed and you win!</div>
+            </div>
+            <button id="help-modal-close">Got it</button>
         </div>
     </div>
+
+    <!-- Results screen (populated by JS) -->
+    <div id="results-screen" aria-modal="true" role="dialog"></div>
 
     <input type="text" id="hidden-input" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="characters">
 
@@ -334,6 +452,8 @@
                 return ((t ^ t >>> 14) >>> 0) / 4294967296;
             };
         }
+
+        const DEBUG = false;
 
         const DATE_SEED = (() => {
             const today = new Date().toISOString().split('T')[0];
@@ -629,64 +749,60 @@
         ============================================================ */
         function showResults(options) {
             const screen = document.getElementById('results-screen');
-            const title = document.getElementById('results-title');
-            const quoteEl = document.getElementById('results-quote');
-            const authorEl = document.getElementById('results-author');
+            const shareIcon = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="2.5" r="2" fill="currentColor"/><circle cx="3" cy="8" r="2" fill="currentColor"/><circle cx="12" cy="13.5" r="2" fill="currentColor"/><line x1="3" y1="8" x2="12" y2="2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="3" y1="8" x2="12" y2="13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+            const titleClass = options.solved
+                ? 'results-title results-title--success'
+                : 'results-title results-title--warning';
 
-            title.textContent = options.solved ? 'Solved' : 'Revealed';
-            title.className = options.solved ? 'solved' : 'revealed';
-
-            quoteEl.textContent = `"${gameState.quote.text}"`;
-            authorEl.textContent = `— ${gameState.quote.author}`;
+            screen.innerHTML = `
+                <div class="results-game-title">Cipher</div>
+                <div class="${titleClass}">${options.solved ? 'Solved' : 'Revealed'}</div>
+                <p class="results-quote">"${gameState.quote.text}"</p>
+                <p class="results-author">— ${gameState.quote.author}</p>
+                <div class="results-actions">
+                    <button class="btn-primary" id="share-btn" type="button">share ${shareIcon}</button>
+                    <a href="index.html" class="btn-secondary">LEXICON</a>
+                </div>`;
 
             screen.classList.add('visible');
 
-            if (options.solved) {
-                spawnConfetti();
-            }
+            screen.querySelector('#share-btn').addEventListener('click', () => {
+                const status = options.solved ? 'solved' : 'revealed';
+                const text = `Lexicon Cipher: ${status} today's quote!\n\n"${gameState.quote.text}" — ${gameState.quote.author}\n\nPlay at: ${window.location.href}`;
+                if (navigator.share) {
+                    navigator.share({ title: 'Lexicon Cipher', text });
+                } else {
+                    navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
+                }
+            });
 
-            // Hide main app content
-            document.getElementById('app').style.opacity = '0.1';
-            document.getElementById('app').style.pointerEvents = 'none';
+            if (options.solved) spawnConfetti();
         }
 
         function spawnConfetti() {
             for (let i = 0; i < 100; i++) {
                 const confetti = document.createElement('div');
-                confetti.style.position = 'fixed';
-                confetti.style.width = '10px';
-                confetti.style.height = '10px';
-                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 50%, 50%)`;
-                confetti.style.top = '-10px';
-                confetti.style.left = Math.random() * 100 + 'vw';
-                confetti.style.zIndex = '9999';
-                confetti.style.borderRadius = '50%';
+                confetti.style.cssText = `position:fixed;width:10px;height:10px;background:hsl(${Math.random()*360},50%,50%);top:-10px;left:${Math.random()*100}vw;z-index:9999;border-radius:50%;`;
                 document.body.appendChild(confetti);
-
-                const duration = 2000 + Math.random() * 3000;
-                const animation = confetti.animate([
+                const anim = confetti.animate([
                     { transform: 'translateY(0) rotate(0)', opacity: 1 },
-                    { transform: `translateY(100vh) rotate(${Math.random() * 720}deg)`, opacity: 0 }
-                ], {
-                    duration: duration,
-                    easing: 'cubic-bezier(0, 0, 0.2, 1)'
-                });
-
-                animation.onfinish = () => confetti.remove();
+                    { transform: `translateY(100vh) rotate(${Math.random()*720}deg)`, opacity: 0 }
+                ], { duration: 2000 + Math.random() * 3000, easing: 'cubic-bezier(0,0,0.2,1)' });
+                anim.onfinish = () => confetti.remove();
             }
         }
 
-        document.getElementById('share-btn').addEventListener('click', () => {
-            const status = gameState.won ? "solved" : "revealed";
-            const text = `Lexicon Cipher: ${status} today's puzzle!\n\n"${gameState.quote.text}" — ${gameState.quote.author}\n\nPlay at: ${window.location.href}`;
-            
-            if (navigator.share) {
-                navigator.share({ title: 'Lexicon Cipher', text: text });
-            } else {
-                navigator.clipboard.writeText(text).then(() => {
-                    alert('Results copied to clipboard!');
-                });
-            }
+        /* ============================================================
+           SECTION: HELP MODAL
+        ============================================================ */
+        document.getElementById('help-btn').addEventListener('click', () => {
+            document.getElementById('help-modal').classList.add('visible');
+        });
+        document.getElementById('help-modal-close').addEventListener('click', () => {
+            document.getElementById('help-modal').classList.remove('visible');
+        });
+        document.getElementById('help-modal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) e.currentTarget.classList.remove('visible');
         });
 
         initGame();
@@ -720,27 +836,23 @@
             // 6. Give up button
             initGiveUp();
 
-            // 7. Load Progress
-            const saved = CipherProgress.load();
-            if (saved) {
-                Object.keys(saved).forEach(numStr => {
-                    const num = parseInt(numStr);
-                    const letter = saved[numStr];
-                    assignLetter(num, letter, false); // false = don't save during batch load
-                });
-            }
+            // 7. Load Progress (skipped in debug mode)
+            if (!DEBUG) {
+                const saved = CipherProgress.load();
+                if (saved) {
+                    Object.keys(saved).forEach(numStr => {
+                        const num = parseInt(numStr);
+                        const letter = saved[numStr];
+                        assignLetter(num, letter, false);
+                    });
+                }
 
-            // Check if already won today in daily status
-            const statusRaw = localStorage.getItem(DailyStatus.KEY);
-            const status = statusRaw ? JSON.parse(statusRaw) : {};
-            const today = new Date().toISOString().split('T')[0];
-            
-            if (status.cipher && status.cipher.dateKey === today && status.cipher.completed) {
-                if (gameState.won) {
-                    showResults({ solved: true });
-                } else {
-                    // It was revealed
-                    showResults({ solved: false });
+                // Check if already completed today
+                const statusRaw = localStorage.getItem(DailyStatus.KEY);
+                const status = statusRaw ? JSON.parse(statusRaw) : {};
+                const today = new Date().toISOString().split('T')[0];
+                if (status.cipher && status.cipher.dateKey === today && status.cipher.completed) {
+                    showResults({ solved: gameState.won });
                 }
             }
         }
