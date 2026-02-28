@@ -830,7 +830,14 @@
                 gameState.cipherMap[numbers[i]] = letter;
             });
 
-            // 5. Render
+            // 5. Log answer for testing
+            const answerMap = Object.entries(gameState.cipherMap)
+                .sort((a, b) => a[0] - b[0])
+                .map(([num, letter]) => `${num}=${letter}`)
+                .join('  ');
+            console.log(`[Cipher] ${gameState.quote.author}: "${gameState.quote.text}"\n[Cipher] Key: ${answerMap}`);
+
+            // 6. Render
             buildQuoteDOM();
 
             // 6. Give up button
