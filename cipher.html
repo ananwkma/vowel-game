@@ -734,16 +734,33 @@
                 const percent = calculatePercent();
                 DailyStatus.markCompleted('cipher');
 
-                // Wave animation: each block pops in sequence left-to-right
+                // Wave animation: line by line, with a subtle left-to-right
+                // stagger within each line
                 const blocks = Array.from(document.querySelectorAll('.cipher-block'));
-                const waveDuration = Math.min(1200, blocks.length * 14);
-                blocks.forEach((block, i) => {
-                    const delay = (i / blocks.length) * waveDuration;
-                    setTimeout(() => {
-                        block.classList.remove('guessed', 'selected', 'unsolved');
-                        block.classList.add('correct', 'wave-pop');
-                        block.addEventListener('animationend', () => block.classList.remove('wave-pop'), { once: true });
-                    }, delay);
+
+                // Group blocks by line using rounded top position
+                const lineMap = new Map();
+                blocks.forEach(block => {
+                    const top = Math.round(block.getBoundingClientRect().top);
+                    if (!lineMap.has(top)) lineMap.set(top, []);
+                    lineMap.get(top).push(block);
+                });
+                const lines = Array.from(lineMap.entries())
+                    .sort((a, b) => a[0] - b[0])
+                    .map(e => e[1]);
+
+                const LINE_GAP = 350;      // ms between each line starting
+                const BLOCK_STAGGER = 20;  // ms between blocks within a line
+
+                lines.forEach((lineBlocks, lineIdx) => {
+                    lineBlocks.forEach((block, blockIdx) => {
+                        const delay = lineIdx * LINE_GAP + blockIdx * BLOCK_STAGGER;
+                        setTimeout(() => {
+                            block.classList.remove('guessed', 'selected', 'unsolved');
+                            block.classList.add('correct', 'wave-pop');
+                            block.addEventListener('animationend', () => block.classList.remove('wave-pop'), { once: true });
+                        }, delay);
+                    });
                 });
 
                 // Give the player 5 seconds to read the completed blocks
