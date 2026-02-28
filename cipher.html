@@ -681,7 +681,17 @@
             if (isWon) {
                 gameState.won = true;
                 DailyStatus.markCompleted('cipher');
-                showResults({ solved: true });
+                
+                // Visually mark all blocks as correct
+                document.querySelectorAll('.cipher-block').forEach(block => {
+                    block.classList.remove('guessed', 'selected');
+                    block.classList.add('correct');
+                });
+
+                // Give the player 5 seconds to read the completed blocks
+                setTimeout(() => {
+                    showResults({ solved: true });
+                }, 5000);
             }
         }
 
@@ -736,7 +746,11 @@
             await animatedDecode();
             
             DailyStatus.markCompleted('cipher');
-            showResults({ solved: false });
+            
+            // Give the player 5 seconds to read the revealed blocks
+            setTimeout(() => {
+                showResults({ solved: false });
+            }, 5000);
         }
 
         async function animatedDecode() {

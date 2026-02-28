@@ -358,57 +358,78 @@
     }
 
     /* ============================================================
-       SECTION: HINT BUTTON
+       SECTION: HINT BUTTON (Matches Ladder Undo)
     ============================================================ */
     .btn-hint {
-      padding: 8px 20px;
-      border: 2px solid rgba(28, 27, 24, 0.25);
-      border-radius: 20px;
-      background: transparent;
-      color: var(--color-hunt-text);
+      padding: 12px;
+      background-color: var(--color-secondary);
+      color: var(--color-secondary-text);
       font-family: var(--font-hunt-serif);
-      font-size: 0.85rem;
+      font-size: 0.7rem;
       font-weight: 700;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: var(--block-radius);
       cursor: pointer;
-      transition: border-color var(--transition-fast), background var(--transition-fast);
+      box-shadow: var(--shadow-md);
+      transition: opacity var(--transition-fast);
     }
 
     .btn-hint:hover {
-      border-color: var(--color-hunt-primary);
-      background: rgba(212, 165, 116, 0.08);
-    }
-
-    .btn-hint:active {
-      background: rgba(212, 165, 116, 0.15);
+      opacity: 0.8;
     }
 
     /* ============================================================
-       SECTION: GIVE-UP BUTTON
+       SECTION: GIVE-UP BUTTON (Matches Ladder Give Up)
     ============================================================ */
+    #give-up-wrapper {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--block-radius);
+      width: 100%;
+    }
+
     .btn-giveup {
+      width: 100%;
+      padding: 12px;
       background: transparent;
-      border: none;
+      border: 1px solid rgba(196, 131, 111, 0.4);
       color: var(--color-hunt-warning);
-      font-family: var(--font-hunt-sans);
-      font-size: 0.75rem;
+      font-family: var(--font-hunt-serif);
+      font-size: 0.7rem;
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       cursor: pointer;
-      opacity: 0.55;
-      transition: opacity var(--transition-fast);
-      padding: 4px 8px;
+      transition: opacity 0.3s;
+      border-radius: var(--block-radius);
+      position: relative;
+      z-index: 1;
+      user-select: none;
+      touch-action: none;
     }
 
     .btn-giveup:hover { opacity: 0.85; }
-    .btn-giveup.confirming { opacity: 1; color: var(--color-hunt-warning); }
+    
+    #give-up-bar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0%;
+      background-color: var(--color-hunt-warning);
+      opacity: 0.25;
+      transition: none;
+      z-index: 0;
+    }
 
     #footer-actions {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      justify-content: center;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-sm);
+      width: 100%;
+      padding-top: var(--spacing-sm);
     }
 
     /* ============================================================
@@ -729,6 +750,7 @@
           <span class="pip" data-word="5"></span>
         </div>
       </div>
+      <div id="category-display">???</div>
     </div>
 
     <!-- GAME CONTENT -->
@@ -741,7 +763,6 @@
 
     <!-- GAME FOOTER -->
     <div id="game-footer">
-      <div id="category-display">???</div>
       <div id="timer-row">
         <div class="timer-block" id="timer-easy-block">
           <span class="timer-label">Easy</span>
@@ -754,8 +775,11 @@
         </div>
       </div>
       <div id="footer-actions">
-        <button class="btn-hint" id="hint-btn">Hint</button>
-        <button class="btn-giveup" id="giveup-btn">Give Up</button>
+        <button class="btn-hint" id="hint-btn">hint</button>
+        <div id="give-up-wrapper">
+          <button class="btn-giveup" id="giveup-btn">hold to give up</button>
+          <div id="give-up-bar"></div>
+        </div>
       </div>
     </div>
 
@@ -1481,27 +1505,15 @@
     /* ============================================================
        SECTION: GIVE-UP
     ============================================================ */
-    let giveUpPending = false;
-    let giveUpTimer = null;
-
-    function handleGiveUp() {
+    function triggerGiveUp() {
       if (gameState.phase === 'done') return;
+      
       const btn = document.getElementById('giveup-btn');
-      if (!giveUpPending) {
-        giveUpPending = true;
-        btn.textContent = 'Sure?';
-        btn.classList.add('confirming');
-        giveUpTimer = setTimeout(() => {
-          giveUpPending = false;
-          btn.textContent = 'Give Up';
-          btn.classList.remove('confirming');
-        }, 3000);
-        return;
-      }
-      // Second tap: confirm
-      clearTimeout(giveUpTimer);
-      giveUpPending = false;
-      btn.classList.remove('confirming');
+      const giveUpBar = document.getElementById('give-up-bar');
+      
+      // Clear progress bar
+      giveUpBar.style.width = '0%';
+
       // Reveal all unfound words (highlight in rose)
       dailyPuzzle.words.forEach(w => {
         if (!gameState.wordsFound.find(f => f.word === w.word)) {
@@ -1523,7 +1535,48 @@
     }
 
     function setupGiveUp() {
-      document.getElementById('giveup-btn').addEventListener('click', handleGiveUp);
+      const giveUpBtn = document.getElementById('giveup-btn');
+      const giveUpBar = document.getElementById('give-up-bar');
+      const HOLD_DURATION_MS = 1500;
+      let holdState = { active: false, startTime: null, timerId: null };
+
+      giveUpBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        if (gameState.phase === 'done') return;
+
+        holdState.active = true;
+        holdState.startTime = Date.now();
+        giveUpBar.style.width = '0%';
+
+        holdState.timerId = setInterval(() => {
+          const elapsed = Date.now() - holdState.startTime;
+          const progress = Math.min(elapsed / HOLD_DURATION_MS, 1);
+          giveUpBar.style.width = (progress * 100) + '%';
+
+          if (progress >= 1) {
+            clearInterval(holdState.timerId);
+            holdState.active = false;
+            triggerGiveUp();
+          }
+        }, 16); // ~60fps
+      });
+
+      // Cancel on pointer release (anywhere on document, in case user drags off button)
+      document.addEventListener('pointerup', () => {
+        if (holdState.active) {
+          clearInterval(holdState.timerId);
+          giveUpBar.style.width = '0%';
+          holdState.active = false;
+        }
+      });
+
+      document.addEventListener('pointercancel', () => {
+        if (holdState.active) {
+          clearInterval(holdState.timerId);
+          giveUpBar.style.width = '0%';
+          holdState.active = false;
+        }
+      });
     }
 
     /* ============================================================
