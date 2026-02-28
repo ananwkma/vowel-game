@@ -140,13 +140,16 @@ Plans:
 
 ### Phase 19: Test and fine-tune puzzle difficulty across all games
 
-**Goal:** [To be planned]
+**Goal:** Each game's daily puzzles feel appropriately challenging — Cipher with pre-reveal and high-repetition quotes, Ladder with 3-4 step paths, Hunt with recognizable-but-challenging hard words — validated across ~5 dates per game
 **Depends on:** Phase 18
-**Plans:** 0 plans
+**Plans:** 4 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 19 to break down)
+- [ ] 19-01-PLAN.md — Cipher: ?date= override, expand 42-quote corpus, repetition filter, pre-reveal 2-3 letters
+- [ ] 19-02-PLAN.md — Ladder: ?date= override, shorten path to 3-4 steps, console debug logging
+- [ ] 19-03-PLAN.md — Hunt: ?date= override, curate moderate-stretch hard words across all 22 categories
+- [ ] 19-04-PLAN.md — Human play-test verification: 5 dates per game, difficulty verdict
 
 ---
 *Roadmap created: 2026-02-19*
-*Last updated: 2026-02-27 — Phase 18 = Letter Hunt (planned, 3 plans)*
+*Last updated: 2026-02-28 — Phase 19 = Puzzle Difficulty Testing (planned, 4 plans)*
