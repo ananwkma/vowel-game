@@ -402,6 +402,17 @@
         @media (max-width: 360px) {
             :root { --block-size: 38px; }
         }
+
+        @keyframes block-wave {
+            0%   { transform: scale(1); }
+            40%  { transform: scale(1.25) translateY(-5px); }
+            70%  { transform: scale(0.93); }
+            100% { transform: scale(1); }
+        }
+
+        .cipher-block.wave-pop {
+            animation: block-wave 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
     </style>
 </head>
 <body>
@@ -625,6 +636,23 @@
             });
         }
 
+        // Tab: advance to next unsolved block
+        document.getElementById('hidden-input').addEventListener('keydown', (e) => {
+            if (e.key !== 'Tab' || gameState.won) return;
+            e.preventDefault();
+            const allBlocks = Array.from(document.querySelectorAll('.cipher-block'));
+            const currentIdx = gameState.selectedNumber !== null
+                ? allBlocks.findIndex(b => parseInt(b.dataset.number) === gameState.selectedNumber)
+                : -1;
+            for (let offset = 1; offset <= allBlocks.length; offset++) {
+                const candidate = allBlocks[(currentIdx + offset) % allBlocks.length];
+                if (candidate.classList.contains('unsolved')) {
+                    selectBlock(parseInt(candidate.dataset.number));
+                    return;
+                }
+            }
+        });
+
         // Hidden input captures typed letter
         document.getElementById('hidden-input').addEventListener('input', (e) => {
             const num = gameState.selectedNumber;
@@ -705,11 +733,17 @@
                 gameState.won = true;
                 const percent = calculatePercent();
                 DailyStatus.markCompleted('cipher');
-                
-                // Visually mark all blocks as correct
-                document.querySelectorAll('.cipher-block').forEach(block => {
-                    block.classList.remove('guessed', 'selected');
-                    block.classList.add('correct');
+
+                // Wave animation: each block pops in sequence left-to-right
+                const blocks = Array.from(document.querySelectorAll('.cipher-block'));
+                const waveDuration = Math.min(1200, blocks.length * 14);
+                blocks.forEach((block, i) => {
+                    const delay = (i / blocks.length) * waveDuration;
+                    setTimeout(() => {
+                        block.classList.remove('guessed', 'selected', 'unsolved');
+                        block.classList.add('correct', 'wave-pop');
+                        block.addEventListener('animationend', () => block.classList.remove('wave-pop'), { once: true });
+                    }, delay);
                 });
 
                 // Give the player 5 seconds to read the completed blocks
