@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Current Position
 
 Phase: 19 of 19 (Puzzle Difficulty Testing & Fine-Tuning)
-Plan: 2 of 3 in current phase
-Status: In progress — 19-02 complete
-Last activity: 2026-02-28 — 19-02 Ladder difficulty tuning (?date= override, path constraint 3-4 steps, debug console logging)
+Plan: 3 of 3 in current phase
+Status: Phase 19 complete — all 3 plans done (cipher, ladder, hunt difficulty tuning)
+Last activity: 2026-02-28 — 19-03 Hunt difficulty tuning (?date= override, curated hard words across all 22 categories)
 
-Progress: [█████████░] 90% (v2.0 — 4/5 phases complete, phase 19 in progress)
+Progress: [██████████] 100% (v2.0 — all 5 phases complete)
 
 ## Performance Metrics
 
@@ -35,6 +35,7 @@ Progress: [█████████░] 90% (v2.0 — 4/5 phases complete, ph
 
 *Updated after each plan completion*
 | Phase 19 P02 | 3 | 2 tasks | 1 files |
+| Phase 19 P03 | 1 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,8 @@ Recent decisions for v2.0:
 - [19-01] Pre-reveal selects 2-3 middle-frequency letters (slice(2,-3) by freq) seeded by date RNG, applied before progress restore
 - [Phase 19-02]: path.length 4-5 constraint (3-4 steps) replaces 5-7 (4-6 steps) to reduce cognitive overload in Ladder puzzles
 - [Phase 19-02]: ?date=YYYY-MM-DD URL param added to ladder.html using UTC methods — consistent pattern with cipher.html from 19-01
+- [Phase 19]: ?date= URL override + UTC methods in hunt.html DATE_SEED — consistent pattern across all three Phase 19 games
+- [Phase 19]: All 22 Hunt CATEGORIES hard words replaced with moderate-stretch alternatives — removes THRIPS, REAMER, SLAINTE, KANPAI, TUPELO, GOBLIN, QUOKKA, OCELOT
 
 ### Roadmap Evolution
 
@@ -104,5 +107,5 @@ Recent decisions for v2.0:
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed 19-02 (Ladder difficulty tuning — date override, path constraint 3-4 steps, debug logging)
-Resume file: .planning/phases/19-test-and-fine-tune-puzzle-difficulty-across-all-games/19-03-PLAN.md
+Stopped at: Completed 19-03 (Hunt difficulty tuning — date override, curated hard words across all 22 categories)
+Resume file: — (Phase 19 complete, all plans done)
