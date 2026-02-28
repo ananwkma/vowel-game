@@ -2210,13 +2210,14 @@
 
       const rank = document.createElement('div');
       rank.className = 'results-rank';
+      if (puzzleState.outcomes.every(o => o === 'solved')) triggerConfetti();
+
       if (prevBest === null) {
         rank.textContent = 'First run!';
         rank.classList.add('results-rank--new-best');
       } else if (isNewBest) {
         rank.textContent = 'New personal best!';
         rank.classList.add('results-rank--new-best');
-        triggerConfetti();
       } else {
         rank.textContent = 'Personal best: ' + PersonalBest.format(prevBest);
       }

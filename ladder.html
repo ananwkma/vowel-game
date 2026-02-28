@@ -1662,8 +1662,8 @@
         await animateOptimalPath(resultsScreen.querySelector('#results-optimal-path'));
       }
 
-      // Fire confetti on first optimal solve only
-      if (solved && delta === 0 && !skipAnimation) {
+      // Fire confetti on every optimal solve visit
+      if (solved && delta === 0) {
         fireConfetti();
       }
     }
