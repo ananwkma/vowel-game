@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Current Position
 
 Phase: 18 of 18 (Letter Hunt)
-Plan: 1 of TBD in current phase
-Status: In progress — 18-01 complete
-Last activity: 2026-02-27 — 18-01 Letter Hunt HTML skeleton, CSS, 22-category word corpus, seeded puzzle engine, grid render, pips, category mystery display, two-phase timer
+Plan: 2 of TBD in current phase
+Status: In progress — 18-02 complete
+Last activity: 2026-02-27 — 18-02 Drag selection (Pointer Events + canvas trace), word evaluation, phase state machine (easy→reveal→hard), two-phase timers, hint system, give-up
 
 Progress: [████████░░] 80% (v2.0 — 4/5 phases complete)
 
@@ -31,7 +31,7 @@ Progress: [████████░░] 80% (v2.0 — 4/5 phases complete)
 | 15. Word Ladder | 3 | ~10 min | ~3.3 min |
 | 16. Ladder Polish | 1 | ~3 min | ~3.0 min |
 | 17. Cipher | 2 | ~10 min | ~5.0 min |
-| 18. Letter Hunt | 1+ | ~4 min | ~4 min |
+| 18. Letter Hunt | 2+ | ~6 min | ~3 min |
 
 *Updated after each plan completion*
 
@@ -79,6 +79,9 @@ Recent decisions for v2.0:
 - [18-01] Tasks 1+2 committed together — intermediate partial-JS file would not render; fix commit captures word-length correction
 - [18-01] GOBLIN replaces HAMMERHEAD in SHARKS category — HAMMERHEAD is 10 chars, violates ≤8-char grid constraint
 - [18-01] DATE_SEED uses _hunt_v1 suffix — game-namespaced, mirrors _ladder_v1 pattern from Phase 15
+- [Phase 18-02]: Tasks 1+2 committed together — drag/evaluate/phase logic interleaved through same call chain
+- [Phase 18-02]: shakeAndClear snapshot pattern — selectedCells.slice() prevents race condition during 400ms async window
+- [Phase 18-02]: endGame() calls showResults() directly — Plan 02 fully testable without Plan 03 results wiring
 
 ### Pending Todos
 
@@ -91,5 +94,5 @@ Recent decisions for v2.0:
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 18-01 (Letter Hunt skeleton + engine)
-Resume file: .planning/phases/18-letter-hunt/18-02-PLAN.md
+Stopped at: Completed 18-02 (Letter Hunt drag selection, phase state machine, hint system)
+Resume file: .planning/phases/18-letter-hunt/18-03-PLAN.md

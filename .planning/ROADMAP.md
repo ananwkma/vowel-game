@@ -136,7 +136,7 @@ Plans:
 | 15. Word Ladder | v2.0 | 3/3 | Complete | 2026-02-27 |
 | 16. Ladder Polish | v2.0 | Complete    | 2026-02-27 | 2026-02-27 |
 | 17. Cipher | v2.0 | 2/2 | Complete | 2026-02-27 |
-| 18. Letter Hunt | 1/3 | In Progress|  | - |
+| 18. Letter Hunt | 2/3 | In Progress|  | - |
 
 ---
 *Roadmap created: 2026-02-19*
