@@ -780,9 +780,11 @@
         }
 
         function spawnConfetti() {
+            const colors = ['#D4A574', '#E8C99A', '#C49060', '#F5F0E8', '#1C1B18'];
             for (let i = 0; i < 100; i++) {
+                const color = colors[Math.floor(Math.random() * colors.length)];
                 const confetti = document.createElement('div');
-                confetti.style.cssText = `position:fixed;width:10px;height:10px;background:hsl(${Math.random()*360},50%,50%);top:-10px;left:${Math.random()*100}vw;z-index:9999;border-radius:50%;`;
+                confetti.style.cssText = `position:fixed;width:10px;height:10px;background:${color};top:-10px;left:${Math.random()*100}vw;z-index:9999;border-radius:50%;`;
                 document.body.appendChild(confetti);
                 const anim = confetti.animate([
                     { transform: 'translateY(0) rotate(0)', opacity: 1 },
