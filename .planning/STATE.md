@@ -83,6 +83,10 @@ Recent decisions for v2.0:
 - [Phase 18-02]: shakeAndClear snapshot pattern — selectedCells.slice() prevents race condition during 400ms async window
 - [Phase 18-02]: endGame() calls showResults() directly — Plan 02 fully testable without Plan 03 results wiring
 
+### Roadmap Evolution
+
+- Phase 19 added: Test and fine-tune puzzle difficulty across all games
+
 ### Pending Todos
 
 - None.

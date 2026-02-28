@@ -138,6 +138,15 @@ Plans:
 | 17. Cipher | v2.0 | 2/2 | Complete | 2026-02-27 |
 | 18. Letter Hunt | 2/3 | In Progress|  | - |
 
+### Phase 19: Test and fine-tune puzzle difficulty across all games
+
+**Goal:** [To be planned]
+**Depends on:** Phase 18
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 19 to break down)
+
 ---
 *Roadmap created: 2026-02-19*
 *Last updated: 2026-02-27 — Phase 18 = Letter Hunt (planned, 3 plans)*
