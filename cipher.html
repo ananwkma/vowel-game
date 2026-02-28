@@ -16,11 +16,6 @@
             color: var(--color-primary-text);
             font-family: var(--font-serif);
             margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            padding-top: 80px;
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
         }
@@ -50,10 +45,32 @@
         #app {
             width: 100%;
             max-width: 600px;
+            margin: 0 auto;
             padding: 0 16px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 100dvh;
+            padding-top: max(48px, env(safe-area-inset-top));
+            padding-bottom: max(48px, env(safe-area-inset-bottom));
+            box-sizing: border-box;
+        }
+
+        #game-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        #game-footer {
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            padding-top: var(--spacing-md);
+            width: 100%;
         }
 
         #game-title {
@@ -324,7 +341,6 @@
 
         /* Give Up Button */
         #give-up-container {
-            margin-top: 48px;
             width: 100%;
             max-width: 200px;
             position: relative;
@@ -390,19 +406,23 @@
     <button id="help-btn" aria-label="How to play">?</button>
 
     <div id="app">
-        <h1 id="game-title">Cipher</h1>
+        <div id="game-content">
+            <h1 id="game-title">Cipher</h1>
 
-        <div id="quote-display">
-            <!-- Rendered by JS -->
+            <div id="quote-display">
+                <!-- Rendered by JS -->
+            </div>
+
+            <div id="quote-author">
+                <!-- Rendered by JS -->
+            </div>
         </div>
 
-        <div id="quote-author">
-            <!-- Rendered by JS -->
-        </div>
-
-        <div id="give-up-container">
-            <button id="give-up-btn">Hold to Reveal</button>
-            <div id="give-up-bar"></div>
+        <div id="game-footer">
+            <div id="give-up-container">
+                <button id="give-up-btn">Hold to Reveal</button>
+                <div id="give-up-bar"></div>
+            </div>
         </div>
     </div>
 
