@@ -8,7 +8,7 @@
     <style>
         :root {
             --cipher-block-size: 38px;
-            --color-medium-charcoal: #5A5956;
+            --color-medium-charcoal: #D8D5CE;
         }
 
         body {
@@ -103,7 +103,7 @@
 
         .cipher-block.guessed {
             background-color: var(--color-medium-charcoal);
-            color: var(--color-secondary-text);
+            color: var(--color-primary-text);
         }
 
         .cipher-block.correct {
@@ -116,9 +116,8 @@
         }
 
         .cipher-block.selected {
-            outline: 3px solid var(--color-primary); /* #D4A574 amber */
-            outline-offset: 2px;
-            z-index: 10;
+            background-color: var(--color-primary);
+            color: var(--color-primary-text);
         }
 
         .punct-mark {
