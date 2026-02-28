@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Current Position
 
 Phase: 18 of 18 (Letter Hunt)
-Plan: 0 of TBD in current phase
-Status: In progress — Phase 17 complete
-Last activity: 2026-02-27 — 17-02 Cipher interaction, letter assignment, duplicate clearing, auto-win detection, 3s hold-to-give-up, results screen, and hub activation
+Plan: 1 of TBD in current phase
+Status: In progress — 18-01 complete
+Last activity: 2026-02-27 — 18-01 Letter Hunt HTML skeleton, CSS, 22-category word corpus, seeded puzzle engine, grid render, pips, category mystery display, two-phase timer
 
 Progress: [████████░░] 80% (v2.0 — 4/5 phases complete)
 
 ## Performance Metrics
 
 **Velocity (v2.0):**
-- Total plans completed: 9
+- Total plans completed: 10
 - Average duration: ~3.5 min
-- Total execution time: ~31 min
+- Total execution time: ~35 min
 
 **By Phase:**
 
@@ -31,7 +31,7 @@ Progress: [████████░░] 80% (v2.0 — 4/5 phases complete)
 | 15. Word Ladder | 3 | ~10 min | ~3.3 min |
 | 16. Ladder Polish | 1 | ~3 min | ~3.0 min |
 | 17. Cipher | 2 | ~10 min | ~5.0 min |
-| 18. Letter Hunt | TBD | — | — |
+| 18. Letter Hunt | 1+ | ~4 min | ~4 min |
 
 *Updated after each plan completion*
 
@@ -76,6 +76,9 @@ Recent decisions for v2.0:
 - [16-01] Expanded PUZZLE_WORDS by ~230 net new words to densify common-word graph
 - [17-01] Compact 38x38px blocks, word-group rendering, daily quote corpus, seeded mapping, subtle author hint (0.5 opacity)
 - [17-02] Selection glow (amber #D4A574), letter assignment with duplicate clearing, auto-win detection, 3s hold-to-give-up, 1.5s animated decode, results overlay (Solved-sage vs Revealed-rose)
+- [18-01] Tasks 1+2 committed together — intermediate partial-JS file would not render; fix commit captures word-length correction
+- [18-01] GOBLIN replaces HAMMERHEAD in SHARKS category — HAMMERHEAD is 10 chars, violates ≤8-char grid constraint
+- [18-01] DATE_SEED uses _hunt_v1 suffix — game-namespaced, mirrors _ladder_v1 pattern from Phase 15
 
 ### Pending Todos
 
@@ -88,5 +91,5 @@ Recent decisions for v2.0:
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed Phase 17 execution (Cipher)
-Resume file: .planning/phases/18-letter-hunt/18-01-PLAN.md
+Stopped at: Completed 18-01 (Letter Hunt skeleton + engine)
+Resume file: .planning/phases/18-letter-hunt/18-02-PLAN.md

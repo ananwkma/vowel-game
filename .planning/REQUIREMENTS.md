@@ -33,8 +33,8 @@ Requirements for the Word Game Collection milestone. Each maps to roadmap phases
 
 ### Letter Hunt
 
-- [ ] **HUNT-01**: User can play a daily Letter Hunt puzzle — one word-search grid per day, same for all players
-- [ ] **HUNT-02**: The puzzle contains 6 hidden words belonging to a mystery category (3 easy + 3 hard) arranged in the grid
+- [x] **HUNT-01**: User can play a daily Letter Hunt puzzle — one word-search grid per day, same for all players
+- [x] **HUNT-02**: The puzzle contains 6 hidden words belonging to a mystery category (3 easy + 3 hard) arranged in the grid
 - [ ] **HUNT-03**: User can click-and-drag to draw a lasso/bubble selection around letters; valid category words persist highlighted, invalid selections dissolve
 - [ ] **HUNT-04**: After all 3 easy words are found, the mystery category name is revealed before the hard phase begins
 - [ ] **HUNT-05**: Easy phase and hard phase are each timed independently, with separate scores recorded for each
@@ -83,8 +83,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LADR-03 | Phase 15 | Pending |
 | LADR-04 | Phase 15 | Pending |
 | LADR-05 | Phase 15 | Complete |
-| HUNT-01 | Phase 16 | Pending |
-| HUNT-02 | Phase 16 | Pending |
+| HUNT-01 | Phase 16 | Complete |
+| HUNT-02 | Phase 16 | Complete |
 | HUNT-03 | Phase 16 | Pending |
 | HUNT-04 | Phase 16 | Pending |
 | HUNT-05 | Phase 16 | Pending |
