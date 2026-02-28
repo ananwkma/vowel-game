@@ -790,10 +790,11 @@
             const titleClass = options.solved
                 ? 'results-title results-title--success'
                 : 'results-title results-title--warning';
+            const statusText = options.solved ? 'CONGRATULATIONS' : 'THANKS FOR PLAYING';
 
             screen.innerHTML = `
                 <div class="results-game-title">Cipher</div>
-                <div class="${titleClass}">${options.solved ? 'Solved' : 'Revealed'}</div>
+                <div class="${titleClass}">${statusText}</div>
                 <p class="results-quote">"${gameState.quote.text}"</p>
                 <p class="results-author">— ${gameState.quote.author}</p>
                 <div class="results-actions">

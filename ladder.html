@@ -1610,31 +1610,23 @@
       let titleText, subtitleText, buttonRow = '';
 
       if (solved) {
+        titleText = 'CONGRATULATIONS';
         if (delta === 0) {
-          titleText = 'Optimal!';
           subtitleText = `Solved in ${steps} step${steps !== 1 ? 's' : ''} — perfect solution`;
         } else {
-          titleText = 'Solved!';
           subtitleText = `Solved in ${steps} step${steps !== 1 ? 's' : ''} (+${delta} from optimal)`;
         }
         if (delta > 0 || DEBUG) {
           buttonRow += `<button class="btn-secondary" id="try-again-btn" type="button">try again</button>`;
         }
-      } else if (lost) {
-        titleText = 'You Lost';
-        subtitleText = `${steps} steps — optimal is ${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''}`;
-        buttonRow += `<button class="btn-secondary" id="try-again-btn" type="button">try again</button>`;
       } else {
-        titleText = 'Gave Up';
-        const remaining = steps > 0
-          ? `after ${steps} step${steps !== 1 ? 's' : ''}`
-          : 'at the start';
-        subtitleText = `${remaining} — optimal is ${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''}`;
+        titleText = 'THANKS FOR PLAYING';
+        subtitleText = steps > 0 ? `${steps} steps` : '';
         buttonRow += `<button class="btn-secondary" id="try-again-btn" type="button">try again</button>`;
       }
 
       // Player path display
-      const pathLabel = solved ? `Your path (${steps} step${steps !== 1 ? 's' : ''})` : 'Your path so far';
+      const pathLabel = solved ? `Your path (${steps} step${steps !== 1 ? 's' : ''})` : 'Your path';
       const pathHTML = (playerPath || []).map((w, i) => {
         const isStart = i === 0;
         const isEnd   = solved && i === playerPath.length - 1;
@@ -1673,8 +1665,8 @@
         await animateOptimalPath(resultsScreen.querySelector('#results-optimal-path'));
       }
 
-      // Fire confetti on every optimal solve visit
-      if (solved && delta === 0) {
+      // Fire confetti on every solve visit
+      if (solved) {
         fireConfetti();
       }
     }

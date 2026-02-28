@@ -1286,7 +1286,7 @@
      */
     function renderProgress() {
       const counter = document.getElementById('word-counter');
-      const pips = document.querySelectorAll('.pip');
+      const pips = document.querySelectorAll('#progress-bar .pip');
 
       // wordIndex is 0-based; display as 1-based, capped at 5
       const displayIndex = Math.min(puzzleState.wordIndex + 1, 5);
@@ -2173,6 +2173,11 @@
       // Mark VOWEL as completed today in shared hub status
       DailyStatus.markCompleted('vowel');
 
+      // Hide gameplay progress bar
+      if (document.getElementById('progress-bar')) {
+        document.getElementById('progress-bar').style.display = 'none';
+      }
+
       // Format final time as M:SS (puzzleState.timerElapsed is integer seconds)
       const totalSeconds = puzzleState.timerElapsed;
       const timeMs = totalSeconds * 1000;
@@ -2187,6 +2192,31 @@
       const screen = document.createElement('div');
       screen.id = 'results-screen';
 
+      const solvedAll = puzzleState.outcomes.every(o => o === 'solved');
+      const statusText = document.createElement('div');
+      statusText.className = 'results-status';
+      statusText.textContent = solvedAll ? 'CONGRATULATIONS' : 'THANKS FOR PLAYING';
+      if (solvedAll) statusText.classList.add('solved');
+      else statusText.classList.add('revealed');
+      
+      // Add status text style for consistency
+      if (!document.getElementById('vowel-status-style')) {
+        const style = document.createElement('style');
+        style.id = 'vowel-status-style';
+        style.textContent = `
+          .results-status {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            text-align: center;
+          }
+          .results-status.solved { color: var(--color-win-bg); }
+          .results-status.revealed { color: var(--color-lose-bg); }
+        `;
+        document.head.appendChild(style);
+      }
+
       const label = document.createElement('div');
       label.className = 'results-label';
       label.textContent = 'Your time';
@@ -2195,13 +2225,33 @@
       time.className = 'results-time';
       time.textContent = timeString;
 
+      // Create pips for results screen (larger, 12px)
+      const pipRow = document.createElement('div');
+      pipRow.style.display = 'flex';
+      pipRow.style.gap = '8px';
+      pipRow.style.marginTop = '-8px';
+      pipRow.style.justifyContent = 'center';
+      for (let i = 0; i < 5; i++) {
+        const pip = document.createElement('span');
+        pip.className = 'pip';
+        const outcome = puzzleState.outcomes[i];
+        if (outcome === 'solved') {
+          pip.classList.add('solved');
+        } else if (outcome === 'gaveup') {
+          pip.classList.add('gaveup');
+        }
+        pip.style.width = '12px';
+        pip.style.height = '12px';
+        pipRow.appendChild(pip);
+      }
+
       // Personal best — check before updating so we know if this run beats it
       const prevBest = PersonalBest.get();
       const isNewBest = PersonalBest.update(timeMs);
 
       const rank = document.createElement('div');
       rank.className = 'results-rank';
-      if (puzzleState.outcomes.every(o => o === 'solved')) triggerConfetti();
+      if (solvedAll) triggerConfetti();
 
       if (prevBest === null) {
         rank.textContent = 'First run!';
@@ -2245,8 +2295,10 @@
 
       actions.appendChild(shareBtn);
 
+      screen.appendChild(statusText);
       screen.appendChild(label);
       screen.appendChild(time);
+      screen.appendChild(pipRow);
       screen.appendChild(rank);
       screen.appendChild(divider);
       screen.appendChild(tomorrow);

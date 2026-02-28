@@ -308,56 +308,6 @@
     }
 
     /* ============================================================
-       SECTION: TIMERS
-    ============================================================ */
-    #timer-row {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      justify-content: center;
-      font-family: var(--font-hunt-serif);
-      font-size: 0.9rem;
-    }
-
-    .timer-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      opacity: 0.5;
-      font-family: var(--font-hunt-sans);
-    }
-
-    .timer-value {
-      font-family: var(--font-hunt-serif);
-      font-weight: 700;
-      font-size: 1rem;
-      letter-spacing: 0.05em;
-      color: var(--color-hunt-text);
-    }
-
-    .timer-block {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1px;
-    }
-
-    #timer-hard-block {
-      opacity: 0.35;
-      transition: opacity 0.4s ease;
-    }
-
-    #timer-hard-block.active {
-      opacity: 1;
-    }
-
-    #timer-separator {
-      font-size: 0.7rem;
-      opacity: 0.3;
-      font-family: var(--font-hunt-sans);
-    }
-
-    /* ============================================================
        SECTION: HINT BUTTON (Matches Ladder Undo)
     ============================================================ */
     .btn-hint {
@@ -517,6 +467,7 @@
       letter-spacing: 0.1em;
       text-transform: uppercase;
       text-align: center;
+      margin-bottom: 48px;
     }
 
     #results-screen .results-status.solved {
@@ -528,20 +479,12 @@
     }
 
     #results-screen .results-category {
-      font-family: var(--font-hunt-serif);
-      font-size: 1.6rem;
-      font-weight: 700;
-      letter-spacing: 0.15em;
+      font-size: 0.85rem;
       text-transform: uppercase;
-      text-align: center;
-      color: var(--color-hunt-text);
-    }
-
-    #results-screen .results-pips {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      justify-content: center;
+      letter-spacing: 0.1em;
+      opacity: 0.5;
+      margin-top: 8px;
+      font-weight: 700;
     }
 
     .results-cols {
@@ -550,26 +493,14 @@
       gap: 24px;
       width: 100%;
       max-width: 300px;
+      margin-top: 16px;
     }
 
     .results-col {
       display: flex;
       flex-direction: column;
+      align-items: center;
       gap: 8px;
-    }
-
-    .results-col-label {
-      font-size: 0.6rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      opacity: 0.5;
-      font-family: var(--font-hunt-sans);
-    }
-
-    .results-col-time {
-      font-family: var(--font-hunt-serif);
-      font-size: 1.6rem;
-      font-weight: 700;
     }
 
     #results-screen .results-word-row {
@@ -598,7 +529,7 @@
       flex-direction: column;
       align-items: center;
       gap: 16px;
-      margin-top: 8px;
+      margin-top: 48px;
     }
 
     /* ============================================================
@@ -763,17 +694,6 @@
 
     <!-- GAME FOOTER -->
     <div id="game-footer">
-      <div id="timer-row">
-        <div class="timer-block" id="timer-easy-block">
-          <span class="timer-label">Easy</span>
-          <span class="timer-value" id="timer-easy">0:00</span>
-        </div>
-        <span id="timer-separator">/</span>
-        <div class="timer-block" id="timer-hard-block">
-          <span class="timer-label">Hard</span>
-          <span class="timer-value" id="timer-hard">—</span>
-        </div>
-      </div>
       <div id="footer-actions">
         <button class="btn-hint" id="hint-btn">hint</button>
         <div id="give-up-wrapper">
@@ -790,16 +710,9 @@
     <div class="results-game-title">HUNT</div>
     <div class="results-status" id="results-status">Solved</div>
     <div class="results-category" id="results-category"></div>
-    <div class="results-pips" id="results-pips"></div>
     <div class="results-cols">
-      <div class="results-col" id="results-col-easy">
-        <div class="results-col-label">Easy</div>
-        <div class="results-col-time" id="results-time-easy">—</div>
-      </div>
-      <div class="results-col" id="results-col-hard">
-        <div class="results-col-label">Hard</div>
-        <div class="results-col-time" id="results-time-hard">—</div>
-      </div>
+      <div class="results-col" id="results-col-easy"></div>
+      <div class="results-col" id="results-col-hard"></div>
     </div>
     <div class="results-actions">
       <button class="btn-primary" id="results-share-btn">share <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="2.5" r="2" fill="currentColor"/><circle cx="3" cy="8" r="2" fill="currentColor"/><circle cx="12" cy="13.5" r="2" fill="currentColor"/><line x1="3" y1="8" x2="12" y2="2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="3" y1="8" x2="12" y2="13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
@@ -824,7 +737,7 @@
       </div>
       <div class="instruction-step">
         <div class="step-num">4</div>
-        <div class="step-text">Each phase is timed separately. Tap <strong>?</strong> for a hint — just a time penalty.</div>
+        <div class="step-text">Stuck? Tap <strong>?</strong> for a hint which reveals the first letter of a word.</div>
       </div>
       <button id="help-modal-close">Got it</button>
     </div>
@@ -989,67 +902,11 @@
 
     let gameState = {
       phase: 'easy',            // 'easy' | 'hard' | 'done'
-      easyStartTime: null,
-      easyElapsed: 0,
-      hardStartTime: null,
-      hardElapsed: 0,
-      hintPenaltyEasy: 0,
-      hintPenaltyHard: 0,
-      easyTimerInterval: null,
-      hardTimerInterval: null,
       wordsFound: [],            // [{word, usedHint}]
       hintIndex: 0,              // round-robin index for hint rotation
       giveUpConfirming: false,
       giveUpTimeout: null,
     };
-
-    /* ============================================================
-       SECTION: TIMERS
-    ============================================================ */
-    function formatTime(ms) {
-      const total = Math.floor(Math.max(0, ms) / 1000);
-      const m = Math.floor(total / 60);
-      const s = total % 60;
-      return `${m}:${s.toString().padStart(2, '0')}`;
-    }
-
-    function renderEasyTimer() {
-      const elapsed = Date.now() - gameState.easyStartTime + gameState.hintPenaltyEasy;
-      document.getElementById('timer-easy').textContent = formatTime(elapsed);
-    }
-
-    function renderHardTimer() {
-      const elapsed = Date.now() - gameState.hardStartTime + gameState.hintPenaltyHard;
-      document.getElementById('timer-hard').textContent = formatTime(elapsed);
-    }
-
-    function startEasyTimer() {
-      gameState.easyStartTime = Date.now();
-      gameState.easyTimerInterval = setInterval(() => {
-        renderEasyTimer();
-      }, 100);
-    }
-
-    function stopEasyTimer() {
-      clearInterval(gameState.easyTimerInterval);
-      gameState.easyTimerInterval = null;
-      gameState.easyElapsed = Date.now() - gameState.easyStartTime + gameState.hintPenaltyEasy;
-    }
-
-    function startHardTimer() {
-      document.getElementById('timer-hard').textContent = '0:00';
-      document.getElementById('timer-hard-block').classList.add('active');
-      gameState.hardStartTime = Date.now();
-      gameState.hardTimerInterval = setInterval(() => {
-        renderHardTimer();
-      }, 100);
-    }
-
-    function stopHardTimer() {
-      clearInterval(gameState.hardTimerInterval);
-      gameState.hardTimerInterval = null;
-      gameState.hardElapsed = Date.now() - gameState.hardStartTime + gameState.hintPenaltyHard;
-    }
 
     /* ============================================================
        SECTION: PROGRESS (pips)
@@ -1160,12 +1017,6 @@
     function showResults(opts = {}) {
       const { solved = false } = opts;
 
-      // Stop all timers
-      stopEasyTimer();
-      if (gameState.phase === 'hard' || gameState.phase === 'done') {
-        stopHardTimer();
-      }
-
       gameState.phase = 'done';
       DailyStatus.markCompleted('hunt');
 
@@ -1174,49 +1025,22 @@
         solved,
         category: dailyPuzzle ? dailyPuzzle.category : '',
         wordsFound: gameState.wordsFound,
-        easyElapsed: gameState.easyElapsed,
-        hardElapsed: gameState.hardElapsed,
         date: new Date().toISOString().split('T')[0],
       });
 
       // Populate results screen
       const rs = document.getElementById('results-screen');
       const statusEl = document.getElementById('results-status');
-      statusEl.textContent = solved ? 'Solved' : 'Revealed';
+      statusEl.textContent = solved ? 'CONGRATULATIONS' : 'THANKS FOR PLAYING';
       statusEl.className = 'results-status ' + (solved ? 'solved' : 'revealed');
 
       document.getElementById('results-category').textContent = dailyPuzzle ? dailyPuzzle.category : '';
-      document.getElementById('results-time-easy').textContent = formatTime(gameState.easyElapsed);
-      document.getElementById('results-time-hard').textContent = gameState.hardElapsed > 0 ? formatTime(gameState.hardElapsed) : '—';
-
-      // Results pips
-      const pipsEl = document.getElementById('results-pips');
-      pipsEl.innerHTML = '';
-      if (dailyPuzzle) {
-        const easyGroup = document.createElement('div');
-        easyGroup.className = 'pip-group';
-        const hardGroup = document.createElement('div');
-        hardGroup.className = 'pip-group';
-        const sep = document.createElement('div');
-        sep.className = 'pip-separator';
-
-        dailyPuzzle.words.forEach((wordObj, i) => {
-          const pip = document.createElement('span');
-          pip.className = 'pip';
-          const found = gameState.wordsFound.find(f => f.word === wordObj.word);
-          if (found) pip.classList.add(found.usedHint ? 'hinted' : 'solved');
-          if (i < 3) easyGroup.appendChild(pip);
-          else hardGroup.appendChild(pip);
-        });
-
-        pipsEl.appendChild(easyGroup);
-        pipsEl.appendChild(sep);
-        pipsEl.appendChild(hardGroup);
-      }
 
       // Results words list — populate into column divs
       const easyColEl = document.getElementById('results-col-easy');
       const hardColEl = document.getElementById('results-col-hard');
+      easyColEl.innerHTML = '';
+      hardColEl.innerHTML = '';
       if (dailyPuzzle) {
         dailyPuzzle.words.forEach((wordObj, i) => {
           const row = document.createElement('div');
@@ -1245,6 +1069,7 @@
     ============================================================ */
     let isDragging = false;
     let selectedCells = []; // [{row, col, el}]
+    let dragDirection = null; // 'horizontal' | 'vertical' | null
 
     function getCellAt(clientX, clientY) {
       // Canvas has pointer-events:none so elementFromPoint hits the cell underneath
@@ -1259,15 +1084,34 @@
       return selectedCells.some(c => c.row === cell.row && c.col === cell.col);
     }
 
-    function isAdjacentToLast(cell) {
+    function isValidMove(cell) {
       if (selectedCells.length === 0) return true;
       const last = selectedCells[selectedCells.length - 1];
-      const dr = Math.abs(cell.row - last.row);
-      const dc = Math.abs(cell.col - last.col);
-      return dr <= 1 && dc <= 1 && (dr + dc) > 0;
+      const dr = cell.row - last.row;
+      const dc = cell.col - last.col;
+
+      // Must be exactly 1 cell away (no skipping)
+      if (Math.abs(dr) > 1 || Math.abs(dc) > 1) return false;
+      // Must not be the same cell
+      if (dr === 0 && dc === 0) return false;
+      // No diagonals
+      if (dr !== 0 && dc !== 0) return false;
+
+      // If we already have a direction, must stick to it
+      if (dragDirection === 'horizontal' && dr !== 0) return false;
+      if (dragDirection === 'vertical' && dc !== 0) return false;
+
+      return true;
     }
 
     function addCellToSelection(cell) {
+      // Determine direction on the second cell
+      if (selectedCells.length === 1) {
+        const first = selectedCells[0];
+        if (cell.row === first.row) dragDirection = 'horizontal';
+        else if (cell.col === first.col) dragDirection = 'vertical';
+      }
+
       selectedCells.push(cell);
       cell.el.classList.add('active');
     }
@@ -1279,7 +1123,19 @@
         }
       });
       selectedCells = [];
+      dragDirection = null;
       clearCanvas();
+    }
+
+    function removeLastCell() {
+      const cell = selectedCells.pop();
+      if (cell) {
+        if (!cell.el.classList.contains('found') && !cell.el.classList.contains('found-hint')) {
+          cell.el.classList.remove('active');
+        }
+      }
+      // If we're back to 1 cell, reset direction lock
+      if (selectedCells.length <= 1) dragDirection = null;
     }
 
     function setupDragSelection() {
@@ -1290,6 +1146,7 @@
         e.preventDefault();
         isDragging = true;
         selectedCells = [];
+        dragDirection = null;
         gridContainer.setPointerCapture(e.pointerId);
         const cell = getCellAt(e.clientX, e.clientY);
         if (cell) addCellToSelection(cell);
@@ -1299,7 +1156,20 @@
         if (!isDragging) return;
         e.preventDefault();
         const cell = getCellAt(e.clientX, e.clientY);
-        if (cell && !isCellInSelection(cell) && isAdjacentToLast(cell)) {
+        if (!cell) return;
+
+        // BACKTRACKING: If we move back to the previous cell, pop the current one
+        if (selectedCells.length >= 2) {
+          const secondToLast = selectedCells[selectedCells.length - 2];
+          if (cell.row === secondToLast.row && cell.col === secondToLast.col) {
+            removeLastCell();
+            drawTraceLine();
+            return;
+          }
+        }
+
+        // Add new cell if valid
+        if (!isCellInSelection(cell) && isValidMove(cell)) {
           addCellToSelection(cell);
           drawTraceLine();
         }
@@ -1446,13 +1316,6 @@
         setTimeout(() => el.classList.remove('active'), 1500);
       }
 
-      // Add 30s penalty to current phase timer
-      if (currentPhase === 'easy') {
-        gameState.hintPenaltyEasy += HINT_PENALTY_MS;
-      } else {
-        gameState.hintPenaltyHard += HINT_PENALTY_MS;
-      }
-
       // Track which words have had hints used for pip coloring
       if (!gameState.hintedWords) gameState.hintedWords = new Set();
       gameState.hintedWords.add(targetWord.word);
@@ -1467,38 +1330,16 @@
     ============================================================ */
     function revealCategory() {
       gameState.phase = 'hard';
-      stopEasyTimer();
 
       const el = document.getElementById('category-display');
       el.textContent = dailyPuzzle.category;
       el.classList.remove('category-stamp'); // reset in case of re-trigger guard
       void el.offsetWidth; // force reflow to restart animation
       el.classList.add('category-stamp');
-
-      // Hard timer starts AFTER animation (~400ms stamp + 50ms grace)
-      setTimeout(startHardTimer, 450);
-
-      // Update footer to show hard timer as active
-      updateTimerDisplay();
-    }
-
-    function updateTimerDisplay() {
-      const easyBlock = document.getElementById('timer-easy-block');
-      const hardBlock = document.getElementById('timer-hard-block');
-      if (gameState.phase === 'easy') {
-        easyBlock.style.opacity = '1';
-        hardBlock.classList.remove('active');
-        document.getElementById('timer-hard').textContent = '—';
-      } else {
-        easyBlock.style.opacity = '0.5';
-        hardBlock.classList.add('active');
-      }
     }
 
     function endGame(gaveUp) {
       gameState.phase = 'done';
-      if (gameState.hardTimerInterval) stopHardTimer();
-      if (gameState.easyTimerInterval) stopEasyTimer();
       showResults({ solved: !gaveUp });
     }
 
@@ -1527,9 +1368,6 @@
           }
         }
       });
-      // Stop active timer
-      if (gameState.phase === 'hard' && gameState.hardTimerInterval) stopHardTimer();
-      else if (gameState.phase === 'easy') stopEasyTimer();
       renderPips();
       endGame(true); // gaveUp = true
     }
@@ -1622,14 +1460,12 @@
       document.getElementById('results-share-btn').addEventListener('click', async () => {
         if (!dailyPuzzle) return;
         const today = new Date().toISOString().split('T')[0];
-        const easyTime = formatTime(gameState.easyElapsed);
-        const hardTime = gameState.hardElapsed > 0 ? formatTime(gameState.hardElapsed) : '--:--';
         const pipEmoji = dailyPuzzle.words.map(w => {
           const found = gameState.wordsFound.find(f => f.word === w.word);
           if (!found) return '⬜';
           return found.usedHint ? '🔴' : '🟢';
         }).join('');
-        const text = `Lexicon Hunt ${today}\n${dailyPuzzle.category}\n${pipEmoji}\nEasy: ${easyTime}  Hard: ${hardTime}`;
+        const text = `Lexicon Hunt ${today}\n${dailyPuzzle.category}\n${pipEmoji}`;
 
         try {
           if (navigator.share) {
@@ -1660,8 +1496,6 @@
       if (saved) {
         // Restore state from saved result
         gameState.wordsFound = saved.wordsFound || [];
-        gameState.easyElapsed = saved.easyElapsed || 0;
-        gameState.hardElapsed = saved.hardElapsed || 0;
         gameState.phase = 'done';
 
         // Reconstruct dailyPuzzle for display
@@ -1715,9 +1549,6 @@
       resizeCanvas();
       renderPips();
       renderCategoryDisplay();
-
-      // 6. Start easy timer
-      startEasyTimer();
 
       // 7. Wire up UI
       setupDragSelection();
