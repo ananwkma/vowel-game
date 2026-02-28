@@ -142,7 +142,7 @@ Plans:
 
 **Goal:** Each game's daily puzzles feel appropriately challenging — Cipher with pre-reveal and high-repetition quotes, Ladder with 3-4 step paths, Hunt with recognizable-but-challenging hard words — validated across ~5 dates per game
 **Depends on:** Phase 18
-**Plans:** 4 plans
+**Plans:** 1/4 plans executed
 
 Plans:
 - [ ] 19-01-PLAN.md — Cipher: ?date= override, expand 42-quote corpus, repetition filter, pre-reveal 2-3 letters

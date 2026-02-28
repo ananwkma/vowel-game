@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** Players can instantly understand and interact with any puzzle — the mechanics are intuitive, the win/lose feedback is immediate and satisfying.
-**Current focus:** Phase 18 — Letter Hunt
+**Current focus:** Phase 19 — Puzzle Difficulty Testing & Fine-Tuning
 
 ## Current Position
 
-Phase: 18 of 18 (Letter Hunt)
-Plan: 2 of TBD in current phase
-Status: In progress — 18-02 complete
-Last activity: 2026-02-27 — 18-02 Drag selection (Pointer Events + canvas trace), word evaluation, phase state machine (easy→reveal→hard), two-phase timers, hint system, give-up
+Phase: 19 of 19 (Puzzle Difficulty Testing & Fine-Tuning)
+Plan: 1 of 3 in current phase
+Status: In progress — 19-01 complete
+Last activity: 2026-02-28 — 19-01 Cipher difficulty tuning (?date= override, 42-quote corpus, repetition filter, pre-reveal 2-3 letters)
 
-Progress: [████████░░] 80% (v2.0 — 4/5 phases complete)
+Progress: [█████████░] 90% (v2.0 — 4/5 phases complete, phase 19 in progress)
 
 ## Performance Metrics
 
@@ -82,6 +82,9 @@ Recent decisions for v2.0:
 - [Phase 18-02]: Tasks 1+2 committed together — drag/evaluate/phase logic interleaved through same call chain
 - [Phase 18-02]: shakeAndClear snapshot pattern — selectedCells.slice() prevents race condition during 400ms async window
 - [Phase 18-02]: endGame() calls showResults() directly — Plan 02 fully testable without Plan 03 results wiring
+- [19-01] ?date=YYYY-MM-DD URL param overrides DATE_SEED in cipher.html for cross-date testing — UTC methods avoid timezone drift
+- [19-01] hasHighLetterRepetition() filters quotes at game-init time with minRatio 0.35, fallback to full corpus if pool < 5
+- [19-01] Pre-reveal selects 2-3 middle-frequency letters (slice(2,-3) by freq) seeded by date RNG, applied before progress restore
 
 ### Roadmap Evolution
 
@@ -97,6 +100,6 @@ Recent decisions for v2.0:
 
 ## Session Continuity
 
-Last session: 2026-02-27
-Stopped at: Completed 18-02 (Letter Hunt drag selection, phase state machine, hint system)
-Resume file: .planning/phases/18-letter-hunt/18-03-PLAN.md
+Last session: 2026-02-28
+Stopped at: Completed 19-01 (Cipher difficulty tuning — date override, repetition filter, pre-reveal)
+Resume file: .planning/phases/19-test-and-fine-tune-puzzle-difficulty-across-all-games/19-02-PLAN.md
