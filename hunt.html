@@ -1176,53 +1176,315 @@
 
     /* ============================================================
        SECTION: DRAG SELECTION
-       (Stub — full wiring in Plan 02)
     ============================================================ */
+    let isDragging = false;
+    let selectedCells = []; // [{row, col, el}]
+
+    function getCellAt(clientX, clientY) {
+      // Canvas has pointer-events:none so elementFromPoint hits the cell underneath
+      const el = document.elementFromPoint(clientX, clientY);
+      if (el && el.classList.contains('grid-cell')) {
+        return { row: parseInt(el.dataset.row), col: parseInt(el.dataset.col), el };
+      }
+      return null;
+    }
+
+    function isCellInSelection(cell) {
+      return selectedCells.some(c => c.row === cell.row && c.col === cell.col);
+    }
+
+    function isAdjacentToLast(cell) {
+      if (selectedCells.length === 0) return true;
+      const last = selectedCells[selectedCells.length - 1];
+      const dr = Math.abs(cell.row - last.row);
+      const dc = Math.abs(cell.col - last.col);
+      return dr <= 1 && dc <= 1 && (dr + dc) > 0;
+    }
+
+    function addCellToSelection(cell) {
+      selectedCells.push(cell);
+      cell.el.classList.add('active');
+    }
+
+    function clearSelection() {
+      selectedCells.forEach(c => {
+        if (!c.el.classList.contains('found') && !c.el.classList.contains('found-hint')) {
+          c.el.classList.remove('active');
+        }
+      });
+      selectedCells = [];
+      clearCanvas();
+    }
+
     function setupDragSelection() {
-      // Implemented in Plan 02
+      const gridContainer = document.getElementById('grid-container');
+
+      gridContainer.addEventListener('pointerdown', (e) => {
+        if (gameState.phase === 'done') return;
+        e.preventDefault();
+        isDragging = true;
+        selectedCells = [];
+        gridContainer.setPointerCapture(e.pointerId);
+        const cell = getCellAt(e.clientX, e.clientY);
+        if (cell) addCellToSelection(cell);
+      });
+
+      gridContainer.addEventListener('pointermove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const cell = getCellAt(e.clientX, e.clientY);
+        if (cell && !isCellInSelection(cell) && isAdjacentToLast(cell)) {
+          addCellToSelection(cell);
+          drawTraceLine();
+        }
+      });
+
+      gridContainer.addEventListener('pointerup', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        evaluateSelection();
+      });
+
+      gridContainer.addEventListener('pointercancel', () => {
+        isDragging = false;
+        clearSelection();
+      });
+    }
+
+    /* ============================================================
+       SECTION: CANVAS
+    ============================================================ */
+    function drawTraceLine() {
+      const canvas = document.getElementById('lasso-canvas');
+      const ctx = canvas.getContext('2d');
+      const gridRect = document.getElementById('letter-grid').getBoundingClientRect();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (selectedCells.length < 2) return;
+
+      ctx.strokeStyle = 'rgba(212, 165, 116, 0.7)';
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+
+      selectedCells.forEach((cell, i) => {
+        const rect = cell.el.getBoundingClientRect();
+        const x = rect.left + rect.width / 2 - gridRect.left;
+        const y = rect.top + rect.height / 2 - gridRect.top;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
+      ctx.stroke();
+    }
+
+    function clearCanvas() {
+      const canvas = document.getElementById('lasso-canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    /* ============================================================
+       SECTION: SELECTION EVALUATION
+    ============================================================ */
+    function evaluateSelection() {
+      if (selectedCells.length === 0) return;
+      const word = selectedCells.map(c => gridData[c.row][c.col]).join('');
+      const unfound = dailyPuzzle.words.filter(w =>
+        !gameState.wordsFound.find(f => f.word === w.word)
+      );
+      const match = unfound.find(w => w.word === word);
+
+      clearCanvas();
+
+      if (match) {
+        const usedHint = gameState.hintedWords && gameState.hintedWords.has(match.word);
+        markWordFound(match, usedHint);
+      } else {
+        shakeAndClear();
+      }
+    }
+
+    function shakeAndClear() {
+      const shakingCells = selectedCells.slice(); // snapshot to safely clean up in timeout
+      shakingCells.forEach(c => {
+        if (!c.el.classList.contains('found') && !c.el.classList.contains('found-hint')) {
+          c.el.classList.add('shake');
+        }
+      });
+      setTimeout(() => {
+        shakingCells.forEach(c => {
+          c.el.classList.remove('shake');
+          if (!c.el.classList.contains('found') && !c.el.classList.contains('found-hint')) {
+            c.el.classList.remove('active');
+          }
+        });
+        selectedCells = [];
+        clearCanvas();
+      }, 400);
+    }
+
+    function markWordFound(wordObj, usedHint) {
+      selectedCells.forEach(c => {
+        c.el.classList.remove('active');
+        c.el.classList.add(usedHint ? 'found-hint' : 'found');
+      });
+      gameState.wordsFound.push({ word: wordObj.word, usedHint: !!usedHint });
+      renderPips();
+      selectedCells = [];
+      clearCanvas();
+      checkPhaseTransition();
+    }
+
+    function checkPhaseTransition() {
+      const easyFound = gameState.wordsFound.filter(f =>
+        dailyPuzzle.words.find(w => w.word === f.word && w.phase === 'easy')
+      ).length;
+      const hardFound = gameState.wordsFound.filter(f =>
+        dailyPuzzle.words.find(w => w.word === f.word && w.phase === 'hard')
+      ).length;
+
+      if (gameState.phase === 'easy' && easyFound === 3) {
+        revealCategory();
+      } else if (gameState.phase === 'hard' && hardFound === 3) {
+        endGame(false);
+      }
     }
 
     /* ============================================================
        SECTION: HINT SYSTEM
-       (Stub — full wiring in Plan 02)
     ============================================================ */
+    function useHint() {
+      if (gameState.phase === 'done') return;
+
+      const currentPhase = gameState.phase; // 'easy' or 'hard'
+      const unfound = dailyPuzzle.words.filter(w =>
+        w.phase === currentPhase &&
+        !gameState.wordsFound.find(f => f.word === w.word)
+      );
+      if (unfound.length === 0) return;
+
+      // Round-robin through unfound words
+      const targetWord = unfound[gameState.hintIndex % unfound.length];
+      gameState.hintIndex++;
+
+      // Find the placement for this word
+      const placement = wordPlacements.find(p => p.word === targetWord.word);
+      if (!placement) return;
+
+      // Pulse the first cell of this word (amber highlight for 1.5s)
+      const firstCell = placement.cells[0];
+      const el = document.querySelector(`[data-row="${firstCell.row}"][data-col="${firstCell.col}"]`);
+      if (el && !el.classList.contains('found') && !el.classList.contains('found-hint')) {
+        el.classList.add('active');
+        setTimeout(() => el.classList.remove('active'), 1500);
+      }
+
+      // Add 30s penalty to current phase timer
+      if (currentPhase === 'easy') {
+        gameState.hintPenaltyEasy += HINT_PENALTY_MS;
+      } else {
+        gameState.hintPenaltyHard += HINT_PENALTY_MS;
+      }
+
+      // Track which words have had hints used for pip coloring
+      if (!gameState.hintedWords) gameState.hintedWords = new Set();
+      gameState.hintedWords.add(targetWord.word);
+    }
+
     function setupHintButton() {
-      document.getElementById('hint-btn').addEventListener('click', () => {
-        // Full hint logic implemented in Plan 02
-      });
+      document.getElementById('hint-btn').addEventListener('click', useHint);
+    }
+
+    /* ============================================================
+       SECTION: PHASE MANAGEMENT
+    ============================================================ */
+    function revealCategory() {
+      gameState.phase = 'hard';
+      stopEasyTimer();
+
+      const el = document.getElementById('category-display');
+      el.textContent = dailyPuzzle.category;
+      el.classList.remove('category-stamp'); // reset in case of re-trigger guard
+      void el.offsetWidth; // force reflow to restart animation
+      el.classList.add('category-stamp');
+
+      // Hard timer starts AFTER animation (~400ms stamp + 50ms grace)
+      setTimeout(startHardTimer, 450);
+
+      // Update footer to show hard timer as active
+      updateTimerDisplay();
+    }
+
+    function updateTimerDisplay() {
+      const easyBlock = document.getElementById('timer-easy-block');
+      const hardBlock = document.getElementById('timer-hard-block');
+      if (gameState.phase === 'easy') {
+        easyBlock.style.opacity = '1';
+        hardBlock.classList.remove('active');
+        document.getElementById('timer-hard').textContent = '—';
+      } else {
+        easyBlock.style.opacity = '0.5';
+        hardBlock.classList.add('active');
+      }
+    }
+
+    function endGame(gaveUp) {
+      gameState.phase = 'done';
+      if (gameState.hardTimerInterval) stopHardTimer();
+      if (gameState.easyTimerInterval) stopEasyTimer();
+      // Plan 03 will call showResults and HuntResult.save and DailyStatus.markCompleted here
+      // For now, log to console so Plan 02 can be tested
+      console.log('[Hunt] Game ended. gaveUp:', gaveUp, 'wordsFound:', gameState.wordsFound.length);
+      showResults({ solved: !gaveUp });
     }
 
     /* ============================================================
        SECTION: GIVE-UP
     ============================================================ */
-    function setupGiveUp() {
+    let giveUpPending = false;
+    let giveUpTimer = null;
+
+    function handleGiveUp() {
+      if (gameState.phase === 'done') return;
       const btn = document.getElementById('giveup-btn');
-      btn.addEventListener('click', () => {
-        if (gameState.phase === 'done') return;
-        if (!gameState.giveUpConfirming) {
-          gameState.giveUpConfirming = true;
-          btn.textContent = 'Confirm?';
-          btn.classList.add('confirming');
-          gameState.giveUpTimeout = setTimeout(() => {
-            gameState.giveUpConfirming = false;
-            btn.textContent = 'Give Up';
-            btn.classList.remove('confirming');
-          }, 3000);
-        } else {
-          clearTimeout(gameState.giveUpTimeout);
-          gameState.giveUpConfirming = false;
+      if (!giveUpPending) {
+        giveUpPending = true;
+        btn.textContent = 'Sure?';
+        btn.classList.add('confirming');
+        giveUpTimer = setTimeout(() => {
+          giveUpPending = false;
+          btn.textContent = 'Give Up';
           btn.classList.remove('confirming');
-          // Reveal all remaining words as found-hint for results display
-          if (dailyPuzzle) {
-            dailyPuzzle.words.forEach(wordObj => {
-              if (!gameState.wordsFound.find(f => f.word === wordObj.word)) {
-                gameState.wordsFound.push({ word: wordObj.word, usedHint: true });
-              }
+        }, 3000);
+        return;
+      }
+      // Second tap: confirm
+      clearTimeout(giveUpTimer);
+      giveUpPending = false;
+      btn.classList.remove('confirming');
+      // Reveal all unfound words (highlight in rose)
+      dailyPuzzle.words.forEach(w => {
+        if (!gameState.wordsFound.find(f => f.word === w.word)) {
+          const placement = wordPlacements.find(p => p.word === w.word);
+          if (placement) {
+            placement.cells.forEach(({ row, col }) => {
+              const el = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+              if (el) { el.classList.remove('active'); el.classList.add('found-hint'); }
             });
+            gameState.wordsFound.push({ word: w.word, usedHint: true });
           }
-          showResults({ solved: false });
         }
       });
+      // Stop active timer
+      if (gameState.phase === 'hard' && gameState.hardTimerInterval) stopHardTimer();
+      else if (gameState.phase === 'easy') stopEasyTimer();
+      renderPips();
+      endGame(true); // gaveUp = true
+    }
+
+    function setupGiveUp() {
+      document.getElementById('giveup-btn').addEventListener('click', handleGiveUp);
     }
 
     /* ============================================================
@@ -1344,7 +1606,7 @@
       // 6. Start easy timer
       startEasyTimer();
 
-      // 7. Wire up UI (drag selection wired in Plan 02)
+      // 7. Wire up UI
       setupDragSelection();
       setupHintButton();
       setupGiveUp();
