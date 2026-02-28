@@ -279,24 +279,22 @@
     #undo-btn {
       flex: 1;
       padding: 12px;
-      background: none;
-      color: var(--color-primary-text);
+      background-color: var(--color-secondary);
+      color: var(--color-secondary-text);
       font-family: var(--font-serif);
       font-size: 0.7rem;
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      border: 1px solid rgba(0,0,0,0.1);
+      border: none;
       border-radius: var(--block-radius);
       cursor: pointer;
-      opacity: 0.4;
+      box-shadow: var(--shadow-md);
       transition: opacity var(--transition-fast);
     }
 
-    #undo-btn:hover { opacity: 0.7; }
-
     #undo-btn:disabled {
-      opacity: 0.2;
+      opacity: 0.3;
       cursor: not-allowed;
     }
 
@@ -427,16 +425,15 @@
     #give-up-btn {
       width: 100%;
       padding: 12px;
-      background: none;
-      border: 1px solid rgba(0,0,0,0.1);
-      color: var(--color-primary-text);
+      background: transparent;
+      border: 1px solid rgba(196, 131, 111, 0.4);
+      color: var(--color-ladder-warning);
       font-family: var(--font-serif);
       font-size: 0.7rem;
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       cursor: pointer;
-      opacity: 0.4;
       transition: opacity 0.3s;
       border-radius: var(--block-radius);
       position: relative;
@@ -444,8 +441,6 @@
       user-select: none;
       touch-action: none;
     }
-
-    #give-up-btn:hover { opacity: 0.7; }
 
     #give-up-bar {
       position: absolute;
