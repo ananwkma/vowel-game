@@ -29,6 +29,7 @@
       --font-hunt-sans: 'Lato', 'Arial', sans-serif;
       --cell-size: 34px; /* overridden dynamically by JS */
       --grid-size: 10;   /* overridden dynamically by JS */
+      --shadow-block: var(--shadow-md);
     }
 
     /* ============================================================
@@ -413,25 +414,29 @@
        SECTION: BUTTONS
     ============================================================ */
     .btn-primary {
-      display: inline-block;
-      padding: 12px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 48px;
       background-color: var(--color-hunt-primary);
       color: white;
       border: none;
-      border-radius: 24px;
+      border-radius: 6px;
       font-family: var(--font-hunt-serif);
       font-size: 1rem;
       font-weight: 700;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.03em;
       text-transform: uppercase;
       cursor: pointer;
-      transition: opacity var(--transition-fast), transform var(--transition-fast);
+      box-shadow: var(--shadow-block);
+      transition: transform 0.1s, filter 0.15s;
       text-decoration: none;
       text-align: center;
     }
 
-    .btn-primary:hover { opacity: 0.9; }
-    .btn-primary:active { transform: scale(0.97); }
+    .btn-primary:hover { filter: brightness(0.96); }
+    .btn-primary:active { transform: translateY(2px); }
 
     .btn-secondary {
       display: inline-block;
@@ -464,17 +469,23 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
+      padding: max(96px, calc(env(safe-area-inset-top) + 72px)) 24px max(24px, env(safe-area-inset-bottom));
       overflow-y: auto;
-      padding: max(60px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+      gap: 8px;
+      text-align: center;
     }
 
-    #results-screen .results-title {
+    .results-game-title {
+      position: absolute;
+      top: max(48px, env(safe-area-inset-top));
+      left: 0;
+      right: 0;
       font-family: var(--font-hunt-serif);
       font-size: 1.5rem;
       font-weight: 700;
       letter-spacing: 0.15em;
       text-transform: uppercase;
-      margin-bottom: 8px;
       text-align: center;
     }
 
@@ -483,7 +494,6 @@
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      margin-bottom: 20px;
       text-align: center;
     }
 
@@ -502,7 +512,6 @@
       letter-spacing: 0.15em;
       text-transform: uppercase;
       text-align: center;
-      margin-bottom: 20px;
       color: var(--color-hunt-text);
     }
 
@@ -510,7 +519,6 @@
       display: flex;
       gap: 32px;
       justify-content: center;
-      margin-bottom: 20px;
     }
 
     #results-screen .results-time-block {
@@ -539,16 +547,32 @@
       align-items: center;
       gap: 4px;
       justify-content: center;
-      margin-bottom: 16px;
+    }
+
+    .results-words-section {
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .results-words-headers {
+      display: flex;
+      justify-content: space-around;
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.5;
+      font-family: var(--font-hunt-sans);
+      margin-bottom: 8px;
+      padding: 0 8px;
     }
 
     #results-screen .results-words {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: repeat(3, auto);
+      grid-auto-flow: column;
+      gap: 8px 24px;
       width: 100%;
-      max-width: 300px;
-      margin-bottom: 24px;
     }
 
     #results-screen .results-word-row {
@@ -575,10 +599,9 @@
     #results-screen .results-actions {
       display: flex;
       flex-direction: column;
-      gap: 12px;
       align-items: center;
-      width: 100%;
-      max-width: 300px;
+      gap: 16px;
+      margin-top: 8px;
     }
 
     /* ============================================================
@@ -587,59 +610,85 @@
     #help-modal {
       position: fixed;
       inset: 0;
-      background: rgba(28, 27, 24, 0.7);
-      z-index: 200;
+      background: rgba(28, 27, 24, 0.85);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 10000;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 24px;
     }
 
-    #help-modal-inner {
+    #help-modal-content {
       background: var(--color-hunt-bg);
-      border-radius: 12px;
-      padding: 28px 24px;
-      max-width: 380px;
       width: 100%;
+      max-width: 360px;
+      border-radius: 12px;
+      padding: 32px 24px;
       position: relative;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      text-align: center;
+      animation: modal-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes modal-pop {
+      from { transform: scale(0.9); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
     }
 
     #help-modal h2 {
       font-family: var(--font-hunt-serif);
-      font-size: 1.2rem;
+      font-size: 1.5rem;
       font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      margin-bottom: 16px;
-      text-align: center;
+      margin-bottom: 20px;
+      color: var(--color-hunt-text);
     }
 
-    #help-modal p, #help-modal li {
-      font-family: var(--font-hunt-sans);
+    #help-modal .instruction-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    #help-modal .step-num {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: var(--color-hunt-primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+
+    #help-modal .step-text {
       font-size: 0.9rem;
-      line-height: 1.5;
-      opacity: 0.8;
-      margin-bottom: 8px;
+      line-height: 1.4;
+      color: var(--color-hunt-text);
     }
 
-    #help-modal ul {
-      padding-left: 20px;
-    }
-
-    #help-close {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: none;
+    #help-modal-close {
+      margin-top: 8px;
+      padding: 12px 32px;
+      background: var(--color-hunt-primary);
+      color: white;
       border: none;
-      font-size: 1.2rem;
+      border-radius: 6px;
+      font-family: var(--font-hunt-serif);
+      font-weight: 700;
+      font-size: 1rem;
       cursor: pointer;
-      opacity: 0.5;
-      line-height: 1;
-      padding: 4px;
+      box-shadow: var(--shadow-block);
+      transition: transform 0.1s;
     }
 
-    #help-close:hover { opacity: 1; }
+    #help-modal-close:active { transform: translateY(2px); }
 
     /* ============================================================
        SECTION: ANIMATIONS
@@ -735,7 +784,7 @@
 
   <!-- RESULTS SCREEN -->
   <div id="results-screen" style="display:none">
-    <div class="results-title">HUNT</div>
+    <div class="results-game-title">HUNT</div>
     <div class="results-status" id="results-status">Solved</div>
     <div class="results-category" id="results-category"></div>
     <div class="results-pips" id="results-pips"></div>
@@ -749,26 +798,39 @@
         <span class="results-time-value" id="results-time-hard">—</span>
       </div>
     </div>
-    <div class="results-words" id="results-words"></div>
+    <div class="results-words-section">
+      <div class="results-words-headers">
+        <span>Easy</span>
+        <span>Hard</span>
+      </div>
+      <div class="results-words" id="results-words"></div>
+    </div>
     <div class="results-actions">
-      <button class="btn-primary" id="results-share-btn">Share</button>
-      <a class="btn-secondary" href="index.html">Back to Hub</a>
+      <button class="btn-primary" id="results-share-btn">share <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="2.5" r="2" fill="currentColor"/><circle cx="3" cy="8" r="2" fill="currentColor"/><circle cx="12" cy="13.5" r="2" fill="currentColor"/><line x1="3" y1="8" x2="12" y2="2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="3" y1="8" x2="12" y2="13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
     </div>
   </div>
 
   <!-- HELP MODAL -->
   <div id="help-modal" style="display:none">
-    <div id="help-modal-inner">
-      <button id="help-close" aria-label="Close help">&times;</button>
+    <div id="help-modal-content">
       <h2>How to Play</h2>
-      <ul>
-        <li>Find <strong>6 hidden words</strong> in the letter grid — 3 easy, 3 hard.</li>
-        <li>Drag across letters to select a word. Release to confirm.</li>
-        <li>All 6 words belong to the same <strong>mystery category</strong>.</li>
-        <li>Find all 3 easy words to <strong>reveal the category</strong>.</li>
-        <li>Then find all 3 hard words to complete the puzzle.</li>
-        <li>Each phase is timed separately. Use hints for a time penalty.</li>
-      </ul>
+      <div class="instruction-step">
+        <div class="step-num">1</div>
+        <div class="step-text">Find <strong>6 hidden words</strong> in the letter grid — 3 easy, then 3 hard.</div>
+      </div>
+      <div class="instruction-step">
+        <div class="step-num">2</div>
+        <div class="step-text">Drag across letters to select a word. All 6 words belong to the same <strong>mystery category</strong>.</div>
+      </div>
+      <div class="instruction-step">
+        <div class="step-num">3</div>
+        <div class="step-text">Find all 3 easy words to <strong>reveal the category</strong>, then find the 3 hard words to finish.</div>
+      </div>
+      <div class="instruction-step">
+        <div class="step-num">4</div>
+        <div class="step-text">Each phase is timed separately. Tap <strong>?</strong> for a hint — just a time penalty.</div>
+      </div>
+      <button id="help-modal-close">Got it</button>
     </div>
   </div>
 
@@ -1498,7 +1560,7 @@
       document.getElementById('help-btn').addEventListener('click', () => {
         document.getElementById('help-modal').style.display = 'flex';
       });
-      document.getElementById('help-close').addEventListener('click', () => {
+      document.getElementById('help-modal-close').addEventListener('click', () => {
         document.getElementById('help-modal').style.display = 'none';
       });
       document.getElementById('help-modal').addEventListener('click', (e) => {
@@ -1549,9 +1611,9 @@
           } else if (navigator.clipboard && navigator.clipboard.writeText) {
             await navigator.clipboard.writeText(text);
             const btn = document.getElementById('results-share-btn');
-            const orig = btn.textContent;
-            btn.textContent = 'Copied!';
-            setTimeout(() => { btn.textContent = orig; }, 1500);
+            const orig = btn.innerHTML;
+            btn.innerHTML = 'Copied!';
+            setTimeout(() => { btn.innerHTML = orig; }, 1500);
           } else {
             prompt('Copy result:', text);
           }
