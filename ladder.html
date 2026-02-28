@@ -972,17 +972,19 @@
         if (start === target) continue;
 
         const path = bfsShortestPath(start, target, ADJACENCY);
-        if (!path || path.length < 5 || path.length > 7) continue;
+        if (!path || path.length < 4 || path.length > 5) continue;
 
         // Require at least one all-common-word solution path, max 10 steps (11 words)
         const commonPath = bfsShortestPath(start, target, COMMON_ADJACENCY);
         if (!commonPath || commonPath.length > 11) continue;
 
+        if (DEBUG) console.log(`[Ladder] Attempt ${attempt}: found path ${path.length - 1} steps: ${path.join(' → ')}`);
         return { start, target, optimalPath: path };
       }
 
       // Absolute fallback: verified common-word pair, 4 steps
       // Path: SCARE->STARE->STALE->STALL->STILL (all common words)
+      if (DEBUG) console.warn('[Ladder] No valid pair found in 50 attempts — using fallback SCARE→STILL');
       return { start: 'SCARE', target: 'STILL', optimalPath: bfsShortestPath('SCARE', 'STILL', ADJACENCY) };
     }
 
