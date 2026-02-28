@@ -115,7 +115,12 @@ Plans:
   3. After finding all 3 easy words, the mystery category name is revealed before the hard phase begins
   4. User can see separate timers and scores for the easy phase and the hard phase
   5. The grid contains exactly 6 hidden words (3 easy + 3 hard) belonging to a shared mystery category
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 18-01-PLAN.md — hunt.html skeleton, CSS, 20+ word category corpus, seeded puzzle engine, grid generation and initial render
+- [ ] 18-02-PLAN.md — Drag selection (Pointer Events + canvas trace), phase state machine, category reveal stamp, two-phase timers, hint system
+- [ ] 18-03-PLAN.md — Results screen, persistence, confetti, share, hub card activation, end-to-end human verification
 
 ## Progress
 
@@ -131,8 +136,8 @@ Plans:
 | 15. Word Ladder | v2.0 | 3/3 | Complete | 2026-02-27 |
 | 16. Ladder Polish | v2.0 | Complete    | 2026-02-27 | 2026-02-27 |
 | 17. Cipher | v2.0 | 2/2 | Complete | 2026-02-27 |
-| 18. Letter Hunt | v2.0 | 0/TBD | Not started | - |
+| 18. Letter Hunt | v2.0 | 0/3 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-19*
-*Last updated: 2026-02-27 — Phase 17 = Cipher (completed)*
+*Last updated: 2026-02-27 — Phase 18 = Letter Hunt (planned, 3 plans)*
