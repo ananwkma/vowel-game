@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Current Position
 
 Phase: 19 of 19 (Puzzle Difficulty Testing & Fine-Tuning)
-Plan: 1 of 3 in current phase
-Status: In progress — 19-01 complete
-Last activity: 2026-02-28 — 19-01 Cipher difficulty tuning (?date= override, 42-quote corpus, repetition filter, pre-reveal 2-3 letters)
+Plan: 2 of 3 in current phase
+Status: In progress — 19-02 complete
+Last activity: 2026-02-28 — 19-02 Ladder difficulty tuning (?date= override, path constraint 3-4 steps, debug console logging)
 
 Progress: [█████████░] 90% (v2.0 — 4/5 phases complete, phase 19 in progress)
 
@@ -34,6 +34,7 @@ Progress: [█████████░] 90% (v2.0 — 4/5 phases complete, ph
 | 18. Letter Hunt | 2+ | ~6 min | ~3 min |
 
 *Updated after each plan completion*
+| Phase 19 P02 | 3 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,8 @@ Recent decisions for v2.0:
 - [19-01] ?date=YYYY-MM-DD URL param overrides DATE_SEED in cipher.html for cross-date testing — UTC methods avoid timezone drift
 - [19-01] hasHighLetterRepetition() filters quotes at game-init time with minRatio 0.35, fallback to full corpus if pool < 5
 - [19-01] Pre-reveal selects 2-3 middle-frequency letters (slice(2,-3) by freq) seeded by date RNG, applied before progress restore
+- [Phase 19-02]: path.length 4-5 constraint (3-4 steps) replaces 5-7 (4-6 steps) to reduce cognitive overload in Ladder puzzles
+- [Phase 19-02]: ?date=YYYY-MM-DD URL param added to ladder.html using UTC methods — consistent pattern with cipher.html from 19-01
 
 ### Roadmap Evolution
 
@@ -101,5 +104,5 @@ Recent decisions for v2.0:
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed 19-01 (Cipher difficulty tuning — date override, repetition filter, pre-reveal)
-Resume file: .planning/phases/19-test-and-fine-tune-puzzle-difficulty-across-all-games/19-02-PLAN.md
+Stopped at: Completed 19-02 (Ladder difficulty tuning — date override, path constraint 3-4 steps, debug logging)
+Resume file: .planning/phases/19-test-and-fine-tune-puzzle-difficulty-across-all-games/19-03-PLAN.md
