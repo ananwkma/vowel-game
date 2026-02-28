@@ -1616,13 +1616,12 @@
         } else {
           subtitleText = `Solved in ${steps} step${steps !== 1 ? 's' : ''} (+${delta} from optimal)`;
         }
-        if (delta > 0 || DEBUG) {
+        if (delta > 0) {
           buttonRow += `<button class="btn-secondary" id="try-again-btn" type="button">try again</button>`;
         }
       } else {
         titleText = 'THANKS FOR PLAYING';
         subtitleText = steps > 0 ? `${steps} steps` : '';
-        buttonRow += `<button class="btn-secondary" id="try-again-btn" type="button">try again</button>`;
       }
 
       // Player path display
