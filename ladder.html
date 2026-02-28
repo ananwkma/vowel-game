@@ -637,9 +637,12 @@
       animation: tileSwipeIn 0.32s ease-out both;
     }
 
-    /* ============================================================
-       SECTION: CONFETTI ANIMATION
-    ============================================================ */
+    @media (max-width: 425px) {
+      :root { --block-size: 42px; }
+    }
+    @media (max-width: 360px) {
+      :root { --block-size: 38px; }
+    }
   </style>
 </head>
 <body>
