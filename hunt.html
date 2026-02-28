@@ -804,9 +804,15 @@
     /* ============================================================
        SECTION: DAILY SEED
     ============================================================ */
+    const urlParams = new URLSearchParams(window.location.search);
+    const _overrideDate = urlParams.get('date'); // e.g. ?date=2026-03-01
+
     const DATE_SEED = (() => {
-      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-      return today + '_hunt_v1'; // game-namespaced, v1 enables future rotation
+      const targetDate = _overrideDate ? new Date(_overrideDate) : new Date();
+      const year = targetDate.getUTCFullYear();
+      const month = String(targetDate.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(targetDate.getUTCDate()).padStart(2, '0');
+      return `${year}-${month}-${day}_hunt_v1`;
     })();
 
     /* ============================================================
@@ -880,6 +886,12 @@
     function getDailyPuzzle(rng) {
       const idx = Math.floor(rng() * CATEGORIES.length);
       const { category, easy, hard } = CATEGORIES[idx];
+      if (DEBUG) {
+        console.log(`[Hunt] Date seed: ${DATE_SEED}`);
+        console.log(`[Hunt] Category: ${category}`);
+        console.log(`[Hunt] Easy words: ${easy.join(', ')}`);
+        console.log(`[Hunt] Hard words: ${hard.join(', ')}`);
+      }
       return {
         category,
         words: [
