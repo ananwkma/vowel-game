@@ -139,6 +139,7 @@
         .cipher-block.selected {
             background-color: var(--color-primary);
             color: var(--color-primary-text);
+            pointer-events: none; /* Prevent redundant clicks once selected */
         }
 
         .punct-mark {
@@ -282,7 +283,7 @@
         }
 
         .results-title {
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: 700;
             letter-spacing: 0.1em;
             text-transform: uppercase;
@@ -601,32 +602,37 @@
 
         function selectBlock(num) {
             if (gameState.won) return;
+            if (gameState.selectedNumber === num) return; // Already selected
             
-            // Deselect previous
+            // 1. Focus input IMMEDIATELY (critical for mobile responsiveness)
+            const hiddenInput = document.getElementById('hidden-input');
+            hiddenInput.value = '';
+            hiddenInput.focus();
+
+            // 2. Deselect previous
             document.querySelectorAll('.cipher-block.selected').forEach(b => b.classList.remove('selected'));
             
             gameState.selectedNumber = num;
             
-            // Select all with this number
+            // 3. Select all with this number
             document.querySelectorAll(`.cipher-block[data-number="${num}"]`).forEach(b => {
                 b.classList.add('selected');
             });
-            
-            // Focus input
-            const hiddenInput = document.getElementById('hidden-input');
-            hiddenInput.value = '';
-            hiddenInput.focus();
         }
 
         // Hidden input captures typed letter
         document.getElementById('hidden-input').addEventListener('input', (e) => {
-            if (gameState.selectedNumber === null || gameState.won) return;
+            const num = gameState.selectedNumber;
+            if (num === null || gameState.won) {
+                e.target.value = '';
+                return;
+            }
             
             const char = e.target.value.slice(-1).toUpperCase();
             e.target.value = '';
             
             if (char && /[A-Z]/.test(char)) {
-                assignLetter(gameState.selectedNumber, char);
+                assignLetter(num, char);
             }
         });
 
@@ -667,6 +673,18 @@
             checkWin();
         }
 
+        function calculatePercent() {
+            let correctCount = 0;
+            const uniqueLetters = [...new Set(gameState.quote.text.toUpperCase().replace(/[^A-Z]/g, '').split(''))];
+            uniqueLetters.forEach(letter => {
+                const num = Object.keys(gameState.cipherMap).find(key => gameState.cipherMap[key] === letter);
+                if (gameState.guesses[num] === letter) {
+                    correctCount++;
+                }
+            });
+            return Math.round((correctCount / uniqueLetters.length) * 100);
+        }
+
         function checkWin() {
             // Only check if ALL numbers have a guess
             const totalNumbers = Object.keys(gameState.cipherMap).length;
@@ -680,6 +698,7 @@
 
             if (isWon) {
                 gameState.won = true;
+                const percent = calculatePercent();
                 DailyStatus.markCompleted('cipher');
                 
                 // Visually mark all blocks as correct
@@ -690,7 +709,7 @@
 
                 // Give the player 5 seconds to read the completed blocks
                 setTimeout(() => {
-                    showResults({ solved: true });
+                    showResults({ solved: true, percentSolved: percent });
                 }, 5000);
             }
         }
@@ -738,6 +757,7 @@
 
         async function handleGiveUp() {
             if (gameState.won) return;
+            const percent = calculatePercent();
             gameState.won = true; // Disable further input
             
             // Hide give-up button
@@ -749,7 +769,7 @@
             
             // Give the player 5 seconds to read the revealed blocks
             setTimeout(() => {
-                showResults({ solved: false });
+                showResults({ solved: false, percentSolved: percent });
             }, 5000);
         }
 
@@ -792,9 +812,12 @@
                 : 'results-title results-title--warning';
             const statusText = options.solved ? 'CONGRATULATIONS' : 'THANKS FOR PLAYING';
 
+            const percentSolved = options.percentSolved || 0;
+
             screen.innerHTML = `
                 <div class="results-game-title">Cipher</div>
                 <div class="${titleClass}">${statusText}</div>
+                <div style="font-size: 0.9rem; font-weight: 700; opacity: 0.7; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 0.05em;">${percentSolved}% SOLVED</div>
                 <p class="results-quote">"${gameState.quote.text}"</p>
                 <p class="results-author">— ${gameState.quote.author}</p>
                 <div class="results-actions">

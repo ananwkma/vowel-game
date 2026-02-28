@@ -462,7 +462,7 @@
     }
 
     #results-screen .results-status {
-      font-size: 2rem;
+      font-size: 1.5rem;
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
@@ -709,6 +709,7 @@
   <div id="results-screen" style="display:none">
     <div class="results-game-title">HUNT</div>
     <div class="results-status" id="results-status">Solved</div>
+    <div id="results-subtitle" style="font-size: 0.9rem; font-weight: 700; opacity: 0.7; margin-top: -40px; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 0.05em;"></div>
     <div class="results-category" id="results-category"></div>
     <div class="results-cols">
       <div class="results-col" id="results-col-easy"></div>
@@ -1028,14 +1029,16 @@
         date: new Date().toISOString().split('T')[0],
       });
 
-      // Populate results screen
-      const rs = document.getElementById('results-screen');
-      const statusEl = document.getElementById('results-status');
-      statusEl.textContent = solved ? 'CONGRATULATIONS' : 'THANKS FOR PLAYING';
-      statusEl.className = 'results-status ' + (solved ? 'solved' : 'revealed');
-
-      document.getElementById('results-category').textContent = dailyPuzzle ? dailyPuzzle.category : '';
-
+            // Populate results screen
+            const rs = document.getElementById('results-screen');
+            const statusEl = document.getElementById('results-status');
+            const subtitleEl = document.getElementById('results-subtitle');
+            statusEl.textContent = solved ? 'CONGRATULATIONS' : 'THANKS FOR PLAYING';
+            statusEl.className = 'results-status ' + (solved ? 'solved' : 'revealed');
+      
+                        const foundCount = gameState.wordsFound.filter(f => !f.usedHint).length;
+                        subtitleEl.textContent = `FOUND ${foundCount}/6 WORDS`;
+                        subtitleEl.style.display = 'block';            document.getElementById('results-category').textContent = dailyPuzzle ? dailyPuzzle.category : '';
       // Results words list — populate into column divs
       const easyColEl = document.getElementById('results-col-easy');
       const hardColEl = document.getElementById('results-col-hard');
