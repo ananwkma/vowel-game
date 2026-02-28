@@ -973,7 +973,7 @@
       return { start: 'SCARE', target: 'STILL', optimalPath: bfsShortestPath('SCARE', 'STILL', ADJACENCY) };
     }
 
-    const DEBUG = new URLSearchParams(window.location.search).get('debug') === '1';
+    const DEBUG = new URLSearchParams(window.location.search).has('debug');
 
     const dailyPuzzle = getDailyLadderPuzzle();
     const OPTIMAL_PATH = dailyPuzzle ? dailyPuzzle.optimalPath : null;

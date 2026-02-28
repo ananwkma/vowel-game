@@ -453,7 +453,7 @@
             };
         }
 
-        const DEBUG = false;
+        const DEBUG = new URLSearchParams(window.location.search).has('debug');
 
         const DATE_SEED = (() => {
             const today = new Date().toISOString().split('T')[0];
