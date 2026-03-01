@@ -845,11 +845,20 @@
 
     function chooseGridSize() {
       const availableWidth = Math.min(window.innerWidth, 500) - 32; // 16px padding each side
+      // Reserve ~260px for header (title+pips+category), footer (buttons), padding, gaps
+      const availableHeight = window.innerHeight - 260;
       for (const size of GRID_SIZES) {
-        const cellSize = Math.floor((availableWidth - (size - 1) * 2) / size); // gap=2px
-        if (cellSize >= 28) return { size, cellSize };
+        const cellByWidth  = Math.floor((availableWidth  - (size - 1) * 2) / size);
+        const cellByHeight = Math.floor((availableHeight - (size - 1) * 2) / size);
+        const cellSize = Math.min(cellByWidth, cellByHeight);
+        if (cellSize >= 26) return { size, cellSize }; // 26px min — still comfortably finger-selectable
       }
-      return { size: 8, cellSize: 36 }; // absolute fallback
+      // Absolute fallback: 8×8, fit whatever space remains
+      const fbCell = Math.min(
+        Math.floor((availableWidth  - 14) / 8),
+        Math.floor((availableHeight - 14) / 8)
+      );
+      return { size: 8, cellSize: Math.max(26, fbCell) };
     }
 
     function placeWords(words, gridSize, rng) {
@@ -1287,12 +1296,17 @@
       setTimeout(() => {
         shakingCells.forEach(c => {
           c.el.classList.remove('shake');
-          if (!c.el.classList.contains('found') && !c.el.classList.contains('found-hint')) {
+          // Don't remove 'active' if this cell is already part of a new drag in progress
+          const stillSelected = selectedCells.some(s => s.row === c.row && s.col === c.col);
+          if (!stillSelected && !c.el.classList.contains('found') && !c.el.classList.contains('found-hint')) {
             c.el.classList.remove('active');
           }
         });
-        selectedCells = [];
-        clearCanvas();
+        // Only wipe state if no drag is in progress — otherwise we'd clear a live selection
+        if (!isDragging) {
+          selectedCells = [];
+          clearCanvas();
+        }
       }, 400);
     }
 
