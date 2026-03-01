@@ -88,7 +88,7 @@
         #quote-display {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px 14px;
+            gap: 12px 24px;
             justify-content: center;
             width: 100%;
             margin-bottom: 24px;
@@ -141,6 +141,37 @@
             color: var(--color-primary-text);
             pointer-events: none; /* Prevent redundant clicks once selected */
         }
+
+        .cipher-block.anchor {
+            background-color: #C8A96E;
+            color: #fff;
+            pointer-events: none;
+        }
+
+        #control-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255,255,255,0.25);
+            background: transparent;
+            color: var(--color-primary-text);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.55;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        .control-btn:hover { opacity: 1; }
+        .control-btn:active { transform: scale(0.9); }
 
         .punct-mark {
             font-size: 1.1rem;
@@ -433,6 +464,10 @@
         </div>
 
         <div id="game-footer">
+            <div id="control-buttons">
+                <button id="undo-btn" class="control-btn" title="Undo last guess">↩</button>
+                <button id="restart-btn" class="control-btn" title="Restart puzzle">↺</button>
+            </div>
             <div id="give-up-container">
                 <button id="give-up-btn">Hold to Reveal</button>
                 <div id="give-up-bar"></div>
@@ -592,6 +627,8 @@
             selectedNumber: null,
             won: false
         };
+        let guessHistory = [];
+        let preRevealNums = new Set();
 
         function buildQuoteDOM() {
             const display = document.getElementById('quote-display');
@@ -690,6 +727,7 @@
             e.target.value = '';
             
             if (char && /[A-Z]/.test(char)) {
+                guessHistory.push(Object.assign({}, gameState.guesses));
                 assignLetter(num, char);
             }
         });
@@ -718,7 +756,7 @@
             // 3. Update DOM for current number
             document.querySelectorAll(`.cipher-block[data-number="${num}"]`).forEach(block => {
                 block.textContent = letter;
-                block.classList.remove('unsolved');
+                block.classList.remove('unsolved', 'anchor');
                 block.classList.add('guessed');
             });
 
@@ -950,6 +988,54 @@
 
         if (DEBUG) document.getElementById('back-link').href = 'index.html?debug';
 
+        /* ============================================================
+           SECTION: UNDO / RESTART
+        ============================================================ */
+        function undoLastGuess() {
+            if (guessHistory.length === 0 || gameState.won) return;
+            const prevGuesses = guessHistory.pop();
+            gameState.guesses = prevGuesses;
+            gameState.selectedNumber = null;
+
+            // Re-render all blocks
+            document.querySelectorAll('.cipher-block').forEach(block => {
+                const num = parseInt(block.dataset.number);
+                block.classList.remove('selected');
+                if (gameState.guesses[num] !== undefined) {
+                    block.textContent = gameState.guesses[num];
+                    block.classList.remove('unsolved', 'anchor');
+                    block.classList.add('guessed');
+                    if (preRevealNums.has(num)) block.classList.add('anchor');
+                } else {
+                    block.textContent = num;
+                    block.classList.remove('guessed', 'anchor');
+                    block.classList.add('unsolved');
+                }
+            });
+
+            CipherProgress.save(gameState.guesses);
+        }
+
+        function restartGame() {
+            localStorage.removeItem(CipherProgress._key());
+            try {
+                const s = JSON.parse(localStorage.getItem(DailyStatus.KEY) || '{}');
+                delete s.cipher;
+                localStorage.setItem(DailyStatus.KEY, JSON.stringify(s));
+            } catch(e) {}
+
+            gameState = { quote: null, letterToNum: {}, cipherMap: {}, guesses: {}, selectedNumber: null, won: false };
+            guessHistory = [];
+            preRevealNums = new Set();
+
+            document.getElementById('results-screen').classList.remove('visible');
+            document.getElementById('give-up-container').style.display = '';
+            initGame();
+        }
+
+        document.getElementById('undo-btn').addEventListener('click', undoLastGuess);
+        document.getElementById('restart-btn').addEventListener('click', restartGame);
+
         function hasHighLetterRepetition(text, minRatio = 0.35) {
             const letters = text.replace(/[^a-z]/gi, '').toUpperCase();
             if (letters.length < 15) return false; // skip very short quotes
@@ -992,16 +1078,20 @@
                 .join('  ');
             console.log(`[Cipher] ${gameState.quote.author}: "${gameState.quote.text}"\n[Cipher] Key: ${answerMap}`);
 
-            // 5b. Pre-reveal 2-3 letters seeded by date
+            // 5b. Pre-reveal letters seeded by date, scaled by quote length
             const uniqueLettersSorted = [...new Set(gameState.quote.text.toUpperCase().replace(/[^A-Z]/g, '').split(''))].sort();
             // Exclude the most-frequent letter (would reveal too much) and the least-frequent (not helpful)
             const letterFreqs = uniqueLettersSorted.map(letter => ({
                 letter,
                 count: (gameState.quote.text.toUpperCase().match(new RegExp(letter, 'g')) || []).length
             })).sort((a, b) => a.count - b.count);
-            // Pre-reveal from middle-frequency letters (not top-3 most common, not bottom-2 rarest)
-            const revealCandidates = letterFreqs.slice(2, -3).map(f => f.letter);
-            const preRevealCount = revealCandidates.length >= 3 ? 3 : revealCandidates.length >= 2 ? 2 : 0;
+            // Scale pre-reveal count and candidate pool by quote length
+            const quoteLen = gameState.quote.text.length;
+            const sliceStart = quoteLen < 60 ? 2 : 1;
+            const sliceEnd = quoteLen < 60 ? -3 : -2;
+            const maxReveal = quoteLen < 60 ? 2 : quoteLen <= 100 ? 3 : 4;
+            const revealCandidates = letterFreqs.slice(sliceStart, sliceEnd).map(f => f.letter);
+            const preRevealCount = Math.min(maxReveal, revealCandidates.length >= 2 ? revealCandidates.length : 0);
             const preRevealLetters = [];
             for (let i = 0; i < preRevealCount; i++) {
                 const idx = Math.floor(rng() * revealCandidates.length);
@@ -1015,7 +1105,7 @@
                 const repRatio = ((letters.length - unique) / letters.length).toFixed(2);
                 console.log(`[Cipher] Quote: "${gameState.quote.text}" — ${gameState.quote.author}`);
                 console.log(`[Cipher] Letters: ${letters.length} total, ${unique} unique, repetition ratio: ${repRatio}`);
-                console.log(`[Cipher] Pre-reveal: ${preRevealLetters.join(', ')} (${preRevealCount} letters)`);
+                console.log(`[Cipher] Pre-reveal: ${preRevealLetters.join(', ')} (${preRevealCount}/${maxReveal} letters, quoteLen=${quoteLen})`);
                 console.log(`[Cipher] High-rep pool: ${highRepQuotes.length}/${QUOTES.length} quotes`);
             }
 
@@ -1028,26 +1118,23 @@
             // Pre-reveal letters (applied after DOM is built, before progress restore)
             preRevealLetters.forEach(letter => {
                 const num = gameState.letterToNum[letter];
-                if (num !== undefined) assignLetter(num, letter, false);
+                if (num !== undefined) {
+                    assignLetter(num, letter, false);
+                    // Mark as anchor: distinct styling + unclickable
+                    document.querySelectorAll(`.cipher-block[data-number="${num}"]`).forEach(b => {
+                        b.classList.add('anchor');
+                    });
+                    preRevealNums.add(num);
+                }
             });
 
-            // 7. Load Progress (skipped in debug mode)
+            // 7. Check if already completed today (no progress restore — every load starts fresh)
             if (!DEBUG) {
-                const saved = CipherProgress.load();
-                if (saved) {
-                    Object.keys(saved).forEach(numStr => {
-                        const num = parseInt(numStr);
-                        const letter = saved[numStr];
-                        assignLetter(num, letter, false);
-                    });
-                }
-
-                // Check if already completed today
                 const statusRaw = localStorage.getItem(DailyStatus.KEY);
                 const status = statusRaw ? JSON.parse(statusRaw) : {};
                 const today = new Date().toISOString().split('T')[0];
                 if (status.cipher && status.cipher.dateKey === today && status.cipher.completed) {
-                    showResults({ solved: gameState.won });
+                    showResults({ solved: true, percentSolved: 100 });
                 }
             }
         }
