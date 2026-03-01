@@ -22,8 +22,8 @@ app.use('/api/', limiter);
 // API Routes
 app.use('/api', apiRoutes);
 
-// Serve the game frontend from root index.html
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../index.html')));
+// Serve static files from project root
+app.use(express.static(path.join(__dirname, '..')));
 
 // Start server
 app.listen(PORT, () => {
