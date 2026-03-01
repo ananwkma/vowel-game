@@ -382,9 +382,6 @@
         #give-up-container {
             width: 100%;
             max-width: 200px;
-            position: relative;
-            overflow: hidden;
-            border-radius: 8px;
         }
 
         #give-up-btn {
@@ -409,12 +406,12 @@
 
         #give-up-bar {
             position: absolute;
-            bottom: 0;
+            top: 0;
             left: 0;
+            width: 0%;
             height: 100%;
             background-color: var(--color-warning);
             opacity: 0.2;
-            width: 0%;
             transition: width 0.1s linear;
             pointer-events: none;
         }
@@ -471,8 +468,7 @@
                 <button id="restart-btn" class="control-btn" title="Restart puzzle">↺</button>
             </div>
             <div id="give-up-container">
-                <button id="give-up-btn">Hold to Reveal</button>
-                <div id="give-up-bar"></div>
+                <button id="give-up-btn"><span id="give-up-bar"></span>Hold to Reveal</button>
             </div>
         </div>
     </div>
