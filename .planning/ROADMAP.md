@@ -44,6 +44,13 @@ See .planning/milestones/v2.0-ROADMAP.md
 
 </details>
 
+### Phase 20: Codebase Cleanup
+
+**Goal:** Deep readability-first restructure of all five HTML files — consistent JS/CSS section ordering, dead code removed, shared logic extracted where it aids clarity; plus web app manifest + "Lexicon" home screen icon (grid-of-tiles SVG) added to all pages
+**Depends on:** Phase 19
+**Requirements:** —
+**Plans:** TBD
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -57,7 +64,8 @@ See .planning/milestones/v2.0-ROADMAP.md
 | 17. Cipher | v2.0 | 2/2 | Complete | 2026-02-27 |
 | 18. Letter Hunt | v2.0 | 3/3 | Complete | 2026-02-28 |
 | 19. Difficulty Calibration | v2.0 | 4/4 | Complete | 2026-03-01 |
+| 20. Codebase Cleanup | — | 0/? | Not started | — |
 
 ---
 *Roadmap created: 2026-02-19*
-*Last updated: 2026-03-01 — v2.0 Word Game Collection shipped*
+*Last updated: 2026-03-01 — Phase 20 Codebase Cleanup added*
