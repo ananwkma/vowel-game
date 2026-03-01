@@ -143,8 +143,8 @@
         }
 
         .cipher-block.anchor {
-            background-color: #C8A96E;
-            color: #fff;
+            background-color: var(--color-success);
+            color: var(--color-primary-text);
             pointer-events: none;
         }
 
@@ -772,13 +772,17 @@
         function calculatePercent() {
             let correctCount = 0;
             const uniqueLetters = [...new Set(gameState.quote.text.toUpperCase().replace(/[^A-Z]/g, '').split(''))];
-            uniqueLetters.forEach(letter => {
-                const num = Object.keys(gameState.cipherMap).find(key => gameState.cipherMap[key] === letter);
-                if (gameState.guesses[num] === letter) {
-                    correctCount++;
-                }
+            // Exclude anchor (pre-revealed) letters — only score what the player solved
+            const playerLetters = uniqueLetters.filter(letter => {
+                const num = parseInt(Object.keys(gameState.cipherMap).find(key => gameState.cipherMap[key] === letter));
+                return !preRevealNums.has(num);
             });
-            return Math.round((correctCount / uniqueLetters.length) * 100);
+            playerLetters.forEach(letter => {
+                const num = Object.keys(gameState.cipherMap).find(key => gameState.cipherMap[key] === letter);
+                if (gameState.guesses[num] === letter) correctCount++;
+            });
+            if (playerLetters.length === 0) return 100;
+            return Math.round((correctCount / playerLetters.length) * 100);
         }
 
         function checkWin() {
