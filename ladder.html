@@ -957,10 +957,8 @@
       if (puzzlePool.length < 2) return null;
 
       // Try up to 50 seed offsets to find a valid pair where:
-      //   1. Optimal BFS path (full dict) has 4-6 steps — sets difficulty
-      //   2. A path exists through COMMON_ADJACENCY (common words only) <=10 steps —
-      //      guarantees players can always solve without hitting obscure words.
-      //      Optimal path may still use uncommon words for a shorter route.
+      //   Optimal BFS path through COMMON_ADJACENCY (common words only) has 3-4 steps —
+      //   ensures the optimal path uses only recognizable words with no obscure intermediates.
       for (let attempt = 0; attempt < 50; attempt++) {
         const rng = seededRandom(DATE_SEED + '_' + attempt);
         const startIdx = Math.floor(rng() * puzzlePool.length);
@@ -971,12 +969,8 @@
 
         if (start === target) continue;
 
-        const path = bfsShortestPath(start, target, ADJACENCY);
+        const path = bfsShortestPath(start, target, COMMON_ADJACENCY);
         if (!path || path.length < 4 || path.length > 5) continue;
-
-        // Require at least one all-common-word solution path, max 10 steps (11 words)
-        const commonPath = bfsShortestPath(start, target, COMMON_ADJACENCY);
-        if (!commonPath || commonPath.length > 11) continue;
 
         if (DEBUG) console.log(`[Ladder] Attempt ${attempt}: found path ${path.length - 1} steps: ${path.join(' → ')}`);
         return { start, target, optimalPath: path };
@@ -985,7 +979,7 @@
       // Absolute fallback: verified common-word pair, 4 steps
       // Path: SCARE->STARE->STALE->STALL->STILL (all common words)
       if (DEBUG) console.warn('[Ladder] No valid pair found in 50 attempts — using fallback SCARE→STILL');
-      return { start: 'SCARE', target: 'STILL', optimalPath: bfsShortestPath('SCARE', 'STILL', ADJACENCY) };
+      return { start: 'SCARE', target: 'STILL', optimalPath: bfsShortestPath('SCARE', 'STILL', COMMON_ADJACENCY) };
     }
 
     const DEBUG = new URLSearchParams(window.location.search).has('debug');
