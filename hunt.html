@@ -1287,27 +1287,21 @@
     }
 
     function shakeAndClear() {
-      const shakingCells = selectedCells.slice(); // snapshot to safely clean up in timeout
+      const shakingCells = selectedCells.slice();
+
+      // Clear game state IMMEDIATELY — no delayed mutation that can race with the next drag
+      selectedCells = [];
+      dragDirection = null;
+      clearCanvas();
+
+      // Remove active and play shake animation on the snapshot cells (visual only)
       shakingCells.forEach(c => {
         if (!c.el.classList.contains('found') && !c.el.classList.contains('found-hint')) {
+          c.el.classList.remove('active');
           c.el.classList.add('shake');
+          setTimeout(() => c.el.classList.remove('shake'), 400);
         }
       });
-      setTimeout(() => {
-        shakingCells.forEach(c => {
-          c.el.classList.remove('shake');
-          // Don't remove 'active' if this cell is already part of a new drag in progress
-          const stillSelected = selectedCells.some(s => s.row === c.row && s.col === c.col);
-          if (!stillSelected && !c.el.classList.contains('found') && !c.el.classList.contains('found-hint')) {
-            c.el.classList.remove('active');
-          }
-        });
-        // Only wipe state if no drag is in progress — otherwise we'd clear a live selection
-        if (!isDragging) {
-          selectedCells = [];
-          clearCanvas();
-        }
-      }, 400);
     }
 
     function markWordFound(wordObj, usedHint) {
