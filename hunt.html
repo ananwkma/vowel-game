@@ -291,7 +291,7 @@
     ============================================================ */
     #category-display {
       font-family: var(--font-hunt-serif);
-      font-size: 1.4rem;
+      font-size: 1.7rem;
       font-weight: 700;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -303,8 +303,30 @@
       justify-content: center;
     }
 
+    #category-subtitle {
+      font-family: var(--font-hunt-serif);
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-align: center;
+      color: var(--color-hunt-text);
+      opacity: 0;
+      height: 0;
+      overflow: hidden;
+      transition: height 0.2s;
+    }
+    #category-subtitle.visible {
+      opacity: 1;
+      height: 1.2em;
+      animation: fade-in 0.4s ease forwards;
+    }
+
     .category-stamp {
-      animation: stamp-reveal 400ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      animation: stamp-reveal 600ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .category-glow {
+      animation: category-glow 400ms ease forwards;
     }
 
     /* ============================================================
@@ -623,9 +645,15 @@
        SECTION: ANIMATIONS
     ============================================================ */
     @keyframes stamp-reveal {
-      0%   { transform: scale(3) rotate(-6deg); opacity: 0; }
+      0%   { transform: scale(5) rotate(-6deg); opacity: 0; }
       60%  { transform: scale(0.95) rotate(1deg); opacity: 1; }
       100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    @keyframes category-glow {
+      0%   { text-shadow: none; }
+      40%  { text-shadow: 0 0 14px var(--color-hunt-primary), 0 0 28px rgba(212,165,116,0.5); }
+      100% { text-shadow: none; }
     }
 
     @keyframes cell-shake {
@@ -680,6 +708,7 @@
         </div>
       </div>
       <div id="category-display">???</div>
+      <div id="category-subtitle"></div>
     </div>
 
     <!-- GAME CONTENT -->
@@ -732,11 +761,15 @@
       </div>
       <div class="instruction-step">
         <div class="step-num">3</div>
-        <div class="step-text">Find all 3 easy words to <strong>reveal the category</strong>.</div>
+        <div class="step-text">Words run <strong>left-to-right</strong> or <strong>top-to-bottom</strong> only — no backwards or diagonal.</div>
       </div>
       <div class="instruction-step">
         <div class="step-num">4</div>
-        <div class="step-text">Stuck? Tap <strong>?</strong> for a hint which reveals the first letter of a word.</div>
+        <div class="step-text">Find all 3 easy words to <strong>reveal the category</strong>.</div>
+      </div>
+      <div class="instruction-step">
+        <div class="step-num">5</div>
+        <div class="step-text">Stuck? Tap the <strong>hint</strong> button to reveal the first letter of a word.</div>
       </div>
       <button id="help-modal-close">Got it</button>
     </div>
@@ -757,7 +790,7 @@
       { category: 'TREES',     easy: ['OAK', 'PINE', 'MAPLE'],      hard: ['LARCH', 'BIRCH', 'CEDAR'] },
       { category: 'TOOLS',     easy: ['SAW', 'DRILL', 'HAMMER'],    hard: ['CHISEL', 'PLIERS', 'LATHE'] },
       { category: 'GEMS',      easy: ['RUBY', 'OPAL', 'JADE'],      hard: ['GARNET', 'TOPAZ', 'PEARL'] },
-      { category: 'OCEANS',    easy: ['ARCTIC', 'PACIFIC', 'INDIAN'], hard: ['ATLANTIC', 'SOUTHERN', 'CORAL'] },
+      { category: 'SEAS',      easy: ['NORTH', 'RED', 'BLACK'],      hard: ['CORAL', 'BERING', 'AEGEAN'] },
       { category: 'MONTHS',    easy: ['JUNE', 'MARCH', 'JULY'],     hard: ['OCTOBER', 'JANUARY', 'AUGUST'] },
       { category: 'SPICES',    easy: ['SAGE', 'THYME', 'PEPPER'],   hard: ['CUMIN', 'FENNEL', 'CLOVES'] },
       { category: 'CHEESES',   easy: ['BRIE', 'GOUDA', 'FETA'],     hard: ['GRUYERE', 'HAVARTI', 'COLBY'] },
@@ -767,7 +800,7 @@
       { category: 'INSECTS',   easy: ['ANT', 'BEE', 'MOTH'],        hard: ['CICADA', 'EARWIG', 'MANTIS'] },
       { category: 'FABRICS',   easy: ['SILK', 'WOOL', 'LINEN'],     hard: ['MUSLIN', 'VELVET', 'TWEED'] },
       { category: 'RIVERS',    easy: ['NILE', 'RHINE', 'CONGO'],    hard: ['DANUBE', 'AMAZON', 'YANGTZE'] },
-      { category: 'SHARKS',    easy: ['BULL', 'TIGER', 'MAKO'],     hard: ['NURSE', 'WHALE', 'LEMON'] },
+      { category: 'SHARKS',    easy: ['BULL', 'TIGER', 'MAKO'],     hard: ['NURSE', 'BASKING', 'LEMON'] },
       { category: 'CHEERS',    easy: ['TOAST', 'SALUT', 'SKOL'],    hard: ['PROSIT', 'SALUTE', 'BRAVO'] },
     ];
 
@@ -1346,9 +1379,24 @@
 
       const el = document.getElementById('category-display');
       el.textContent = dailyPuzzle.category;
-      el.classList.remove('category-stamp'); // reset in case of re-trigger guard
+      el.classList.remove('category-stamp', 'category-glow'); // reset in case of re-trigger guard
       void el.offsetWidth; // force reflow to restart animation
       el.classList.add('category-stamp');
+
+      // Glow pulse after stamp lands
+      setTimeout(() => {
+        el.classList.add('category-glow');
+        el.addEventListener('animationend', () => el.classList.remove('category-glow'), { once: true });
+      }, 600);
+
+      // Subtitle fades in after 500ms
+      const sub = document.getElementById('category-subtitle');
+      sub.classList.remove('visible');
+      sub.textContent = '';
+      setTimeout(() => {
+        sub.textContent = 'CATEGORY REVEALED';
+        sub.classList.add('visible');
+      }, 500);
     }
 
     function endGame(gaveUp) {
