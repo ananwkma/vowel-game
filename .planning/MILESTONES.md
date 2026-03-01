@@ -25,3 +25,19 @@
 
 ---
 
+
+## v2.0 Word Game Collection (Shipped: 2026-03-01)
+
+**Phases completed:** Phases 14–19 (6 phases, 16 plans)
+**Files changed:** 8 game files | **Timeline:** 4 days (2026-02-26 → 2026-03-01)
+
+**Key accomplishments:**
+- Game collection hub (index.html) with card-based navigation and daily completion status; VOWEL migrated to vowel.html with shared CSS design tokens
+- Word Ladder game (ladder.html) — daily BFS-seeded puzzle, one-letter-change path from start→target, optimal path reveal, path history, personal best
+- Cipher game (cipher.html) — daily famous quote as number-substitution cipher; pre-reveal anchor letters, undo/restart, give-up with progress bar
+- Letter Hunt game (hunt.html) — daily word-search grid, drag-to-select mechanic, two-phase timed scoring with mystery category reveal
+- Difficulty calibration across all 3 new games: Cipher repetition filter + scaled pre-reveal, Ladder 3–4 step paths via COMMON_ADJACENCY BFS, Hunt moderate-stretch hard words across 22 categories
+- Play-test verification: 9 bugs found and fixed across all three games; all games approved as consistently challenging and mobile-ready
+
+---
+

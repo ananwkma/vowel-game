@@ -1,12 +1,13 @@
-# Yellow Blocks Word Game (VOWEL)
+# Word Game Collection
 
 ## What This Is
 
-A browser-based daily word puzzle where the player sees a consonant sequence and must place yellow vowel blocks into the correct positions to form a valid English word. Five words per day, timed with penalties for giving up. Tracks personal best across sessions. Works on mobile and desktop with separate optimised interaction models — tap-to-pick on touch, drag-hover on desktop.
+A browser-based daily word puzzle collection with four games: VOWEL (place vowels into consonant sequences), Word Ladder (change one letter at a time from start to target), Cipher (decode a famous quote from number-substitution), and Letter Hunt (find hidden words in a grid before time runs out). A central hub (index.html) tracks which daily puzzles the player has completed. All games share a warm typographic aesthetic, work on mobile and desktop, and produce a new puzzle every day.
 
-Shipped v1.0 on 2026-02-23 (Single HTML file, core gameplay).
+Shipped v1.0 on 2026-02-23 (Single HTML file, core VOWEL gameplay).
 Shipped v1.1 on 2026-02-24 (Daily puzzles, timer, score, streaks).
 Shipped v1.2 on 2026-02-25 (Backend stats, personal best, mobile gesture redesign).
+Shipped v2.0 on 2026-03-01 (Four-game collection hub with Ladder, Cipher, Hunt).
 
 ## Core Value
 
@@ -38,55 +39,60 @@ Players can instantly understand and interact with any puzzle — the mechanics 
 - ✓ Full E2E local verification — v1.2
 - ✓ Mobile: tap-to-pick vowel, drag-to-reposition (separate gestures) — v1.2
 - ✓ Personal best tracking in localStorage with confetti on new record — v1.2
-
-### Active
-
-<!-- v2.0 Word Game Collection -->
-- [ ] Game collection hub (index.html portal, card-based, same aesthetic)
-- [ ] VOWEL migrated to vowel.html
-- [ ] Word Ladder game (daily, start→target, one-letter changes, path history, personal best)
-- [ ] Letter Hunt game (daily word-search grid, lasso/bubble mechanic, mystery category reveal, timed easy/hard scoring)
+- ✓ Game collection hub (index.html portal, card-based, same aesthetic) — v2.0
+- ✓ VOWEL migrated to vowel.html with shared CSS design tokens — v2.0
+- ✓ Word Ladder game (daily, start→target, one-letter changes, path history, personal best) — v2.0
+- ✓ Letter Hunt game (daily word-search grid, drag selection, mystery category reveal, timed easy/hard scoring) — v2.0
+- ✓ Cipher game (daily famous-quote number substitution, pre-reveal anchor letters, undo/restart) — v2.0 (added during v2.0)
+- ✓ Difficulty calibration: Ladder 3–4 step paths, Cipher repetition filter + scaled pre-reveal, Hunt moderate-stretch hard words — v2.0
 
 ### Deferred
 
-- [ ] **ENH-03**: Difficulty filter (short words vs. long words)
-- [ ] **ENH-04**: Hint system (reveal one vowel)
+- [ ] **ENH-03**: Difficulty filter (short words vs. long words) for VOWEL
+- [ ] **ENH-04**: Hint system (reveal one vowel) for VOWEL
 - [ ] **ACC-01**: Allow user scaling (pinch-zoom) for visually impaired users
+- [ ] Cloud deployment — local backend validated in v1.2; deployment is a strong next candidate
 
 ### Out of Scope
 
 - User authentication/login — anonymous play is sufficient
-- Multiplayer/Social sharing — v2+
-- Cloud deployment — deferred; local backend validated in v1.2; deployment is a strong next candidate
+- Multiplayer/Social sharing — post-v2.0
+- VOWEL leaderboard on GitHub Pages — backend is local-only; personal best covers the solo experience
 
 ## Context
 
 **Codebase:**
-- Single `index.html` (vanilla HTML/CSS/JS, ~2,311 lines) — serves as both GitHub Pages frontend and local Express frontend
+- `index.html` — game collection hub (~220 lines)
+- `vowel.html` — VOWEL game (~2,350 lines)
+- `ladder.html` — Word Ladder game (~900 lines)
+- `cipher.html` — Cipher game (~1,050 lines)
+- `hunt.html` — Letter Hunt game (~1,100 lines)
+- `styles/design-tokens.css` — shared CSS custom properties (colors, fonts, spacing)
 - `server/` (Node.js/Express, ~144 lines) — API routes, SQLite service, rate limiting
 - `server/db/scores.db` — SQLite file, local only
 
-**Word list:** 2,710 common English words embedded in JS array.
+**Word list:** 2,710 common English words in VOWEL/Ladder; 809 common words as Ladder PUZZLE_WORDS; 42 famous-quote Cipher corpus; 22 word-search Hunt categories.
 
-**Design:** Warm off-white background (#f5f0e8), amber/tan vowel blocks, charcoal consonant blocks, serif font.
+**Design:** Warm off-white background (#f5f0e8), amber/tan accents, sage green success, charcoal text, Playfair Display serif. Shared via design-tokens.css across all games.
 
-**Deployment:** GitHub Pages serves `index.html` statically. Local backend runs via `npm start`. No cloud deployment yet.
+**Deployment:** GitHub Pages serves static HTML. Local backend runs via `npm start`. No cloud deployment yet.
 
-**Known gaps from v1.2:**
-- Backend is local-only — leaderboard/percentile stats require server running; users on GitHub Pages see personal best only
+**Known gaps from v2.0:**
+- Backend is local-only — VOWEL leaderboard/percentile stats require server running; GitHub Pages users see personal best only
+- Cipher, Ladder, Hunt have no backend stat tracking — standalone local state only
 - Phase 11 has no VERIFICATION.md (tech debt, non-blocking — verified by Phase 13 E2E)
 
 ## Constraints
 
 - **Tech**: Vanilla frontend (no build step), Node/Express/SQLite backend
-- **Single file frontend**: Must remain a single `index.html` — no bundler, no framework
+- **Single file per game**: Each game is a self-contained HTML file — no bundler, no framework
 - **Mobile-first**: Touch interactions must be polished and distinct from desktop
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Single HTML file (v1.0) | No setup friction, works by double-clicking | ✓ Good — trivial deployment, maintained through v1.2 |
+| Single HTML file per game (v1.0→v2.0) | No setup friction, works by double-clicking | ✓ Good — trivial deployment, maintained through v2.0 |
 | SQLite for v1.2 | Simple, file-based, relational power for analytics | ✓ Good — worked well locally; deployment deferred |
 | Local-only v1.2 | Validate backend logic before cloud deployment | ✓ Good — E2E verified, cloud deployment is clear next step |
 | Smoothed percentile `(slower + 0.5) / total` | Avoids 0% and 100% edge cases with small samples | ✓ Good |
@@ -94,16 +100,15 @@ Players can instantly understand and interact with any puzzle — the mechanics 
 | Fire-and-forget score submission | Score submit doesn't block results screen render | ✓ Good |
 | Personal best in localStorage (not backend) | No deployment needed, works offline, per-device | ✓ Good — replaced leaderboard after v1.2 |
 | Separate mobile gestures (tap=pick, drag=position) | Finger obscures letters during hover-select on touch | ✓ Good — shipped post-v1.2 audit |
-
-## Current Milestone: v2.0 Word Game Collection
-
-**Goal:** Expand from a single VOWEL game into a multi-game collection hub with two original new games.
-
-**Target features:**
-- Game collection hub portal (index.html) with card navigation
-- VOWEL migrated to vowel.html (existing game, relocated)
-- Word Ladder — daily puzzle, change one letter at a time, path history, personal best
-- Letter Hunt — daily word-search grid, lasso/bubble selection mechanic, mystery category reveal, timed easy/hard split scoring
+| Shared CSS design tokens (design-tokens.css) | Multi-game visual consistency without duplication | ✓ Good — all v2.0 games share one source of truth |
+| Hash-based routing (#/vowel etc.) for hub | GitHub Pages has no server-side routing; hash avoids 404s | ✓ Good |
+| BFS precomputed adjacency map at startup | Avoids 5–15s freeze on first puzzle generation on mobile | ✓ Good |
+| Cipher added to v2.0 scope mid-milestone | User request during planning; fit the collection theme | ✓ Good — fourth game strengthens collection |
+| COMMON_ADJACENCY BFS for Ladder path length | Ensures all intermediate words in optimal path are recognizable | ✓ Good — SLART-type obscure words eliminated |
+| Anchor letters (pre-reveal) for Cipher | Gives players a foothold; scaled by quote length | ✓ Good — accessibility without trivialization |
+| shakeAndClear clears state synchronously | Async clear caused race with new drag; synchronous eliminates race entirely | ✓ Good — drag ghost bug eliminated |
+| chooseGridSize() height-aware in Hunt | Window width alone caused grid overflow on iPhone SE | ✓ Good — fits all tested mobile sizes |
+| SEAS/SHARKS category corrections in Hunt | CORAL is a sea (not ocean), WHALE is not a shark | ✓ Good — factual accuracy + BASKING shark is well-known |
 
 ---
-*Last updated: 2026-02-25 after v2.0 milestone start*
+*Last updated: 2026-03-01 after v2.0 milestone*
