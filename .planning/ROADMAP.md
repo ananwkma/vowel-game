@@ -49,7 +49,14 @@ See .planning/milestones/v2.0-ROADMAP.md
 **Goal:** Deep readability-first restructure of all five HTML files — consistent JS/CSS section ordering, dead code removed, shared logic extracted where it aids clarity; plus web app manifest + "Lexicon" home screen icon (grid-of-tiles SVG) added to all pages
 **Depends on:** Phase 19
 **Requirements:** —
-**Plans:** TBD
+**Plans:** 5 plans
+
+Plans:
+- [ ] 20-01-PLAN.md — Manifest + icons: create manifest.json, lexicon-icon.svg, and add PWA head tags to all 5 pages
+- [ ] 20-02-PLAN.md — Create shared.js (seededRandom, DATE_SEED, IS_DEBUG, DailyStatus) + full restructure of vowel.html
+- [ ] 20-03-PLAN.md — Full restructure of ladder.html (shared.js integration + standard section ordering)
+- [ ] 20-04-PLAN.md — Full restructure of cipher.html (add CSS section markers + shared.js integration)
+- [ ] 20-05-PLAN.md — Full restructure of hunt.html + minor cleanup of index.html
 
 ## Progress
 
@@ -64,8 +71,8 @@ See .planning/milestones/v2.0-ROADMAP.md
 | 17. Cipher | v2.0 | 2/2 | Complete | 2026-02-27 |
 | 18. Letter Hunt | v2.0 | 3/3 | Complete | 2026-02-28 |
 | 19. Difficulty Calibration | v2.0 | 4/4 | Complete | 2026-03-01 |
-| 20. Codebase Cleanup | — | 0/? | Not started | — |
+| 20. Codebase Cleanup | — | 0/5 | Not started | — |
 
 ---
 *Roadmap created: 2026-02-19*
-*Last updated: 2026-03-01 — Phase 20 Codebase Cleanup added*
+*Last updated: 2026-03-01 — Phase 20 plans created (5 plans, 3 waves)*
