@@ -63,7 +63,12 @@ Plans:
 **Goal:** Cipher: backspace/delete clears a letter assignment (all occurrences, anchor-protected); Cipher + Ladder + Hunt fixed to guarantee no puzzle repeats within a 150-day rolling window (consecutive-day repeats reported); Cipher and Hunt corpora expanded to support the window
 **Depends on:** Phase 20
 **Requirements:** —
-**Plans:** TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 21-01-PLAN.md — Cipher: backspace/delete feature + QUOTES corpus expansion (42 → 200) + 150-day rolling window seeding
+- [ ] 21-02-PLAN.md — Hunt: CATEGORIES corpus expansion (22 → 60) + 60-day rolling window seeding
+- [ ] 21-03-PLAN.md — Ladder: 150-day rolling window seeding fix (DATE_SEED v2)
 
 ## Progress
 
@@ -79,8 +84,8 @@ Plans:
 | 18. Letter Hunt | v2.0 | 3/3 | Complete | 2026-02-28 |
 | 19. Difficulty Calibration | v2.0 | 4/4 | Complete | 2026-03-01 |
 | 20. Codebase Cleanup | — | 0/5 | Not started | — |
-| 21. Feature Updates & Bug Fixes | — | 0/? | Not started | — |
+| 21. Feature Updates & Bug Fixes | — | 0/3 | Not started | — |
 
 ---
 *Roadmap created: 2026-02-19*
-*Last updated: 2026-03-02 — Phase 21 Feature Updates & Bug Fixes added*
+*Last updated: 2026-03-02 — Phase 21 planned (3 plans, all Wave 1 parallel)*
