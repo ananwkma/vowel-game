@@ -58,6 +58,13 @@ Plans:
 - [ ] 20-04-PLAN.md — Full restructure of cipher.html (add CSS section markers + shared.js integration)
 - [ ] 20-05-PLAN.md — Full restructure of hunt.html + minor cleanup of index.html
 
+### Phase 21: Feature Updates & Bug Fixes
+
+**Goal:** Cipher: backspace/delete clears a letter assignment (all occurrences, anchor-protected); Cipher + Ladder + Hunt fixed to guarantee no puzzle repeats within a 150-day rolling window (consecutive-day repeats reported); Cipher and Hunt corpora expanded to support the window
+**Depends on:** Phase 20
+**Requirements:** —
+**Plans:** TBD
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -72,7 +79,8 @@ Plans:
 | 18. Letter Hunt | v2.0 | 3/3 | Complete | 2026-02-28 |
 | 19. Difficulty Calibration | v2.0 | 4/4 | Complete | 2026-03-01 |
 | 20. Codebase Cleanup | — | 0/5 | Not started | — |
+| 21. Feature Updates & Bug Fixes | — | 0/? | Not started | — |
 
 ---
 *Roadmap created: 2026-02-19*
-*Last updated: 2026-03-01 — Phase 20 plans created (5 plans, 3 waves)*
+*Last updated: 2026-03-02 — Phase 21 Feature Updates & Bug Fixes added*
