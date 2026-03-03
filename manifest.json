@@ -1,0 +1,25 @@
+{
+  "name": "Lexicon — Daily Word Games",
+  "short_name": "Lexicon",
+  "description": "Play Vowel, Ladder, Cipher, and Hunt — four daily word puzzles.",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F8F7F4",
+  "theme_color": "#D4A574",
+  "icons": [
+    {
+      "src": "/icons/lexicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/lexicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
