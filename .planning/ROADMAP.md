@@ -83,7 +83,7 @@ Plans:
 | 17. Cipher | v2.0 | 2/2 | Complete | 2026-02-27 |
 | 18. Letter Hunt | v2.0 | 3/3 | Complete | 2026-02-28 |
 | 19. Difficulty Calibration | v2.0 | 4/4 | Complete | 2026-03-01 |
-| 20. Codebase Cleanup | 6/6 | Complete   | 2026-03-03 | — |
+| 20. Codebase Cleanup | 6/6 | Complete    | 2026-03-03 | — |
 | 21. Feature Updates & Bug Fixes | — | 0/3 | Not started | — |
 
 ---
