@@ -480,6 +480,18 @@
             animation: block-wave 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
+        @keyframes block-rejected {
+            0%   { transform: translateX(0); }
+            20%  { transform: translateX(-5px); }
+            40%  { transform: translateX(5px); }
+            60%  { transform: translateX(-4px); }
+            80%  { transform: translateX(4px); }
+            100% { transform: translateX(0); }
+        }
+        .cipher-block.block-rejected {
+            animation: block-rejected 0.35s ease;
+        }
+
         /* ============================================================
            SECTION: RESPONSIVE
         ============================================================ */
@@ -794,6 +806,7 @@
         };
         let guessHistory = [];
         let preRevealNums = new Set();
+        let anchorLetters = new Set(); // letters (A-Z) that are pre-revealed — cannot be typed
 
         /* ============================================================
            SECTION: UTILITY FUNCTIONS
@@ -1207,6 +1220,14 @@
             e.target.value = '';
 
             if (char && /[A-Z]/.test(char)) {
+                // Reject if the typed letter is an anchor (pre-revealed) letter
+                if (anchorLetters.has(char)) {
+                    document.querySelectorAll(`.cipher-block[data-number="${num}"]`).forEach(b => {
+                        b.classList.add('block-rejected');
+                        b.addEventListener('animationend', () => b.classList.remove('block-rejected'), { once: true });
+                    });
+                    return;
+                }
                 guessHistory.push(Object.assign({}, gameState.guesses));
                 assignLetter(num, char);
             }
@@ -1248,6 +1269,7 @@
             gameState = { quote: null, letterToNum: {}, cipherMap: {}, guesses: {}, selectedNumber: null, won: false };
             guessHistory = [];
             preRevealNums = new Set();
+            anchorLetters = new Set();
 
             elResultsScreen.classList.remove('visible');
             document.getElementById('give-up-container').style.display = '';
@@ -1354,6 +1376,7 @@
                         b.classList.add('anchor');
                     });
                     preRevealNums.add(num);
+                    anchorLetters.add(letter);
                 }
             });
 
