@@ -122,7 +122,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: var(--spacing-lg);
+      gap: var(--block-gap);
     }
 
     /* Target word display (always visible at top) */
@@ -244,7 +244,6 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding-top: var(--spacing-md);
       /* Masking gradient to fade out older steps at bottom */
       -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
       mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
@@ -265,8 +264,9 @@
       transform: scale(0.95);
     }
 
-    .history-start {
-      opacity: 0.15; /* History start entry — slightly muted to indicate it's the origin, not a step */
+    /* Higher specificity than .history-entry to ensure the muted start opacity wins */
+    .history-entry.history-start {
+      opacity: 0.15;
     }
 
     .history-tile {
@@ -289,23 +289,24 @@
     #controls {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: var(--spacing-sm);
       width: 100%;
       margin-top: auto;
       padding-bottom: 20px;
     }
 
+    /* Undo — solid charcoal, matches Hunt hint button */
     .btn-game {
       background-color: var(--color-secondary);
       color: var(--color-secondary-text);
       border: none;
-      padding: 14px;
+      padding: 12px;
       border-radius: var(--block-radius);
       font-family: var(--font-serif);
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.1em;
       cursor: pointer;
       box-shadow: var(--shadow-md);
       transition: opacity var(--transition-fast);
@@ -314,6 +315,49 @@
     .btn-game:disabled {
       opacity: 0.3;
       cursor: not-allowed;
+    }
+
+    /* Give Up wrapper — overflow:hidden clips the fill bar */
+    #give-up-wrapper {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--block-radius);
+      width: 100%;
+    }
+
+    /* Give Up button — transparent with warning border, matches Hunt */
+    .btn-giveup {
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      border: 1px solid rgba(196, 131, 111, 0.4);
+      color: var(--color-warning);
+      font-family: var(--font-serif);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity var(--transition-fast);
+      border-radius: var(--block-radius);
+      position: relative;
+      z-index: 1;
+      user-select: none;
+      touch-action: none;
+    }
+
+    .btn-giveup:hover { opacity: 0.85; }
+
+    #give-up-bar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0%;
+      background-color: var(--color-warning);
+      opacity: 0.25;
+      transition: none;
+      z-index: 0;
     }
 
     /* ============================================================
@@ -443,22 +487,6 @@
     }
 
     /* Give Up Hold Bar */
-    #give-up-btn {
-      position: relative;
-      overflow: hidden;
-    }
-
-    #give-up-bar {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      height: 100%;
-      width: 0%;
-      background-color: var(--color-ladder-warning);
-      opacity: 0.3;
-      transition: width 0.1s linear;
-      pointer-events: none;
-    }
 
     /* ============================================================
        SECTION: HIDDEN INPUT (mobile keyboard trigger)
@@ -507,7 +535,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       padding: var(--spacing-xl) var(--spacing-lg);
       padding-top: max(96px, calc(env(safe-area-inset-top) + 72px));
       overflow-y: auto;
@@ -705,10 +733,10 @@
 
       <div id="controls">
         <button id="undo-btn" class="btn-game" disabled>Undo</button>
-        <button id="give-up-btn" class="btn-game">
-          Give Up
+        <div id="give-up-wrapper">
+          <button id="give-up-btn" class="btn-giveup">hold to give up</button>
           <div id="give-up-bar"></div>
-        </button>
+        </div>
       </div>
     </div>
   </main>
@@ -1182,6 +1210,7 @@
       const slideAmt  = blockSize + blockGap;
       historyContainer.style.transition = 'none';
       historyContainer.style.transform  = `translateY(-${slideAmt}px)`;
+      tilesContainer.classList.remove('tiles-shaking');
       tilesContainer.classList.remove('tiles-stamping');
       void tilesContainer.offsetWidth;
       tilesContainer.classList.add('tiles-stamping');
