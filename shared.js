@@ -58,13 +58,13 @@ const IS_DEBUG = new URLSearchParams(location.search).has('debug');
 const DailyStatus = {
   KEY: 'wordGames_dailyStatus',
 
-  markCompleted(gameId) {
+  markCompleted(gameId, extraData = {}) {
     const today = new Date().toISOString().split('T')[0];
     let status = {};
     try {
       status = JSON.parse(localStorage.getItem(this.KEY) || '{}');
     } catch(e) {}
-    status[gameId] = { completed: true, dateKey: today, timestamp: Date.now() };
+    status[gameId] = { completed: true, dateKey: today, timestamp: Date.now(), ...extraData };
     try {
       localStorage.setItem(this.KEY, JSON.stringify(status));
     } catch(e) {

@@ -94,6 +94,10 @@
             align-items: center;
             justify-content: center;
             width: 100%;
+            transition: justify-content 0s;
+        }
+        #game-content.keyboard-open {
+            justify-content: flex-start;
         }
 
         #game-footer {
@@ -990,7 +994,7 @@
             if (isWon) {
                 gameState.won = true;
                 const percent = calculatePercent();
-                DailyStatus.markCompleted('cipher');
+                DailyStatus.markCompleted('cipher', { solved: true, percentSolved: percent });
 
                 // Wave animation: line by line, with a subtle left-to-right
                 // stagger within each line
@@ -1159,7 +1163,7 @@
 
             await animatedDecode();
 
-            DailyStatus.markCompleted('cipher');
+            DailyStatus.markCompleted('cipher', { solved: false, percentSolved: percent });
 
             // Give the player 5 seconds to read the revealed blocks
             setTimeout(() => {
@@ -1390,12 +1394,21 @@
                 const status = statusRaw ? JSON.parse(statusRaw) : {};
                 const today = new Date().toISOString().split('T')[0];
                 if (status.cipher && status.cipher.dateKey === today && status.cipher.completed) {
-                    showResults({ solved: true, percentSolved: 100 });
+                    showResults({ solved: status.cipher.solved ?? true, percentSolved: status.cipher.percentSolved ?? 100 });
                 }
             }
 
             // Debug: update back-link to preserve ?debug param
             if (IS_DEBUG) document.getElementById('back-link').href = 'index.html?debug';
+        }
+
+        // Mobile: top-align content when virtual keyboard is open so the quote stays visible
+        if (window.visualViewport) {
+            const gameContent = document.getElementById('game-content');
+            window.visualViewport.addEventListener('resize', () => {
+                const keyboardOpen = window.visualViewport.height < window.innerHeight * 0.75;
+                gameContent.classList.toggle('keyboard-open', keyboardOpen);
+            });
         }
 
         document.addEventListener('DOMContentLoaded', initGame);
