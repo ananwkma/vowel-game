@@ -1463,6 +1463,9 @@
         sub.textContent = 'CATEGORY REVEALED';
         sub.classList.add('visible');
       }, 500);
+
+      // If hard words were already found before category reveal, finish the game
+      checkPhaseTransition();
     }
 
     function endGame(gaveUp) {
