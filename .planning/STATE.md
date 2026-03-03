@@ -9,11 +9,11 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 
 ## Current Position
 
-Phase: 20-codebase-cleanup — Plan 02 of N complete
-Status: Phase 20 active — shared.js created; vowel.html restructured with standard section ordering
-Last activity: 2026-03-03 — Phase 20, Plan 02 complete; shared.js extracted, vowel.html uses shared utilities
+Phase: 20-codebase-cleanup — Plan 06 of N complete (phase complete — all gaps closed)
+Status: Phase 20 complete — all 3 verification gaps closed; all 5 HTML files fully restructured
+Last activity: 2026-03-03 — Phase 20, Plan 06 complete; index.html wired to shared.js, vowel.html sections reordered
 
-Progress: [██████████] Phase 20 in progress — Plans 20-01, 20-02 complete
+Progress: [████████████████] Phase 20 complete — Plans 20-01, 20-02, 20-03, 20-04, 20-05, 20-06 complete
 
 ## Accumulated Context
 
@@ -23,7 +23,11 @@ Progress: [██████████] Phase 20 in progress — Plans 20-01,
 - [20-01] apple-mobile-web-app-title unified to "Lexicon" on all pages for consistent home screen branding
 - [20-02] VOWEL_DATE_SEED = DATE_SEED (no _vowel_v1 suffix) — suffix not present in original; adding it would change daily word sequence for existing users
 - [20-02] All ungated console.log calls in vowel.html gated behind IS_DEBUG for clean production console
+- [20-03] LADDER_DATE_SEED = DATE_SEED + '_ladder_v1' — suffix preserved as it was present in original ladder.html; removing it would change daily puzzle sequence
+- [20-03] Event handler naming standard: handleTileSelect, handleSubmitWord, handleResetGame, etc. established in ladder.html
+- [20-04] CIPHER_DATE_SEED = DATE_SEED + '_cipher_v1' — suffix preserved as it was present in original cipher.html.
 - (Full log in PROJECT.md Key Decisions)
+- [Phase 20-06]: Task 2 no-op: ladder.html console.log calls confirmed already gated by IS_DEBUG — verification report was incorrect
 
 ### Roadmap Evolution
 
@@ -40,5 +44,5 @@ Progress: [██████████] Phase 20 in progress — Plans 20-01,
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Completed 20-codebase-cleanup/20-02-PLAN.md
-Resume: Continue with next plan in Phase 20 (codebase cleanup)
+Stopped at: Completed 20-codebase-cleanup/20-06-PLAN.md
+Resume: Phase 20 complete — plan next phase
