@@ -41,3 +41,19 @@
 
 ---
 
+
+## v2.1 Cleanup & Stability (Shipped: 2026-03-03)
+
+**Phases completed:** Phases 20–21 (2 phases, 9 plans)
+**Files changed:** 17 | **LOC:** +1,170 / −263 | **Timeline:** 2 days (2026-03-02 → 2026-03-03)
+
+**Key accomplishments:**
+- PWA manifest + PNG home screen icons — all 5 pages installable to iOS/Android; full-bleed amber "L" icon
+- `shared.js` extracted — `seededRandom`, `DATE_SEED`, `IS_DEBUG`, `DailyStatus` shared across all games; eliminates duplication
+- All 5 HTML files restructured with consistent `SECTION: NAME` CSS/JS ordering and dead code removed
+- Cipher: backspace/delete clears letter assignment (all occurrences, anchor-protected); QUOTES corpus 42→200
+- Hunt CATEGORIES corpus 22→60; Cipher + Ladder + Hunt all on 60–150-day Fisher-Yates no-repeat seeding
+- Post-launch polish: 10+ bugs fixed including give-up score restore, drag backtrack, footer spacing, PWA safe area, iOS callout suppression, anchor count by word length, and hard-words-first game completion
+
+---
+

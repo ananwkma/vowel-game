@@ -8,6 +8,7 @@ Shipped v1.0 on 2026-02-23 (Single HTML file, core VOWEL gameplay).
 Shipped v1.1 on 2026-02-24 (Daily puzzles, timer, score, streaks).
 Shipped v1.2 on 2026-02-25 (Backend stats, personal best, mobile gesture redesign).
 Shipped v2.0 on 2026-03-01 (Four-game collection hub with Ladder, Cipher, Hunt).
+Shipped v2.1 on 2026-03-03 (Codebase cleanup, shared.js, PWA icons, corpus expansion, no-repeat seeding).
 
 ## Core Value
 
@@ -71,13 +72,13 @@ Players can instantly understand and interact with any puzzle — the mechanics 
 - `server/` (Node.js/Express, ~144 lines) — API routes, SQLite service, rate limiting
 - `server/db/scores.db` — SQLite file, local only
 
-**Word list:** 2,710 common English words in VOWEL/Ladder; 809 common words as Ladder PUZZLE_WORDS; 42 famous-quote Cipher corpus; 22 word-search Hunt categories.
+**Word list:** 2,710 common English words in VOWEL/Ladder; 809 common words as Ladder PUZZLE_WORDS; 200 famous-quote Cipher corpus (≤12 words, ≤7-letter words); 60 word-search Hunt categories.
 
 **Design:** Warm off-white background (#f5f0e8), amber/tan accents, sage green success, charcoal text, Playfair Display serif. Shared via design-tokens.css across all games.
 
 **Deployment:** GitHub Pages serves static HTML. Local backend runs via `npm start`. No cloud deployment yet.
 
-**Known gaps from v2.0:**
+**Known gaps:**
 - Backend is local-only — VOWEL leaderboard/percentile stats require server running; GitHub Pages users see personal best only
 - Cipher, Ladder, Hunt have no backend stat tracking — standalone local state only
 - Phase 11 has no VERIFICATION.md (tech debt, non-blocking — verified by Phase 13 E2E)
@@ -109,6 +110,10 @@ Players can instantly understand and interact with any puzzle — the mechanics 
 | shakeAndClear clears state synchronously | Async clear caused race with new drag; synchronous eliminates race entirely | ✓ Good — drag ghost bug eliminated |
 | chooseGridSize() height-aware in Hunt | Window width alone caused grid overflow on iPhone SE | ✓ Good — fits all tested mobile sizes |
 | SEAS/SHARKS category corrections in Hunt | CORAL is a sea (not ocean), WHALE is not a shark | ✓ Good — factual accuracy + BASKING shark is well-known |
+| PNG icons via Node/zlib encoder | iOS apple-touch-icon rejects SVG; generated 192px+512px from pixel data | ✓ Good — full-bleed amber L, no black border |
+| DailyStatus.markCompleted extraData param | Cipher needs to persist solved/percentSolved for give-up restore | ✓ Good — backward-compatible, other games unaffected |
+| Anchor count by word count (not char length) | Word count more semantically meaningful for difficulty | ✓ Good — <6w:2, 6-7w:3, 8+w:4 |
+| Cipher quote pool ≤12 words, ≤7-letter words | Long quotes overwhelming on small screens | ✓ Good — constraints improve playability |
 
 ---
-*Last updated: 2026-03-01 after v2.0 milestone*
+*Last updated: 2026-03-03 after v2.1 milestone*

@@ -6,6 +6,7 @@
 - ✅ **v1.1 Score, Streaks & Mobile Polish** — Phases 6–9 (shipped 2026-02-24)
 - ✅ **v1.2 Daily Leaderboard & Backend Stats** — Phases 10–13 (shipped 2026-02-25)
 - ✅ **v2.0 Word Game Collection** — Phases 14–19 (shipped 2026-03-01)
+- ✅ **v2.1 Cleanup & Stability** — Phases 20–21 (shipped 2026-03-03)
 
 ## Phases
 
@@ -44,31 +45,15 @@ See .planning/milestones/v2.0-ROADMAP.md
 
 </details>
 
-### Phase 20: Codebase Cleanup
+<details>
+<summary>✅ v2.1 Cleanup & Stability (Phases 20–21) — SHIPPED 2026-03-03</summary>
 
-**Goal:** Deep readability-first restructure of all five HTML files — consistent JS/CSS section ordering, dead code removed, shared logic extracted where it aids clarity; plus web app manifest + "Lexicon" home screen icon (grid-of-tiles SVG) added to all pages
-**Depends on:** Phase 19
-**Requirements:** —
-**Plans:** 6/6 plans complete
+See .planning/milestones/v2.1-ROADMAP.md
 
-Plans:
-- [ ] 20-01-PLAN.md — Manifest + icons: create manifest.json, lexicon-icon.svg, and add PWA head tags to all 5 pages
-- [ ] 20-02-PLAN.md — Create shared.js (seededRandom, DATE_SEED, IS_DEBUG, DailyStatus) + full restructure of vowel.html
-- [ ] 20-03-PLAN.md — Full restructure of ladder.html (shared.js integration + standard section ordering)
-- [ ] 20-04-PLAN.md — Full restructure of cipher.html (add CSS section markers + shared.js integration)
-- [ ] 20-05-PLAN.md — Full restructure of hunt.html + minor cleanup of index.html
+- [x] **Phase 20: Codebase Cleanup** — shared.js extracted; all 5 HTML files restructured; PWA manifest + PNG home screen icons (completed 2026-03-03)
+- [x] **Phase 21: Feature Updates & Bug Fixes** — Cipher backspace/delete + corpus 42→200; Hunt categories 22→60; 60–150-day no-repeat seeding for all games; 10+ post-launch bugs fixed (completed 2026-03-03)
 
-### Phase 21: Feature Updates & Bug Fixes
-
-**Goal:** Cipher: backspace/delete clears a letter assignment (all occurrences, anchor-protected); Cipher + Ladder + Hunt fixed to guarantee no puzzle repeats within a 150-day rolling window (consecutive-day repeats reported); Cipher and Hunt corpora expanded to support the window
-**Depends on:** Phase 20
-**Requirements:** —
-**Plans:** 3/3 plans complete
-
-Plans:
-- [ ] 21-01-PLAN.md — Cipher: backspace/delete feature + QUOTES corpus expansion (42 → 200) + 150-day rolling window seeding
-- [ ] 21-02-PLAN.md — Hunt: CATEGORIES corpus expansion (22 → 60) + 60-day rolling window seeding
-- [ ] 21-03-PLAN.md — Ladder: 150-day rolling window seeding fix (DATE_SEED v2)
+</details>
 
 ## Progress
 
@@ -83,9 +68,9 @@ Plans:
 | 17. Cipher | v2.0 | 2/2 | Complete | 2026-02-27 |
 | 18. Letter Hunt | v2.0 | 3/3 | Complete | 2026-02-28 |
 | 19. Difficulty Calibration | v2.0 | 4/4 | Complete | 2026-03-01 |
-| 20. Codebase Cleanup | 6/6 | Complete    | 2026-03-03 | — |
-| 21. Feature Updates & Bug Fixes | — | Complete    | 2026-03-03 | — |
+| 20. Codebase Cleanup | v2.1 | 6/6 | Complete | 2026-03-03 |
+| 21. Feature Updates & Bug Fixes | v2.1 | 3/3 | Complete | 2026-03-03 |
 
 ---
 *Roadmap created: 2026-02-19*
-*Last updated: 2026-03-02 — Phase 21 planned (3 plans, all Wave 1 parallel)*
+*Last updated: 2026-03-03 — v2.1 Cleanup & Stability shipped*
