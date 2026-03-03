@@ -1,46 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <!-- Lexicon grid-of-tiles icon: 4 columns x 2 rows, warm palette -->
-  <!-- Tile dimensions: 108px wide, 118px tall, 20px gap, 20px corner radius -->
-  <!-- Row 1 starts at y=89, Row 2 starts at y=227 -->
-  <!-- Col positions: 24, 144, 264, 384 -->
-
-  <!-- Row 1, Col 1: L — amber tile -->
-  <rect x="24" y="89" width="108" height="118" rx="20" fill="#D4A574"/>
-  <text x="78" y="148" font-family="Georgia, serif" font-size="58" font-weight="700"
+  <rect x="32" y="32" width="448" height="448" rx="80" fill="#D4A574"/>
+  <text x="256" y="272" font-family="Georgia, serif" font-size="300" font-weight="700"
         fill="#1C1B18" text-anchor="middle" dominant-baseline="central">L</text>
-
-  <!-- Row 1, Col 2: E — charcoal tile -->
-  <rect x="144" y="89" width="108" height="118" rx="20" fill="#2C2B28"/>
-  <text x="198" y="148" font-family="Georgia, serif" font-size="58" font-weight="700"
-        fill="#F8F7F4" text-anchor="middle" dominant-baseline="central">E</text>
-
-  <!-- Row 1, Col 3: X — amber tile -->
-  <rect x="264" y="89" width="108" height="118" rx="20" fill="#D4A574"/>
-  <text x="318" y="148" font-family="Georgia, serif" font-size="58" font-weight="700"
-        fill="#1C1B18" text-anchor="middle" dominant-baseline="central">X</text>
-
-  <!-- Row 1, Col 4: I — amber tile -->
-  <rect x="384" y="89" width="108" height="118" rx="20" fill="#D4A574"/>
-  <text x="438" y="148" font-family="Georgia, serif" font-size="58" font-weight="700"
-        fill="#1C1B18" text-anchor="middle" dominant-baseline="central">I</text>
-
-  <!-- Row 2, Col 1: C — off-white tile -->
-  <rect x="24" y="227" width="108" height="118" rx="20" fill="#F5F0E8"/>
-  <text x="78" y="286" font-family="Georgia, serif" font-size="58" font-weight="700"
-        fill="#1C1B18" text-anchor="middle" dominant-baseline="central">C</text>
-
-  <!-- Row 2, Col 2: O — sage tile -->
-  <rect x="144" y="227" width="108" height="118" rx="20" fill="#8BAF7C"/>
-  <text x="198" y="286" font-family="Georgia, serif" font-size="58" font-weight="700"
-        fill="#1C1B18" text-anchor="middle" dominant-baseline="central">O</text>
-
-  <!-- Row 2, Col 3: N — amber tile -->
-  <rect x="264" y="227" width="108" height="118" rx="20" fill="#D4A574"/>
-  <text x="318" y="286" font-family="Georgia, serif" font-size="58" font-weight="700"
-        fill="#1C1B18" text-anchor="middle" dominant-baseline="central">N</text>
-
-  <!-- Row 2, Col 4: decorative diamond/star — charcoal accent tile -->
-  <rect x="384" y="227" width="108" height="118" rx="20" fill="#2C2B28"/>
-  <polygon points="438,251 447,278 474,278 452,294 460,321 438,305 416,321 424,294 402,278 429,278"
-           fill="#D4A574"/>
 </svg>
