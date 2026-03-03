@@ -653,6 +653,9 @@
       animation: tileSwipeIn 0.32s ease-out both;
     }
 
+    /* ============================================================
+       SECTION: RESPONSIVE
+    ============================================================ */
     @media (max-width: 425px) {
       :root { --block-size: 42px; }
     }
@@ -954,6 +957,8 @@
       return `${year}-${month}-${day}_ladder_v1`;
     })();
 
+    const DEBUG = new URLSearchParams(window.location.search).has('debug');
+
     function getDailyLadderPuzzle() {
       // Only pick puzzle endpoints from PUZZLE_WORDS that also have at least one
       // common-word neighbor — ensures both ends are reachable within common words.
@@ -989,8 +994,6 @@
       if (DEBUG) console.warn('[Ladder] No valid pair found in 50 attempts — using fallback SCARE→STILL');
       return { start: 'SCARE', target: 'STILL', optimalPath: bfsShortestPath('SCARE', 'STILL', COMMON_ADJACENCY) };
     }
-
-    const DEBUG = new URLSearchParams(window.location.search).has('debug');
 
     const dailyPuzzle = getDailyLadderPuzzle();
     const OPTIMAL_PATH = dailyPuzzle ? dailyPuzzle.optimalPath : null;
@@ -1087,10 +1090,12 @@
     /* ============================================================
        SECTION: STARTUP LOG (verification)
     ============================================================ */
-    console.log('[WordLadder] Today\'s puzzle:', dailyPuzzle ? dailyPuzzle.start : 'NONE', '→', dailyPuzzle ? dailyPuzzle.target : 'NONE');
-    console.log('[WordLadder] Optimal path:', OPTIMAL_PATH ? OPTIMAL_PATH.join(' → ') : 'NONE', '(' + OPTIMAL_STEPS + ' steps)');
-    console.log('[WordLadder] Optimal steps:', OPTIMAL_STEPS);
-    console.log('[WordLadder] ADJACENCY sample:', Object.keys(ADJACENCY).slice(0, 3));
+    if (DEBUG) {
+      console.log('[WordLadder] Today\'s puzzle:', dailyPuzzle ? dailyPuzzle.start : 'NONE', '→', dailyPuzzle ? dailyPuzzle.target : 'NONE');
+      console.log('[WordLadder] Optimal path:', OPTIMAL_PATH ? OPTIMAL_PATH.join(' → ') : 'NONE', '(' + OPTIMAL_STEPS + ' steps)');
+      console.log('[WordLadder] Optimal steps:', OPTIMAL_STEPS);
+      console.log('[WordLadder] ADJACENCY sample:', Object.keys(ADJACENCY).slice(0, 3));
+    }
 
     /* ============================================================
        SECTION: GAME STATE
