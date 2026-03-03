@@ -1290,7 +1290,7 @@
             // Shuffle all QUOTES with the window-offset seed, pick by dayOfWindow position.
             // Prefer high letter-repetition — filter from shuffled order to keep determinism.
             const shuffledQuotes = (() => {
-                const arr = QUOTES.slice();
+                const arr = QUOTES.filter(q => q.text.trim().split(/\s+/).length <= 12);
                 const shuffleRng = seededRandom(CIPHER_DATE_SEED + '_shuffle');
                 for (let i = arr.length - 1; i > 0; i--) {
                     const j = Math.floor(shuffleRng() * (i + 1));
@@ -1358,7 +1358,7 @@
                 console.log(`[Cipher] Quote: "${gameState.quote.text}" — ${gameState.quote.author}`);
                 console.log(`[Cipher] Letters: ${letters.length} total, ${unique} unique, repetition ratio: ${repRatio}`);
                 console.log(`[Cipher] Pre-reveal: ${preRevealLetters.join(', ')} (${preRevealCount}/${maxReveal} letters, wordCount=${wordCount}, quoteLen=${quoteLen})`);
-                console.log(`[Cipher] High-rep pool: ${highRepQuotes.length}/${QUOTES.length} quotes`);
+                console.log(`[Cipher] High-rep pool: ${highRepQuotes.length}/${shuffledQuotes.length} quotes (${QUOTES.length} total, filtered to ≤12 words)`);
             }
 
             // 6. Render
