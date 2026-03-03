@@ -6,9 +6,9 @@
     <meta name="theme-color" content="#D4A574">
 
     <!-- Web app manifest (PWA / home screen pinning) -->
-    <link rel="manifest" href="/manifest.json">
-    <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg">
-    <link rel="apple-touch-icon" href="/icons/lexicon-192.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+    <link rel="apple-touch-icon" href="icons/lexicon-192.png">
 
     <!-- iOS standalone mode -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -25,6 +25,12 @@
         :root {
             --cipher-block-size: var(--block-size);
             --color-medium-charcoal: #D8D5CE;
+            /* Bridge shared tokens to cipher-specific names */
+            --color-cipher-bg: var(--color-bg);
+            --color-cipher-primary: var(--color-primary);
+            --color-cipher-text: var(--color-primary-text);
+            --color-cipher-success: var(--color-success);
+            --color-cipher-warning: var(--color-warning);
         }
 
         /* ============================================================
@@ -542,7 +548,7 @@
 
     <input type="text" id="hidden-input" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="characters">
 
-    <script src="/shared.js"></script>
+    <script src="shared.js"></script>
     <script>
         /* ============================================================
            SECTION: CONSTANTS & CONFIG
@@ -616,6 +622,19 @@
         /* ============================================================
            SECTION: UTILITY FUNCTIONS
         ============================================================ */
+        const CipherProgress = {
+            _key() { return `cipher_progress_${new Date().toISOString().split('T')[0]}`; },
+            save(guesses) {
+                try { localStorage.setItem(this._key(), JSON.stringify(guesses)); } catch(e) {}
+            },
+            load() {
+                try {
+                    const raw = localStorage.getItem(this._key());
+                    return raw ? JSON.parse(raw) : null;
+                } catch(e) { return null; }
+            }
+        };
+
         function hasHighLetterRepetition(text, minRatio = 0.35) {
             const letters = text.replace(/[^a-z]/gi, '').toUpperCase();
             if (letters.length < 15) return false; // skip very short quotes
@@ -807,24 +826,88 @@
             }
         }
 
-        /* ============================================================
-           SECTION: PERSISTENCE
-        ============================================================ */
-        const CipherProgress = {
-            _key() { return `cipher_progress_${new Date().toISOString().split('T')[0]}`; },
-            save(guesses) {
-                try { localStorage.setItem(this._key(), JSON.stringify(guesses)); } catch(e) {}
-            },
-            load() {
-                try {
-                    const raw = localStorage.getItem(this._key());
-                    return raw ? JSON.parse(raw) : null;
-                } catch(e) { return null; }
+        async function animatedDecode() {
+            const blocks = Array.from(document.querySelectorAll('.cipher-block'));
+            const totalDuration = 1500;
+            const delayPerBlock = totalDuration / blocks.length;
+
+            for (let i = 0; i < blocks.length; i++) {
+                const block = blocks[i];
+                const num = parseInt(block.dataset.number);
+                const correctLetter = gameState.cipherMap[num];
+
+                // Update state
+                gameState.guesses[num] = correctLetter;
+
+                // Update UI with animation
+                block.textContent = correctLetter;
+                block.classList.remove('unsolved', 'guessed', 'selected');
+                block.classList.add('correct', 'reveal-transition');
+
+                // Brief highlight
+                block.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    block.style.transform = 'scale(1)';
+                }, 200);
+
+                await new Promise(resolve => setTimeout(resolve, delayPerBlock));
             }
-        };
+        }
 
         /* ============================================================
-           SECTION: GIVE-UP & REVEAL
+           SECTION: UI RENDERING
+        ============================================================ */
+        function showResults(options) {
+            const shareIcon = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="2.5" r="2" fill="currentColor"/><circle cx="3" cy="8" r="2" fill="currentColor"/><circle cx="12" cy="13.5" r="2" fill="currentColor"/><line x1="3" y1="8" x2="12" y2="2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="3" y1="8" x2="12" y2="13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+            const titleClass = options.solved
+                ? 'results-title results-title--success'
+                : 'results-title results-title--warning';
+            const statusText = options.solved ? 'CONGRATULATIONS' : 'THANKS FOR PLAYING';
+
+            const percentSolved = options.percentSolved || 0;
+
+            elResultsScreen.innerHTML = `
+                <div class="results-game-title">Cipher</div>
+                <div class="${titleClass}">${statusText}</div>
+                <div style="font-size: 0.9rem; font-weight: 700; opacity: 0.7; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 0.05em;">${percentSolved}% SOLVED</div>
+                <p class="results-quote">"${gameState.quote.text}"</p>
+                <p class="results-author">— ${gameState.quote.author}</p>
+                <div class="results-actions">
+                    <button class="btn-primary" id="share-btn" type="button">share ${shareIcon}</button>
+                </div>`;
+
+            elResultsScreen.classList.add('visible');
+
+            elResultsScreen.querySelector('#share-btn').addEventListener('click', () => {
+                const status = options.solved ? 'solved' : 'revealed';
+                const text = `Lexicon Cipher: ${status} today's quote!\n\n"${gameState.quote.text}" — ${gameState.quote.author}\n\nPlay at: ${window.location.href}`;
+                if (navigator.share) {
+                    navigator.share({ title: 'Lexicon Cipher', text });
+                } else {
+                    navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
+                }
+            });
+
+            if (options.solved) spawnConfetti();
+        }
+
+        function spawnConfetti() {
+            const colors = ['#D4A574', '#E8C99A', '#C49060', '#F5F0E8', '#1C1B18'];
+            for (let i = 0; i < 100; i++) {
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const confetti = document.createElement('div');
+                confetti.style.cssText = `position:fixed;width:10px;height:10px;background:${color};top:-10px;left:${Math.random()*100}vw;z-index:9999;border-radius:50%;`;
+                document.body.appendChild(confetti);
+                const anim = confetti.animate([
+                    { transform: 'translateY(0) rotate(0)', opacity: 1 },
+                    { transform: `translateY(100vh) rotate(${Math.random()*720}deg)`, opacity: 0 }
+                ], { duration: 2000 + Math.random() * 3000, easing: 'cubic-bezier(0,0,0.2,1)' });
+                anim.onfinish = () => confetti.remove();
+            }
+        }
+
+        /* ============================================================
+           SECTION: EVENT HANDLERS
         ============================================================ */
         let giveUpTimer = null;
         let giveUpStart = 0;
@@ -882,89 +965,6 @@
             }, 5000);
         }
 
-        async function animatedDecode() {
-            const blocks = Array.from(document.querySelectorAll('.cipher-block'));
-            const totalDuration = 1500;
-            const delayPerBlock = totalDuration / blocks.length;
-
-            for (let i = 0; i < blocks.length; i++) {
-                const block = blocks[i];
-                const num = parseInt(block.dataset.number);
-                const correctLetter = gameState.cipherMap[num];
-
-                // Update state
-                gameState.guesses[num] = correctLetter;
-
-                // Update UI with animation
-                block.textContent = correctLetter;
-                block.classList.remove('unsolved', 'guessed', 'selected');
-                block.classList.add('correct', 'reveal-transition');
-
-                // Brief highlight
-                block.style.transform = 'scale(1.1)';
-                setTimeout(() => {
-                    block.style.transform = 'scale(1)';
-                }, 200);
-
-                await new Promise(resolve => setTimeout(resolve, delayPerBlock));
-            }
-        }
-
-        /* ============================================================
-           SECTION: RESULTS & SHARING
-        ============================================================ */
-        function showResults(options) {
-            const shareIcon = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="2.5" r="2" fill="currentColor"/><circle cx="3" cy="8" r="2" fill="currentColor"/><circle cx="12" cy="13.5" r="2" fill="currentColor"/><line x1="3" y1="8" x2="12" y2="2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="3" y1="8" x2="12" y2="13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
-            const titleClass = options.solved
-                ? 'results-title results-title--success'
-                : 'results-title results-title--warning';
-            const statusText = options.solved ? 'CONGRATULATIONS' : 'THANKS FOR PLAYING';
-
-            const percentSolved = options.percentSolved || 0;
-
-            elResultsScreen.innerHTML = `
-                <div class="results-game-title">Cipher</div>
-                <div class="${titleClass}">${statusText}</div>
-                <div style="font-size: 0.9rem; font-weight: 700; opacity: 0.7; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 0.05em;">${percentSolved}% SOLVED</div>
-                <p class="results-quote">"${gameState.quote.text}"</p>
-                <p class="results-author">— ${gameState.quote.author}</p>
-                <div class="results-actions">
-                    <button class="btn-primary" id="share-btn" type="button">share ${shareIcon}</button>
-                </div>`;
-
-            elResultsScreen.classList.add('visible');
-
-            elResultsScreen.querySelector('#share-btn').addEventListener('click', () => {
-                const status = options.solved ? 'solved' : 'revealed';
-                const text = `Lexicon Cipher: ${status} today's quote!\n\n"${gameState.quote.text}" — ${gameState.quote.author}\n\nPlay at: ${window.location.href}`;
-                if (navigator.share) {
-                    navigator.share({ title: 'Lexicon Cipher', text });
-                } else {
-                    navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
-                }
-            });
-
-            if (options.solved) spawnConfetti();
-        }
-
-        function spawnConfetti() {
-            const colors = ['#D4A574', '#E8C99A', '#C49060', '#F5F0E8', '#1C1B18'];
-            for (let i = 0; i < 100; i++) {
-                const color = colors[Math.floor(Math.random() * colors.length)];
-                const confetti = document.createElement('div');
-                confetti.style.cssText = `position:fixed;width:10px;height:10px;background:${color};top:-10px;left:${Math.random()*100}vw;z-index:9999;border-radius:50%;`;
-                document.body.appendChild(confetti);
-                const anim = confetti.animate([
-                    { transform: 'translateY(0) rotate(0)', opacity: 1 },
-                    { transform: `translateY(100vh) rotate(${Math.random()*720}deg)`, opacity: 0 }
-                ], { duration: 2000 + Math.random() * 3000, easing: 'cubic-bezier(0,0,0.2,1)' });
-                anim.onfinish = () => confetti.remove();
-            }
-        }
-
-        /* ============================================================
-           SECTION: HELP MODAL
-        ============================================================ */
         document.getElementById('help-btn').addEventListener('click', () => {
             elHelpModal.classList.add('visible');
         });
@@ -975,9 +975,6 @@
             if (e.target === e.currentTarget) e.currentTarget.classList.remove('visible');
         });
 
-        /* ============================================================
-           SECTION: EVENT HANDLERS
-        ============================================================ */
         // Tab: advance to next unsolved block
         elHiddenInput.addEventListener('keydown', (e) => {
             if (e.key !== 'Tab' || gameState.won) return;

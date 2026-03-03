@@ -6,9 +6,9 @@
   <meta name="theme-color" content="#D4A574">
 
   <!-- Web app manifest (PWA / home screen pinning) -->
-  <link rel="manifest" href="/manifest.json">
-  <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg">
-  <link rel="apple-touch-icon" href="/icons/lexicon-192.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+  <link rel="apple-touch-icon" href="icons/lexicon-192.png">
 
   <!-- iOS standalone mode -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -98,209 +98,221 @@
       font-weight: 700;
       letter-spacing: 0.15em;
       text-transform: uppercase;
-      color: var(--color-ladder-text);
+      margin: max(40px, calc(env(safe-area-inset-top) + 20px)) 0 0;
       text-align: center;
-      flex-shrink: 0;
+      color: var(--color-ladder-text);
+      opacity: 0.9;
     }
 
-    #app {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100dvh;
-      padding-top: max(48px, env(safe-area-inset-top));
-      padding-bottom: max(48px, env(safe-area-inset-bottom));
-      gap: 0;
-      max-width: 400px;
-      margin: 0 auto;
-      width: 100%;
-      padding-left: var(--spacing-md);
-      padding-right: var(--spacing-md);
-    }
-
-    #game-content {
+    main {
       flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px 16px env(safe-area-inset-bottom);
+      overflow-x: hidden;
     }
 
-    #game-footer {
-      flex-shrink: 0;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--spacing-sm);
+    #game-container {
       width: 100%;
-      padding-top: var(--spacing-md);
-      padding-bottom: var(--spacing-sm);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-lg);
     }
 
-    #target-label,
-    #current-label {
+    /* Target word display (always visible at top) */
+    #target-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-xs);
+    }
+
+    .target-label {
       font-size: 0.65rem;
-      letter-spacing: 0.12em;
       text-transform: uppercase;
+      letter-spacing: 0.2em;
       opacity: 0.5;
-      font-family: var(--font-serif);
-    }
-
-    #current-label {
-      margin-top: calc(var(--spacing-xl) + var(--spacing-xl)); /* 64px — wide visual gap from target */
+      font-weight: 700;
     }
 
     #target-display {
       display: flex;
-      flex-direction: row;
-      justify-content: center;
       gap: var(--block-gap);
-      margin-top: var(--spacing-xs);
     }
 
     .target-tile {
       width: var(--block-size);
       height: var(--block-size);
-      border-radius: var(--block-radius);
-      background-color: var(--color-success);
-      color: var(--color-primary-text);
-      font-family: var(--font-serif);
-      font-size: 1.4rem;
-      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.03);
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: var(--shadow-md);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--color-ladder-text);
+      border-radius: var(--radius-sm);
+    }
+
+    /* Current word interaction grid */
+    #tiles-container {
+      display: flex;
+      gap: var(--block-gap);
+      margin-top: calc(var(--spacing-xl) + var(--spacing-xl)); /* 64px — wide visual gap from target */
+      position: relative;
+      z-index: 10;
     }
 
     /* ============================================================
        SECTION: TILES
     ============================================================ */
-    #tiles-container {
-      display: flex;
-      flex-direction: row;
-      gap: var(--block-gap);
-      justify-content: center;
-      margin-top: var(--spacing-xs);
-      position: relative;
-      z-index: 2;
-    }
-
     .tile {
       width: var(--block-size);
       height: var(--block-size);
-      border-radius: var(--block-radius);
-      background-color: var(--color-secondary);
-      color: var(--color-secondary-text);
-      font-family: var(--font-serif);
-      font-size: 1.4rem;
-      font-weight: 700;
+      border: 3px solid rgba(255, 255, 255, 0.15); /* subtle gleam — signals tappable */
+      background-color: transparent;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--color-ladder-text);
       cursor: pointer;
-      border: 3px solid rgba(255, 255, 255, 0.15); /* subtle gleam — signals tappable */
-      box-shadow: var(--shadow-md);
-      transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+      transition: all var(--transition-fast);
+      border-radius: var(--radius-sm);
+      -webkit-tap-highlight-color: transparent;
     }
 
     .tile.selected {
-      background-color: var(--color-ladder-primary);
-      color: #000;
-      border-color: rgba(255, 255, 255, 0.0); /* clear on selected so matched green shows */
-      box-shadow: var(--shadow-md);
+      border-color: var(--color-ladder-primary);
+      background-color: rgba(212, 165, 116, 0.1);
+      transform: translateY(-4px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
 
     .tile--matched {
-      border-color: var(--color-success);
+      background-color: var(--color-ladder-success) !important;
+      color: var(--color-bg) !important;
+      border-color: rgba(255, 255, 255, 0.0); /* clear on selected so matched green shows */
+    }
+
+    .tile--matched.selected {
+      border-color: var(--color-ladder-primary) !important;
       box-shadow: var(--shadow-md), 0 0 0 2px rgba(139, 175, 124, 0.35); /* outer glow */
     }
 
     /* ============================================================
        SECTION: TILE HINT
     ============================================================ */
-    #tile-hint {
-      font-size: 0.65rem;
-      font-family: var(--font-serif);
-      letter-spacing: 0.08em;
-      font-style: italic;
-      opacity: 0.4;
-      margin-top: var(--spacing-xs);
-      position: relative;
-      z-index: 2;
+    #error-message {
+      height: 1.2rem;
+      color: var(--color-ladder-primary);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      text-align: center;
+      margin-top: var(--spacing-sm);
     }
 
     /* ============================================================
        SECTION: ERROR MESSAGE
     ============================================================ */
-    #error-message {
-      text-align: center;
-      color: var(--color-ladder-warning);
-      font-size: 0.85rem;
-      min-height: 1.2em;
-      margin-top: var(--spacing-xs);
-      position: relative;
-      z-index: 2;
+    .tiles-shaking {
+      animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes shake {
+      10%, 90% { transform: translate3d(-1px, 0, 0); }
+      20%, 80% { transform: translate3d(2px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+      40%, 60% { transform: translate3d(4px, 0, 0); }
     }
 
     /* ============================================================
        SECTION: HISTORY
     ============================================================ */
-    #history-container {
-      overflow-y: auto;
-      max-height: 280px;
+    #history-outer {
       width: 100%;
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: var(--spacing-md);
+      /* Masking gradient to fade out older steps at bottom */
+      -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+      mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+    }
+
+    #history-container {
       display: flex;
       flex-direction: column;
       gap: var(--block-gap);
-      margin-top: var(--block-gap);
+      width: fit-content;
+      padding-bottom: 80px; /* space for scrolling */
     }
 
     .history-entry {
-      flex-shrink: 0;
       display: flex;
-      flex-direction: row;
-      justify-content: center;
       gap: var(--block-gap);
-      opacity: 0.45;
+      opacity: 0.4;
+      transform: scale(0.95);
+    }
+
+    .history-start {
+      opacity: 0.15; /* History start entry — slightly muted to indicate it's the origin, not a step */
     }
 
     .history-tile {
       width: var(--block-size);
       height: var(--block-size);
-      border-radius: var(--block-radius);
-      background-color: var(--color-secondary);
-      color: var(--color-secondary-text);
-      font-family: var(--font-serif);
-      font-size: 1.4rem;
-      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.02);
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: var(--shadow-md);
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--color-ladder-text);
+      border-radius: var(--radius-sm);
     }
 
     /* ============================================================
        SECTION: BUTTONS
     ============================================================ */
-    #undo-btn {
-      padding: 12px;
-      background-color: var(--color-secondary);
-      color: var(--color-secondary-text);
-      font-family: var(--font-serif);
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      border: none;
-      border-radius: var(--block-radius);
-      cursor: pointer;
-      box-shadow: var(--shadow-md);
-      transition: opacity var(--transition-fast);
+    #controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      width: 100%;
+      margin-top: auto;
+      padding-bottom: 20px;
     }
 
-    #undo-btn:disabled {
-      opacity: 0.3;
+    .btn-game {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--color-ladder-text);
+      padding: 14px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-serif);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-game:disabled {
+      opacity: 0.2;
       cursor: not-allowed;
     }
 
@@ -315,151 +327,137 @@
       width: 28px;
       height: 28px;
       border-radius: 50%;
-      border: 1.5px solid var(--color-primary-text);
+      border: 1px solid var(--color-ladder-text);
       background: transparent;
-      color: var(--color-primary-text);
+      color: var(--color-ladder-text);
       font-family: var(--font-serif);
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       font-weight: 700;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      opacity: 0.6;
-      transition: opacity 0.2s, transform 0.1s;
+      opacity: 0.5;
+      transition: opacity var(--transition-fast);
     }
 
-    #help-btn:hover, #help-btn:active { opacity: 1; transform: scale(1.05); }
+    #help-btn:hover { opacity: 1; }
 
     /* ============================================================
        SECTION: HELP MODAL
     ============================================================ */
     #help-modal {
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.4);
-      display: none;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(28, 27, 24, 0.95);
+      z-index: 7000;
+      display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 10000;
       padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
     }
 
-    #help-modal.visible { display: flex; }
+    #help-modal.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
 
-    #help-modal-content {
+    .help-content {
       background: var(--color-bg);
-      width: 100%;
-      max-width: 400px;
-      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
       padding: 32px 24px;
-      position: relative;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-      text-align: center;
-      animation: modal-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border-radius: var(--radius-lg);
+      max-width: 400px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
     }
 
-    @keyframes modal-pop {
-      from { transform: scale(0.9); opacity: 0; }
-      to   { transform: scale(1);   opacity: 1; }
-    }
-
-    #help-modal h2 {
+    .help-title {
       font-family: var(--font-serif);
       font-size: 1.2rem;
       font-weight: 700;
-      letter-spacing: 0.1em;
-      margin-bottom: 20px;
-      color: var(--color-primary-text);
       text-transform: uppercase;
+      letter-spacing: 0.1em;
+      text-align: center;
     }
 
-    #help-modal .instruction-step {
+    .help-steps {
       display: flex;
-      align-items: flex-start;
+      flex-direction: column;
       gap: 16px;
-      text-align: left;
-      margin-bottom: 20px;
     }
 
-    #help-modal .step-num {
-      flex-shrink: 0;
+    .help-step {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .step-num {
       width: 24px;
       height: 24px;
-      background: var(--color-primary);
-      color: var(--color-primary-text);
+      border: 1px solid var(--color-ladder-primary);
+      color: var(--color-ladder-primary);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 0.7rem;
       font-weight: 700;
-      font-size: 0.8rem;
-      padding-bottom: 4px;
+      flex-shrink: 0;
+      margin-top: 2px;
     }
 
-    #help-modal .step-text {
+    .step-text {
       font-size: 0.9rem;
-      line-height: 1.45;
-      color: var(--color-primary-text);
-      opacity: 0.85;
+      line-height: 1.5;
+      opacity: 0.8;
+    }
+
+    .step-text strong {
+      color: var(--color-ladder-primary);
+      font-weight: 700;
     }
 
     #help-modal-close {
       margin-top: 8px;
-      padding: 10px 32px;
-      background: var(--color-primary);
-      color: var(--color-primary-text);
+      background: var(--color-ladder-primary);
       border: none;
-      border-radius: 6px;
+      color: var(--color-bg);
+      padding: 14px;
+      border-radius: var(--radius-md);
       font-family: var(--font-serif);
+      font-size: 0.8rem;
       font-weight: 700;
-      font-size: 0.9rem;
-      cursor: pointer;
-      letter-spacing: 0.03em;
-      box-shadow: var(--shadow-block);
       text-transform: uppercase;
-      transition: transform 0.1s;
+      letter-spacing: 0.1em;
+      cursor: pointer;
     }
 
-    #help-modal-close:active { transform: translateY(2px); }
-
-    #give-up-wrapper {
+    /* Give Up Hold Bar */
+    #give-up-btn {
       position: relative;
       overflow: hidden;
-      border-radius: var(--block-radius);
-    }
-
-    #give-up-btn {
-      width: 100%;
-      padding: 12px;
-      background: transparent;
-      border: 1px solid rgba(196, 131, 111, 0.4);
-      color: var(--color-ladder-warning);
-      font-family: var(--font-serif);
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: opacity 0.3s;
-      border-radius: var(--block-radius);
-      position: relative;
-      z-index: 1;
-      user-select: none;
-      touch-action: none;
     }
 
     #give-up-bar {
       position: absolute;
+      bottom: 0;
       left: 0;
-      top: 0;
       height: 100%;
       width: 0%;
       background-color: var(--color-ladder-warning);
-      opacity: 0.25;
-      transition: none;
-      z-index: 0;
+      opacity: 0.3;
+      transition: width 0.1s linear;
+      pointer-events: none;
     }
 
     /* ============================================================
@@ -469,40 +467,33 @@
       position: absolute;
       opacity: 0;
       pointer-events: none;
-      width: 1px;
-      height: 1px;
+      top: 0;
+      left: 0;
     }
 
     /* ============================================================
        SECTION: ANIMATIONS
     ============================================================ */
-    @keyframes tile-shake {
-      0%, 100% { transform: translateX(0); }
-      20% { transform: translateX(-6px); }
-      40% { transform: translateX(6px); }
-      60% { transform: translateX(-4px); }
-      80% { transform: translateX(4px); }
-    }
-
-    @keyframes tile-stamp {
+    /* Stamp-down effect: tiles lift, new word stamps down, history slides down */
+    @keyframes lift-and-stamp {
       0%   { transform: translateY(0); }
-      40%  { transform: translateY(-14px); }   /* peak lift — grey entry visible below */
+      35%  { transform: translateY(-14px); }   /* peak lift — grey entry visible below */
       100% { transform: translateY(0); }       /* settle back to position */
     }
 
-    @keyframes tile-unstamp {
-      0%   { transform: translateY(0); }
+    /* Undo effect: history slides up, tiles do a gentle settle-down */
+    @keyframes unstamp {
+      0%   { transform: translateY(-8px); }
       35%  { transform: translateY(6px); }  /* slight press as word arrives back */
       100% { transform: translateY(0); }
     }
 
-    .tiles-shaking   { animation: tile-shake   0.4s ease-in-out; }
-    .tiles-stamping  { animation: tile-stamp   0.4s ease-in-out forwards; }
-    .tiles-unstamping{ animation: tile-unstamp 0.3s ease-out forwards; }
+    .tiles-stamping {
+      animation: lift-and-stamp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
 
-    /* History start entry — slightly muted to indicate it's the origin, not a step */
-    .history-entry.history-start {
-      opacity: 0.45;
+    .tiles-unstamping {
+      animation: unstamp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
     }
 
     /* ============================================================
@@ -510,211 +501,228 @@
     ============================================================ */
     #results-screen {
       position: fixed;
-      inset: 0;
-      background: var(--color-ladder-bg);
-      z-index: 5000;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--color-bg);
+      z-index: 8000;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: var(--spacing-xl) var(--spacing-lg);
-      padding-top: max(96px, calc(env(safe-area-inset-top) + 72px));
-      overflow-y: auto;
-      gap: var(--spacing-sm);
+      padding: 40px 24px;
       text-align: center;
-    }
-
-    #results-screen[hidden] {
-      display: none;
     }
 
     .results-game-title {
-      position: absolute;
-      top: max(48px, env(safe-area-inset-top));
-      left: 0;
-      right: 0;
-      font-family: var(--font-serif);
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: 0.15em;
+      font-size: 0.7rem;
       text-transform: uppercase;
-      color: var(--color-ladder-text);
-      text-align: center;
+      letter-spacing: 0.3em;
+      opacity: 0.5;
+      margin-bottom: 8px;
     }
 
     .results-title {
       font-size: 1.5rem;
       font-weight: 700;
       letter-spacing: 0.1em;
-      text-transform: uppercase;
+      margin-bottom: 4px;
     }
 
-    .results-title--warning {
-      color: var(--color-ladder-warning);
-    }
-
-    .results-title--success {
-      color: var(--color-ladder-success);
-    }
+    .results-title--success { color: var(--color-ladder-success); }
+    .results-title--warning { color: var(--color-ladder-primary); }
 
     .results-steps {
-      font-size: 1rem;
-      opacity: 0.75;
+      font-size: 1.1rem;
+      opacity: 0.8;
+      margin-bottom: 32px;
     }
 
     .results-section-label {
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
-      opacity: 0.5;
-      margin-top: var(--spacing-md);
+      letter-spacing: 0.15em;
+      opacity: 0.4;
+      margin-bottom: 12px;
+      font-weight: 700;
     }
 
     .results-optimal-path {
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      max-height: 320px;
-      overflow-y: auto;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 32px;
+      max-width: 320px;
     }
 
     .optimal-word {
-      font-size: 1rem;
-      letter-spacing: 0.12em;
-      font-weight: 500;
+      font-family: var(--font-serif);
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 6px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-sm);
       opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
-    .optimal-word.optimal-start { font-weight: 700; }
-    .optimal-word.optimal-end { font-weight: 700; color: var(--color-success); }
-    .optimal-word.revealed { opacity: 1; transition: opacity 0.3s ease-in; }
+    .optimal-word.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .optimal-start { background: rgba(255, 255, 255, 0.05); }
+    .optimal-end   { background: var(--color-ladder-success); color: var(--color-bg); border-color: transparent; }
 
     /* Arrow connector between words in optimal path */
-    .optimal-word::after { content: '↓'; display: block; font-size: 0.65rem; opacity: 0.4; line-height: 1.2; }
-    .optimal-word:last-child::after { content: ''; }
+    .optimal-word:not(:last-child)::after {
+      content: '→';
+      position: absolute;
+      right: -14px;
+      opacity: 0.3;
+      font-size: 0.8rem;
+    }
 
     .results-actions {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 16px;
-      margin-top: var(--spacing-lg);
+      gap: 12px;
+      width: 100%;
+      max-width: 240px;
+      margin-top: 16px;
     }
 
     .btn-primary {
+      background: var(--color-ladder-primary);
+      border: none;
+      color: var(--color-bg);
+      padding: 16px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-serif);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      padding: 12px 48px;
-      background: var(--color-primary);
-      color: #ffffff;
-      border: none;
-      border-radius: 6px;
-      font-family: var(--font-serif);
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: var(--shadow-block);
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-      transition: transform 0.1s, filter 0.15s;
+      gap: 10px;
     }
-    .btn-primary:hover  { filter: brightness(0.96); }
-    .btn-primary:active { transform: translateY(2px); }
 
     .btn-secondary {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--color-ladder-text);
+      padding: 14px;
+      border-radius: var(--radius-md);
       font-family: var(--font-serif);
-      font-size: 0.85rem;
-      color: var(--color-primary-text);
-      opacity: 0.5;
-      text-decoration: none;
-      background: none;
-      border: none;
-      border-bottom: 1px solid transparent;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
       cursor: pointer;
-      padding: 0;
-      transition: opacity 0.15s, border-color 0.15s;
-    }
-    .btn-secondary:hover {
-      opacity: 0.8;
-      border-bottom-color: rgba(28,27,24,0.4);
     }
 
     /* ============================================================
        SECTION: TILE SWIPE-IN ANIMATION
     ============================================================ */
-    @keyframes tileSwipeIn {
-      from { opacity: 0; transform: translateX(-24px) scale(0.92); }
-      to   { opacity: 1; transform: translateX(0)     scale(1);    }
-    }
     .tile-swipe-in {
-      animation: tileSwipeIn 0.32s ease-out both;
+      animation: tile-swipe 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+    }
+
+    @keyframes tile-swipe {
+      0% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
     }
 
     /* ============================================================
        SECTION: RESPONSIVE
     ============================================================ */
-    @media (max-width: 425px) {
-      :root { --block-size: 42px; }
+    @media (max-width: 380px) {
+      :root {
+        --block-size: 48px;
+        --block-gap: 6px;
+      }
+      #game-title { font-size: 1.3rem; }
+      .tile, .target-tile { font-size: 1.2rem; }
     }
-    @media (max-width: 360px) {
-      :root { --block-size: 38px; }
+
+    /* Ultra-small height fix */
+    @media (max-height: 600px) {
+      #tiles-container { margin-top: var(--spacing-lg); }
+      #game-title { margin-top: max(32px, calc(env(safe-area-inset-top) + 12px)); }
+      #history-container { padding-bottom: 40px; }
     }
   </style>
 </head>
 <body>
-  <a href="index.html" id="back-link" aria-label="Back to Word Games hub">LEXICON</a>
+  <a href="index.html" id="back-link">HUB</a>
   <button id="help-btn" aria-label="How to play">?</button>
-  <input type="text" id="hidden-input" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" aria-hidden="true" tabindex="-1">
 
-  <div id="app">
-    <h1 id="game-title">Ladder</h1>
-    <div id="game-content">
-      <div id="target-label">TARGET</div>
-      <div id="target-display" aria-label="Target word"></div>
+  <h1 id="game-title">Ladder</h1>
 
-      <div id="current-label">YOUR WORD</div>
-      <div id="tiles-container" role="group" aria-label="Current word tiles"></div>
-      <div id="tile-hint" aria-hidden="true">tap a letter to change it</div>
-      <div id="error-message" role="alert" aria-live="polite"></div>
+  <main>
+    <div id="game-container">
+      <!-- Target word (static goal) -->
+      <div id="target-container">
+        <div class="target-label">Target</div>
+        <div id="target-display" aria-label="Target word">
+          <!-- Target tiles generated by JS -->
+        </div>
+      </div>
 
-      <div id="history-container" aria-label="Word path history"></div>
-    </div>
+      <!-- Current word (interactive) -->
+      <div id="tiles-container" role="grid" aria-label="Current word interaction">
+        <!-- Interactive tiles generated by JS -->
+      </div>
 
-    <div id="game-footer">
-      <button id="undo-btn" type="button" disabled>undo</button>
-      <div id="give-up-wrapper">
-        <button id="give-up-btn" type="button">hold to give up</button>
-        <div id="give-up-bar"></div>
+      <div id="error-message" aria-live="polite"></div>
+
+      <!-- History of steps (dynamic list) -->
+      <div id="history-outer">
+        <div id="history-container" aria-label="Step history">
+          <!-- History entries added here -->
+        </div>
+      </div>
+
+      <div id="controls">
+        <button id="undo-btn" class="btn-game" disabled>Undo</button>
+        <button id="give-up-btn" class="btn-game">
+          Give Up
+          <div id="give-up-bar"></div>
+        </button>
       </div>
     </div>
-  </div>
+  </main>
 
-  <!-- Help modal -->
+  <!-- Capture keyboard input for mobile -->
+  <input type="text" id="hidden-input" inputmode="text" autocomplete="off" spellcheck="false" aria-hidden="true">
+
+  <!-- Help Modal -->
   <div id="help-modal" aria-hidden="true">
-    <div id="help-modal-content">
-      <h2>How to Play</h2>
-
-      <div class="instruction-step">
-        <div class="step-num">1</div>
-        <div class="step-text"><strong>Tap a letter</strong> in YOUR WORD, then <strong>type a new letter</strong> — the word submits automatically.</div>
-      </div>
-
-      <div class="instruction-step">
-        <div class="step-num">2</div>
-        <div class="step-text">Each step must be a valid English word. You can only change <strong>one letter at a time</strong>.</div>
-      </div>
-
-      <div class="instruction-step">
-        <div class="step-num">3</div>
-        <div class="step-text">Work your way to the <strong>TARGET</strong> word in as few steps as possible. Green borders show letters already in the right place.</div>
-      </div>
-
-      <div class="instruction-step">
-        <div class="step-num">4</div>
-        <div class="step-text">Made a mistake? Use <strong>Undo</strong> to take back your last step.</div>
+    <div class="help-content">
+      <h2 class="help-title">How to Play</h2>
+      <div class="help-steps">
+        <div class="help-step">
+          <div class="step-num">1</div>
+          <div class="step-text">Change one letter at a time to transform the starting word into the <strong>Target</strong>.</div>
+        </div>
+        <div class="help-step">
+          <div class="step-num">2</div>
+          <div class="step-text">Every step must be a <strong>valid 5-letter word</strong>.</div>
+        </div>
+        <div class="help-step">
+          <div class="step-num">3</div>
+          <div class="step-text">Try to reach the target in as few steps as possible.</div>
+        </div>
+        <div class="help-step">
+          <div class="step-num">4</div>
+          <div class="step-text">Made a mistake? Use <strong>Undo</strong> to take back your last step.</div>
+        </div>
       </div>
 
       <button id="help-modal-close">Got it</button>
@@ -730,20 +738,12 @@
   <canvas id="confetti-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;" hidden></canvas>
 
   <script src="data/words5.js"></script>
-  <script src="/shared.js"></script>
+  <script src="shared.js"></script>
   <script>
     /* ============================================================
        SECTION: DICTIONARY
        Loaded from data/words5.js (15,921 five-letter English words).
        DICTIONARY is declared by that external script.
-    ============================================================ */
-
-    /* ============================================================
-       SECTION: PUZZLE WORDS
-       Curated subset of DICTIONARY — common, recognizable words only.
-       Puzzle start/target are picked from this set, and the BFS optimal
-       path must pass through only these words so players never need an
-       obscure intermediate step to solve the puzzle.
     ============================================================ */
     const PUZZLE_WORDS = new Set([
       // A
@@ -866,13 +866,71 @@
     ]);
 
     /* ============================================================
-       SECTION: ADJACENCY MAP
-       Pre-computed at startup: O(1) one-letter-change lookup
+       SECTION: CONSTANTS & CONFIG
+    ============================================================ */
+    const LADDER_DATE_SEED = DATE_SEED + '_ladder_v1';
+
+    const ADJACENCY = buildAdjacencyMap(DICTIONARY);
+    const COMMON_ADJACENCY = buildAdjacencyMap([...PUZZLE_WORDS]);
+
+    const dailyPuzzle = getDailyLadderPuzzle();
+    const OPTIMAL_PATH = dailyPuzzle ? dailyPuzzle.optimalPath : null;
+    const OPTIMAL_STEPS = OPTIMAL_PATH ? OPTIMAL_PATH.length - 1 : 0;
+
+    if (IS_DEBUG) {
+        console.log(`[Ladder] Date: ${LADDER_DATE_SEED}`);
+        console.log(`[Ladder] Optimal path (${OPTIMAL_STEPS} steps): ${OPTIMAL_PATH ? OPTIMAL_PATH.join(' → ') : 'fallback'}`);
+    }
+
+    /* Persistence Utilities */
+    const LadderResult = {
+      _key() { return `ladder_result_${new Date().toISOString().split('T')[0]}`; },
+      save({ solved, steps, playerPath }) {
+        try { localStorage.setItem(this._key(), JSON.stringify({ solved, steps, playerPath })); } catch(e) {}
+      },
+      load() {
+        try {
+          const raw = localStorage.getItem(this._key());
+          return raw ? JSON.parse(raw) : null;
+        } catch(e) { return null; }
+      },
+      clear() {
+        try { localStorage.removeItem(this._key()); } catch(e) {}
+      }
+    };
+
+    const LadderProgress = {
+      _key() { return `ladder_progress_${new Date().toISOString().split('T')[0]}`; },
+      save(playerPath) {
+        try { localStorage.setItem(this._key(), JSON.stringify(playerPath)); } catch(e) {}
+      },
+      load() {
+        try { const raw = localStorage.getItem(this._key()); return raw ? JSON.parse(raw) : null; } catch(e) { return null; }
+      },
+      clear() {
+        try { localStorage.removeItem(this._key()); } catch(e) {}
+      }
+    };
+
+    /* ============================================================
+       SECTION: STATE
+    ============================================================ */
+    let gameState = {
+      currentWord: dailyPuzzle ? dailyPuzzle.start : 'STONE',
+      targetWord: dailyPuzzle ? dailyPuzzle.target : 'CRANE',
+      playerPath: [dailyPuzzle ? dailyPuzzle.start : 'STONE'],
+      pendingTileIndex: null,
+      pendingLetter: null,
+      completed: false,
+      gaveUp: false,
+    };
+
+    /* ============================================================
+       SECTION: UTILITY FUNCTIONS
     ============================================================ */
     function buildAdjacencyMap(words) {
       const adjacency = {};
-      const buckets = {};  // pattern like "C*ANE" -> [words sharing that pattern]
-
+      const buckets = {};
       for (const word of words) {
         const upper = word.toUpperCase();
         adjacency[upper] = [];
@@ -882,8 +940,6 @@
           buckets[pattern].push(upper);
         }
       }
-
-      // Every word in a bucket differs from every other by exactly that one letter
       for (const group of Object.values(buckets)) {
         for (let i = 0; i < group.length; i++) {
           for (let j = i + 1; j < group.length; j++) {
@@ -892,25 +948,15 @@
           }
         }
       }
-
       return adjacency;
     }
 
-    const ADJACENCY = buildAdjacencyMap(DICTIONARY);
-    // Common-word-only graph: guarantees at least one all-common path exists for every puzzle
-    const COMMON_ADJACENCY = buildAdjacencyMap([...PUZZLE_WORDS]);
-
-    /* ============================================================
-       SECTION: BFS SHORTEST PATH
-    ============================================================ */
     function bfsShortestPath(start, target, adjacency) {
       const startU = start.toUpperCase();
       const targetU = target.toUpperCase();
       if (startU === targetU) return [startU];
-
       const visited = new Set([startU]);
       const queue = [[startU, [startU]]];
-
       while (queue.length > 0) {
         const [current, path] = queue.shift();
         const neighbors = adjacency[current] || [];
@@ -925,65 +971,6 @@
       return null;
     }
 
-    /* ============================================================
-       SECTION: CONSTANTS & CONFIG
-       LADDER_DATE_SEED: game-specific seed built from shared.js DATE_SEED
-       (_ladder_v1 suffix preserves the original daily sequence)
-    ============================================================ */
-    const LADDER_DATE_SEED = DATE_SEED + '_ladder_v1';
-
-    /* ============================================================
-       SECTION: ENGINE
-       getDailyLadderPuzzle: deterministic seed → same puzzle for all players
-    ============================================================ */
-    function getDailyLadderPuzzle() {
-      // Only pick puzzle endpoints from PUZZLE_WORDS that also have at least one
-      // common-word neighbor — ensures both ends are reachable within common words.
-      const puzzlePool = Object.keys(ADJACENCY).filter(w =>
-        w.length === 5 && PUZZLE_WORDS.has(w) &&
-        COMMON_ADJACENCY[w] && COMMON_ADJACENCY[w].length >= 1
-      );
-
-      if (puzzlePool.length < 2) return null;
-
-      // Try up to 50 seed offsets to find a valid pair where:
-      //   Optimal BFS path through COMMON_ADJACENCY (common words only) has 3-4 steps —
-      //   ensures the optimal path uses only recognizable words with no obscure intermediates.
-      for (let attempt = 0; attempt < 50; attempt++) {
-        const rng = seededRandom(LADDER_DATE_SEED + '_' + attempt);
-        const startIdx = Math.floor(rng() * puzzlePool.length);
-        const targetIdx = Math.floor(rng() * puzzlePool.length);
-
-        const start = puzzlePool[startIdx];
-        const target = puzzlePool[targetIdx];
-
-        if (start === target) continue;
-
-        const path = bfsShortestPath(start, target, COMMON_ADJACENCY);
-        if (!path || path.length < 4 || path.length > 5) continue;
-
-        if (IS_DEBUG) console.log(`[Ladder] Attempt ${attempt}: found path ${path.length - 1} steps: ${path.join(' → ')}`);
-        return { start, target, optimalPath: path };
-      }
-
-      // Absolute fallback: verified common-word pair, 4 steps
-      // Path: SCARE->STARE->STALE->STALL->STILL (all common words)
-      if (IS_DEBUG) console.warn('[Ladder] No valid pair found in 50 attempts — using fallback SCARE→STILL');
-      return { start: 'SCARE', target: 'STILL', optimalPath: bfsShortestPath('SCARE', 'STILL', COMMON_ADJACENCY) };
-    }
-
-    const dailyPuzzle = getDailyLadderPuzzle();
-    const OPTIMAL_PATH = dailyPuzzle ? dailyPuzzle.optimalPath : null;
-    const OPTIMAL_STEPS = OPTIMAL_PATH ? OPTIMAL_PATH.length - 1 : 0;
-
-    if (IS_DEBUG) {
-        console.log(`[Ladder] Date: ${LADDER_DATE_SEED}`);
-        console.log(`[Ladder] Optimal path (${OPTIMAL_STEPS} steps): ${OPTIMAL_PATH ? OPTIMAL_PATH.join(' → ') : 'fallback'}`);
-    }
-
-    /* ============================================================
-       SECTION: VALIDATION HELPERS
-    ============================================================ */
     function isValidDictionaryWord(word) {
       return !!ADJACENCY[word.toUpperCase()];
     }
@@ -1005,169 +992,6 @@
       return neighbors.includes(upper);
     }
 
-    /* ============================================================
-       SECTION: LADDER RESULT PERSISTENCE
-       Saves today's result so revisiting the page shows results, not the game
-    ============================================================ */
-    const LadderResult = {
-      _key() { return `ladder_result_${new Date().toISOString().split('T')[0]}`; },
-      save({ solved, steps, playerPath }) {
-        try { localStorage.setItem(this._key(), JSON.stringify({ solved, steps, playerPath })); } catch(e) {}
-      },
-      load() {
-        try {
-          const raw = localStorage.getItem(this._key());
-          return raw ? JSON.parse(raw) : null;
-        } catch(e) { return null; }
-      },
-      clear() {
-        try { localStorage.removeItem(this._key()); } catch(e) {}
-      }
-    };
-
-    /* ============================================================
-       SECTION: IN-PROGRESS PERSISTENCE
-       Saves playerPath after every step/undo so a refresh restores history
-    ============================================================ */
-    const LadderProgress = {
-      _key() { return `ladder_progress_${new Date().toISOString().split('T')[0]}`; },
-      save(playerPath) {
-        try { localStorage.setItem(this._key(), JSON.stringify(playerPath)); } catch(e) {}
-      },
-      load() {
-        try { const raw = localStorage.getItem(this._key()); return raw ? JSON.parse(raw) : null; } catch(e) { return null; }
-      },
-      clear() {
-        try { localStorage.removeItem(this._key()); } catch(e) {}
-      }
-    };
-
-    /* ============================================================
-       SECTION: STARTUP LOG (verification)
-    ============================================================ */
-    if (IS_DEBUG) {
-      console.log('[WordLadder] Today\'s puzzle:', dailyPuzzle ? dailyPuzzle.start : 'NONE', '→', dailyPuzzle ? dailyPuzzle.target : 'NONE');
-      console.log('[WordLadder] Optimal path:', OPTIMAL_PATH ? OPTIMAL_PATH.join(' → ') : 'NONE', '(' + OPTIMAL_STEPS + ' steps)');
-      console.log('[WordLadder] Optimal steps:', OPTIMAL_STEPS);
-      console.log('[WordLadder] ADJACENCY sample:', Object.keys(ADJACENCY).slice(0, 3));
-    }
-
-    /* ============================================================
-       SECTION: GAME STATE
-    ============================================================ */
-    let gameState = {
-      currentWord: dailyPuzzle ? dailyPuzzle.start : 'STONE',
-      targetWord: dailyPuzzle ? dailyPuzzle.target : 'CRANE',
-      playerPath: [dailyPuzzle ? dailyPuzzle.start : 'STONE'], // Includes start word; target appended on win
-      pendingTileIndex: null,  // Which tile index is being edited (null = none)
-      pendingLetter: null,     // The typed letter for the pending tile (null = unchanged)
-      completed: false,
-      gaveUp: false,
-    };
-
-    /* ============================================================
-       SECTION: DOM REFERENCES
-    ============================================================ */
-    const tilesContainer = document.getElementById('tiles-container');
-    const historyContainer = document.getElementById('history-container');
-    const targetDisplay = document.getElementById('target-display');
-    const errorMessage = document.getElementById('error-message');
-    const undoBtn   = document.getElementById('undo-btn');
-    const giveUpBtn = document.getElementById('give-up-btn');
-    const giveUpBar = document.getElementById('give-up-bar');
-    const hiddenInput = document.getElementById('hidden-input');
-
-    /* ============================================================
-       SECTION: TILE RENDERING
-    ============================================================ */
-    const tileElements = [];
-
-    function renderTiles(word) {
-      tilesContainer.innerHTML = '';
-      tileElements.length = 0;
-      const letters = word.toUpperCase().split('');
-
-      const targetLetters = gameState.targetWord ? gameState.targetWord.toUpperCase().split('') : [];
-
-      letters.forEach((letter, idx) => {
-        const tile = document.createElement('div');
-        tile.className = 'tile';
-        tile.setAttribute('data-index', idx);
-        tile.setAttribute('role', 'button');
-
-        // Show pending letter if this tile is being edited
-        let displayLetter = letter;
-        if (idx === gameState.pendingTileIndex && gameState.pendingLetter) {
-          displayLetter = gameState.pendingLetter;
-          tile.classList.add('selected');
-        } else if (idx === gameState.pendingTileIndex) {
-          tile.classList.add('selected');
-        }
-        tile.textContent = displayLetter;
-        tile.setAttribute('aria-label', 'Tile ' + (idx + 1) + ': ' + displayLetter);
-
-        // Green border when this position already matches the target
-        if (targetLetters[idx] && displayLetter === targetLetters[idx]) {
-          tile.classList.add('tile--matched');
-        }
-
-        tile.classList.add('tile-swipe-in');
-        tile.style.animationDelay = (idx * 0.04) + 's';
-        tile.addEventListener('animationend', () => { tile.classList.remove('tile-swipe-in'); tile.style.animationDelay = ''; }, { once: true });
-        tile.addEventListener('click', () => selectTile(idx));
-        tilesContainer.appendChild(tile);
-        tileElements[idx] = tile;
-      });
-    }
-
-    /* ============================================================
-       SECTION: TILE SELECTION
-    ============================================================ */
-    function selectTile(index) {
-      if (gameState.completed || gameState.gaveUp) return;
-
-      // Reset the previously pending tile to its original letter
-      if (gameState.pendingTileIndex !== null && gameState.pendingTileIndex !== index) {
-        tileElements[gameState.pendingTileIndex].textContent =
-          gameState.currentWord[gameState.pendingTileIndex].toUpperCase();
-        tileElements[gameState.pendingTileIndex].classList.remove('selected');
-        gameState.pendingLetter = null;
-      }
-
-      gameState.pendingTileIndex = index;
-      tileElements[index].classList.add('selected');
-
-      // Focus hidden input so mobile keyboard opens
-      hiddenInput.value = '';
-      hiddenInput.focus();
-
-      clearError();
-    }
-
-    /* ============================================================
-       SECTION: HIDDEN INPUT — capture typed characters
-    ============================================================ */
-    hiddenInput.addEventListener('input', (e) => {
-      if (gameState.pendingTileIndex === null) return;
-
-      // Get last character typed (handles rapid input on mobile)
-      const raw = e.target.value;
-      const char = raw.slice(-1).toUpperCase();
-
-      if (char && /[A-Z]/.test(char)) {
-        gameState.pendingLetter = char;
-        tileElements[gameState.pendingTileIndex].textContent = char;
-        // Auto-submit immediately on letter entry
-        submitWord();
-      }
-
-      // Reset input value so next keypress always triggers 'input' event
-      e.target.value = '';
-    });
-
-    /* ============================================================
-       SECTION: ERROR DISPLAY
-    ============================================================ */
     function showError(msg) {
       errorMessage.textContent = msg;
     }
@@ -1178,312 +1002,10 @@
 
     function shakeTiles() {
       tilesContainer.classList.remove('tiles-shaking');
-      // Force reflow to restart animation
       void tilesContainer.offsetWidth;
       tilesContainer.classList.add('tiles-shaking');
-      tilesContainer.addEventListener('animationend', () => {
-        tilesContainer.classList.remove('tiles-shaking');
-      }, { once: true });
     }
 
-    /* ============================================================
-       SECTION: UNDO BUTTON
-    ============================================================ */
-    function updateUndoButton() {
-      undoBtn.disabled = gameState.playerPath.length <= 1 || gameState.completed || gameState.gaveUp;
-    }
-
-    function doUndoAnimation() {
-      const blockSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--block-size')) || 52;
-      const blockGap  = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--block-gap'))  || 9;
-      const slideAmt  = blockSize + blockGap;
-
-      // Slide history UP — top entry rises back to tile level
-      historyContainer.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-      historyContainer.style.transform  = `translateY(-${slideAmt}px)`;
-
-      setTimeout(() => {
-        // Remove the top history entry (it's now at tile level)
-        if (historyContainer.firstChild) historyContainer.removeChild(historyContainer.firstChild);
-
-        // Snap history back to natural position
-        historyContainer.style.transition = 'none';
-        historyContainer.style.transform  = 'translateY(0)';
-
-        // Restore previous word
-        gameState.playerPath.pop();
-        LadderProgress.save(gameState.playerPath);
-        const prevWord = gameState.playerPath[gameState.playerPath.length - 1];
-        gameState.currentWord  = prevWord;
-        gameState.pendingTileIndex = null;
-        gameState.pendingLetter    = null;
-        renderTiles(prevWord);
-
-        // Tiles do a gentle settle-down as the word "arrives back"
-        tilesContainer.classList.remove('tiles-unstamping');
-        void tilesContainer.offsetWidth;
-        tilesContainer.classList.add('tiles-unstamping');
-        tilesContainer.addEventListener('animationend', () => {
-          tilesContainer.classList.remove('tiles-unstamping');
-        }, { once: true });
-
-        updateUndoButton();
-      }, 400);
-    }
-
-    undoBtn.addEventListener('click', () => {
-      if (undoBtn.disabled) return;
-      doUndoAnimation();
-    });
-
-    /* ============================================================
-       SECTION: HELP MODAL
-    ============================================================ */
-    const helpModal      = document.getElementById('help-modal');
-    const helpBtn        = document.getElementById('help-btn');
-    const helpModalClose = document.getElementById('help-modal-close');
-
-    helpBtn.addEventListener('click', () => {
-      helpModal.classList.add('visible');
-      helpModal.setAttribute('aria-hidden', 'false');
-    });
-
-    function closeHelpModal() {
-      helpModal.classList.remove('visible');
-      helpModal.setAttribute('aria-hidden', 'true');
-    }
-
-    helpModalClose.addEventListener('click', closeHelpModal);
-    helpModal.addEventListener('click', (e) => {
-      if (e.target === helpModal) closeHelpModal();
-    });
-
-    /* ============================================================
-       SECTION: STAMP ANIMATION
-       Sequence:
-         0 ms      — snap history up so grey entry hides behind tiles,
-                     then start tile lift animation (old word rises).
-         ~160 ms   — tiles at peak lift, grey entry visible below them;
-                     render new word into tiles + slide history down.
-         160–400 ms — tiles settle back showing new word; history pulls away.
-    ============================================================ */
-    const LIFT_PEAK_MS = 160; // 40 % of 400 ms animation
-
-    function doStampAnimation(candidate, onWin) {
-      const blockSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--block-size')) || 52;
-      const blockGap  = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--block-gap'))  || 9;
-      const slideAmt  = blockSize + blockGap;
-
-      // Snap history up immediately so grey entry is behind tiles from frame 0
-      historyContainer.style.transition = 'none';
-      historyContainer.style.transform  = `translateY(-${slideAmt}px)`;
-
-      // Start lift animation (old word rises, revealing grey entry below)
-      tilesContainer.classList.remove('tiles-stamping');
-      void tilesContainer.offsetWidth;
-      tilesContainer.classList.add('tiles-stamping');
-
-      // At peak lift: swap to new word, then pull history down
-      setTimeout(() => {
-        gameState.pendingTileIndex = null;
-        gameState.pendingLetter    = null;
-        gameState.currentWord      = candidate;
-        gameState.playerPath.push(candidate);
-        LadderProgress.save(gameState.playerPath);
-        renderTiles(candidate);
-
-        historyContainer.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-        historyContainer.style.transform  = 'translateY(0)';
-
-        updateUndoButton();
-        if (onWin) {
-          onWin();
-        } else if (gameState.playerPath.length - 1 >= (IS_DEBUG ? 10 : 50)) {
-          gameState.gaveUp = true;
-          DailyStatus.markCompleted('ladder');
-          const steps = gameState.playerPath.length - 1;
-          setTimeout(() => showResults({ solved: false, lost: true, steps, delta: steps - OPTIMAL_STEPS, playerPath: gameState.playerPath.slice() }), 500);
-        }
-      }, LIFT_PEAK_MS);
-
-      tilesContainer.addEventListener('animationend', () => {
-        tilesContainer.classList.remove('tiles-stamping');
-      }, { once: true });
-    }
-
-    /* ============================================================
-       SECTION: HISTORY
-    ============================================================ */
-    function addToHistory(word, isStart = false) {
-      const entry = document.createElement('div');
-      entry.className = 'history-entry';
-      if (isStart) entry.classList.add('history-start');
-      entry.setAttribute('aria-label', word);
-
-      word.toUpperCase().split('').forEach((letter, idx) => {
-        const tile = document.createElement('div');
-        tile.className = 'history-tile tile-swipe-in';
-        tile.style.animationDelay = (idx * 0.04) + 's';
-        tile.addEventListener('animationend', () => { tile.classList.remove('tile-swipe-in'); tile.style.animationDelay = ''; }, { once: true });
-        tile.textContent = letter;
-        entry.appendChild(tile);
-      });
-
-      historyContainer.prepend(entry);
-
-      // Scroll to top so newest entry (just below tiles) is always visible
-      historyContainer.scrollTop = 0;
-    }
-
-    /* ============================================================
-       SECTION: WORD SUBMISSION
-    ============================================================ */
-    function submitWord() {
-      if (gameState.completed || gameState.gaveUp) return;
-      if (gameState.pendingTileIndex === null) {
-        showError('Tap a tile to change a letter');
-        return;
-      }
-
-      // Build the candidate word from current tiles
-      const letters = gameState.currentWord.toUpperCase().split('');
-      if (gameState.pendingLetter) {
-        letters[gameState.pendingTileIndex] = gameState.pendingLetter;
-      }
-      const candidate = letters.join('');
-
-      // Validation: count diffs
-      const diffs = countLetterDiffs(gameState.currentWord, candidate);
-
-      if (diffs === 0) {
-        showError('Change exactly one letter');
-        gameState.pendingLetter = null;          // clear bad letter, keep tile selected
-        renderTiles(gameState.currentWord);
-        shakeTiles();
-        return;
-      }
-
-      if (diffs > 1) {
-        showError('Change exactly one letter');
-        gameState.pendingLetter = null;
-        renderTiles(gameState.currentWord);
-        shakeTiles();
-        return;
-      }
-
-      // Validation: dictionary check (must be a neighbor in adjacency map)
-      if (!isValidNextWord(gameState.currentWord, candidate)) {
-        showError('Not a valid word');
-        gameState.pendingLetter = null;          // clear bad letter, keep tile selected
-        renderTiles(gameState.currentWord);
-        shakeTiles();
-        return;
-      }
-
-      // Valid word — lift tiles, stamp down, slide history
-      clearError();
-      addToHistory(candidate);
-
-      const isWin = candidate === gameState.targetWord;
-      doStampAnimation(candidate, isWin ? () => {
-        gameState.completed = true;
-        DailyStatus.markCompleted('ladder');
-        const steps = gameState.playerPath.length - 1;
-        setTimeout(() => showResults({ solved: true, steps, delta: steps - OPTIMAL_STEPS, playerPath: gameState.playerPath.slice() }), 500);
-      } : null);
-    }
-
-    /* ============================================================
-       SECTION: GIVE UP HOLD MECHANIC
-    ============================================================ */
-    function setupGiveUp() {
-      const HOLD_DURATION_MS = 1500;
-      let holdState = { active: false, startTime: null, timerId: null };
-
-      giveUpBtn.addEventListener('pointerdown', (e) => {
-        e.preventDefault();
-        if (gameState.completed || gameState.gaveUp) return;
-
-        holdState.active = true;
-        holdState.startTime = Date.now();
-        giveUpBar.style.width = '0%';
-
-        holdState.timerId = setInterval(() => {
-          const elapsed = Date.now() - holdState.startTime;
-          const progress = Math.min(elapsed / HOLD_DURATION_MS, 1);
-          giveUpBar.style.width = (progress * 100) + '%';
-
-          if (progress >= 1) {
-            clearInterval(holdState.timerId);
-            holdState.active = false;
-            triggerGiveUp();
-          }
-        }, 16); // ~60fps
-      });
-
-      // Cancel on pointer release (anywhere on document, in case user drags off button)
-      document.addEventListener('pointerup', () => {
-        if (holdState.active) {
-          clearInterval(holdState.timerId);
-          giveUpBar.style.width = '0%';
-          holdState.active = false;
-        }
-      });
-
-      document.addEventListener('pointercancel', () => {
-        if (holdState.active) {
-          clearInterval(holdState.timerId);
-          giveUpBar.style.width = '0%';
-          holdState.active = false;
-        }
-      });
-    }
-
-    function triggerGiveUp() {
-      if (gameState.gaveUp || gameState.completed) return;
-      gameState.gaveUp = true;
-      updateUndoButton();
-      DailyStatus.markCompleted('ladder');
-      const steps = gameState.playerPath.length - 1;
-      showResults({ solved: false, steps, delta: steps - OPTIMAL_STEPS, playerPath: gameState.playerPath.slice() });
-    }
-
-    /* ============================================================
-       SECTION: GAME CONTROLS
-    ============================================================ */
-    function disableGameControls() {
-      undoBtn.disabled = true;
-      giveUpBtn.disabled = true;
-    }
-
-    /* ============================================================
-       SECTION: OPTIMAL PATH ANIMATION
-    ============================================================ */
-    async function animateOptimalPath(container) {
-      // container is the .results-optimal-path div, already in the DOM
-      if (!OPTIMAL_PATH) return;
-
-      for (let i = 0; i < OPTIMAL_PATH.length; i++) {
-        const word = OPTIMAL_PATH[i];
-        const el = document.createElement('div');
-        el.className = 'optimal-word';
-        el.textContent = word;
-
-        // Mark start and target for visual distinction
-        if (i === 0) el.classList.add('optimal-start');
-        if (i === OPTIMAL_PATH.length - 1) el.classList.add('optimal-end');
-
-        container.appendChild(el);
-
-        // Stagger each word reveal: append hidden, then fade in after brief delay
-        await new Promise(resolve => setTimeout(resolve, 300));
-        el.classList.add('revealed');
-      }
-    }
-
-    /* ============================================================
-       SECTION: CONFETTI
-    ============================================================ */
     function fireConfetti() {
       const colors = ['#D4A574', '#E8C99A', '#C49060', '#F5F0E8', '#1C1B18'];
       for (let i = 0; i < 100; i++) {
@@ -1499,14 +1021,10 @@
       }
     }
 
-    /* ============================================================
-       SECTION: SHARE RESULT
-    ============================================================ */
     function shareResult({ solved, steps, delta }) {
       const today = new Date().toISOString().split('T')[0];
       const start = dailyPuzzle.start;
       const target = dailyPuzzle.target;
-
       let text;
       if (solved) {
         if (delta === 0) {
@@ -1517,7 +1035,6 @@
       } else {
         text = `Word Ladder ${today} | ${start} → ${target} | Gave up | Optimal: ${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''}`;
       }
-
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {
           const shareBtn = document.getElementById('share-btn');
@@ -1534,89 +1051,206 @@
       }
     }
 
-    /* ============================================================
-       SECTION: RESET GAME (Try Again)
-    ============================================================ */
-    function resetGame() {
-      if (!dailyPuzzle) return;
-      LadderResult.clear();
-      LadderProgress.clear();
-      // Reset game state — same daily puzzle, fresh attempt
-      gameState.currentWord = dailyPuzzle.start;
-      gameState.pendingTileIndex = null;
-      gameState.pendingLetter = null;
-      gameState.playerPath = [dailyPuzzle.start];
-      gameState.completed = false;
-      gameState.gaveUp = false;
-
-      // Clear UI
-      historyContainer.innerHTML = '';
-      clearError();
-      giveUpBar.style.width = '0%';
-
-      // Re-enable game controls
-      updateUndoButton();
-      giveUpBtn.disabled = false;
-
-      // Re-initialize game UI
-      addToHistory(dailyPuzzle.start, true); // Start word back as first history entry
-      renderTiles(dailyPuzzle.start);
-
-      // Hide results screen
-      const resultsScreen = document.getElementById('results-screen');
-      resultsScreen.hidden = true;
-      resultsScreen.innerHTML = '';
+    function disableGameControls() {
+      undoBtn.disabled = true;
+      giveUpBtn.disabled = true;
     }
 
     /* ============================================================
-       SECTION: RESULTS SCREEN
+       SECTION: DOM REFERENCES
     ============================================================ */
+    const tilesContainer = document.getElementById('tiles-container');
+    const historyContainer = document.getElementById('history-container');
+    const targetDisplay = document.getElementById('target-display');
+    const errorMessage = document.getElementById('error-message');
+    const undoBtn   = document.getElementById('undo-btn');
+    const giveUpBtn = document.getElementById('give-up-btn');
+    const giveUpBar = document.getElementById('give-up-bar');
+    const hiddenInput = document.getElementById('hidden-input');
+    const helpModal      = document.getElementById('help-modal');
+    const helpBtn        = document.getElementById('help-btn');
+    const helpModalClose = document.getElementById('help-modal-close');
+
+    /* ============================================================
+       SECTION: ENGINE
+    ============================================================ */
+    function getDailyLadderPuzzle() {
+      const puzzlePool = Object.keys(ADJACENCY).filter(w =>
+        w.length === 5 && PUZZLE_WORDS.has(w) &&
+        COMMON_ADJACENCY[w] && COMMON_ADJACENCY[w].length >= 1
+      );
+      if (puzzlePool.length < 2) return null;
+      for (let attempt = 0; attempt < 50; attempt++) {
+        const rng = seededRandom(LADDER_DATE_SEED + '_' + attempt);
+        const startIdx = Math.floor(rng() * puzzlePool.length);
+        const targetIdx = Math.floor(rng() * puzzlePool.length);
+        const start = puzzlePool[startIdx];
+        const target = puzzlePool[targetIdx];
+        if (start === target) continue;
+        const path = bfsShortestPath(start, target, COMMON_ADJACENCY);
+        if (!path || path.length < 4 || path.length > 5) continue;
+        if (IS_DEBUG) console.log(`[Ladder] Attempt ${attempt}: found path ${path.length - 1} steps: ${path.join(' → ')}`);
+        return { start, target, optimalPath: path };
+      }
+      if (IS_DEBUG) console.warn('[Ladder] No valid pair found in 50 attempts — using fallback SCARE→STILL');
+      return { start: 'SCARE', target: 'STILL', optimalPath: bfsShortestPath('SCARE', 'STILL', COMMON_ADJACENCY) };
+    }
+
+    /* ============================================================
+       SECTION: UI RENDERING
+    ============================================================ */
+    const tileElements = [];
+
+    function renderTiles(word) {
+      tilesContainer.innerHTML = '';
+      tileElements.length = 0;
+      const letters = word.toUpperCase().split('');
+      const targetLetters = gameState.targetWord ? gameState.targetWord.toUpperCase().split('') : [];
+
+      letters.forEach((letter, idx) => {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.setAttribute('data-index', idx);
+        tile.setAttribute('role', 'button');
+        let displayLetter = letter;
+        if (idx === gameState.pendingTileIndex) {
+          if (gameState.pendingLetter) displayLetter = gameState.pendingLetter;
+          tile.classList.add('selected');
+        }
+        tile.textContent = displayLetter;
+        tile.setAttribute('aria-label', 'Tile ' + (idx + 1) + ': ' + displayLetter);
+        if (targetLetters[idx] && displayLetter === targetLetters[idx]) {
+          tile.classList.add('tile--matched');
+        }
+        tile.classList.add('tile-swipe-in');
+        tile.style.animationDelay = (idx * 0.04) + 's';
+        tile.addEventListener('animationend', () => { tile.classList.remove('tile-swipe-in'); tile.style.animationDelay = ''; }, { once: true });
+        tile.addEventListener('click', () => handleTileSelect(idx));
+        tilesContainer.appendChild(tile);
+        tileElements[idx] = tile;
+      });
+    }
+
+    function updateUndoButton() {
+      undoBtn.disabled = gameState.playerPath.length <= 1 || gameState.completed || gameState.gaveUp;
+    }
+
+    function doUndoAnimation() {
+      const blockSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--block-size')) || 52;
+      const blockGap  = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--block-gap'))  || 9;
+      const slideAmt  = blockSize + blockGap;
+      historyContainer.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+      historyContainer.style.transform  = `translateY(-${slideAmt}px)`;
+      setTimeout(() => {
+        if (historyContainer.firstChild) historyContainer.removeChild(historyContainer.firstChild);
+        historyContainer.style.transition = 'none';
+        historyContainer.style.transform  = 'translateY(0)';
+        gameState.playerPath.pop();
+        LadderProgress.save(gameState.playerPath);
+        const prevWord = gameState.playerPath[gameState.playerPath.length - 1];
+        gameState.currentWord  = prevWord;
+        gameState.pendingTileIndex = null;
+        gameState.pendingLetter    = null;
+        renderTiles(prevWord);
+        tilesContainer.classList.remove('tiles-unstamping');
+        void tilesContainer.offsetWidth;
+        tilesContainer.classList.add('tiles-unstamping');
+        tilesContainer.addEventListener('animationend', () => {
+          tilesContainer.classList.remove('tiles-unstamping');
+        }, { once: true });
+        updateUndoButton();
+      }, 400);
+    }
+
+    function doStampAnimation(candidate, onWin) {
+      const blockSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--block-size')) || 52;
+      const blockGap  = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--block-gap'))  || 9;
+      const slideAmt  = blockSize + blockGap;
+      historyContainer.style.transition = 'none';
+      historyContainer.style.transform  = `translateY(-${slideAmt}px)`;
+      tilesContainer.classList.remove('tiles-stamping');
+      void tilesContainer.offsetWidth;
+      tilesContainer.classList.add('tiles-stamping');
+      setTimeout(() => {
+        gameState.pendingTileIndex = null;
+        gameState.pendingLetter    = null;
+        gameState.currentWord      = candidate;
+        gameState.playerPath.push(candidate);
+        LadderProgress.save(gameState.playerPath);
+        renderTiles(candidate);
+        historyContainer.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        historyContainer.style.transform  = 'translateY(0)';
+        updateUndoButton();
+        if (onWin) onWin();
+        else if (gameState.playerPath.length - 1 >= (IS_DEBUG ? 10 : 50)) {
+          gameState.gaveUp = true;
+          DailyStatus.markCompleted('ladder');
+          const steps = gameState.playerPath.length - 1;
+          setTimeout(() => showResults({ solved: false, lost: true, steps, delta: steps - OPTIMAL_STEPS, playerPath: gameState.playerPath.slice() }), 500);
+        }
+      }, 160); // LIFT_PEAK_MS
+      tilesContainer.addEventListener('animationend', () => {
+        tilesContainer.classList.remove('tiles-stamping');
+      }, { once: true });
+    }
+
+    function addToHistory(word, isStart = false) {
+      const entry = document.createElement('div');
+      entry.className = 'history-entry';
+      if (isStart) entry.classList.add('history-start');
+      entry.setAttribute('aria-label', word);
+      word.toUpperCase().split('').forEach((letter, idx) => {
+        const tile = document.createElement('div');
+        tile.className = 'history-tile tile-swipe-in';
+        tile.style.animationDelay = (idx * 0.04) + 's';
+        tile.addEventListener('animationend', () => { tile.classList.remove('tile-swipe-in'); tile.style.animationDelay = ''; }, { once: true });
+        tile.textContent = letter;
+        entry.appendChild(tile);
+      });
+      historyContainer.prepend(entry);
+      historyContainer.scrollTop = 0;
+    }
+
+    async function animateOptimalPath(container) {
+      if (!OPTIMAL_PATH) return;
+      for (let i = 0; i < OPTIMAL_PATH.length; i++) {
+        const word = OPTIMAL_PATH[i];
+        const el = document.createElement('div');
+        el.className = 'optimal-word';
+        el.textContent = word;
+        if (i === 0) el.classList.add('optimal-start');
+        if (i === OPTIMAL_PATH.length - 1) el.classList.add('optimal-end');
+        container.appendChild(el);
+        await new Promise(resolve => setTimeout(resolve, 300));
+        el.classList.add('revealed');
+      }
+    }
+
     async function showResults({ solved, steps, delta, playerPath, skipAnimation = false, lost = false }) {
       disableGameControls();
-
       const resultsScreen = document.getElementById('results-screen');
-
-      // Save result so revisiting shows results screen instead of the game
-      if (!skipAnimation) {
-        LadderResult.save({ solved, steps, playerPath });
-      }
-
-      // Build results screen HTML
+      if (!skipAnimation) LadderResult.save({ solved, steps, playerPath });
       let titleText, subtitleText, buttonRow = '';
-
       if (solved) {
         titleText = 'CONGRATULATIONS';
-        if (delta === 0) {
-          subtitleText = `Solved in ${steps} step${steps !== 1 ? 's' : ''} — perfect solution`;
-        } else {
-          subtitleText = `Solved in ${steps} step${steps !== 1 ? 's' : ''} (+${delta} from optimal)`;
-        }
-        if (delta > 0) {
-          buttonRow += `<button class="btn-secondary" id="try-again-btn" type="button">try again</button>`;
-        }
+        subtitleText = (delta === 0) ? `Solved in ${steps} step${steps !== 1 ? 's' : ''} — perfect solution` : `Solved in ${steps} step${steps !== 1 ? 's' : ''} (+${delta} from optimal)`;
+        if (delta > 0) buttonRow += `<button class="btn-secondary" id="try-again-btn" type="button">try again</button>`;
       } else {
         titleText = 'THANKS FOR PLAYING';
         subtitleText = steps > 0 ? `${steps} steps` : '';
       }
-
-      // Player path display
       const pathLabel = solved ? `Your path (${steps} step${steps !== 1 ? 's' : ''})` : 'Your path';
       const pathHTML = (playerPath || []).map((w, i) => {
         const isStart = i === 0;
         const isEnd   = solved && i === playerPath.length - 1;
         return `<div class="optimal-word revealed ${isStart ? 'optimal-start' : ''} ${isEnd ? 'optimal-end' : ''}">${w}</div>`;
       }).join('');
-
-      // Gave up (not lost): also show optimal path (animated on first view, instant on revisit)
       const optimalSection = !solved && !lost ? `
         <div class="results-section-label">Optimal path (${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''})</div>
         <div class="results-optimal-path" id="results-optimal-path">${skipAnimation ? OPTIMAL_PATH.map((w, i) => `<div class="optimal-word revealed ${i === 0 ? 'optimal-start' : ''} ${i === OPTIMAL_PATH.length - 1 ? 'optimal-end' : ''}">${w}</div>`).join('') : ''}</div>` : '';
-
       const shareIcon = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="2.5" r="2" fill="currentColor"/><circle cx="3" cy="8" r="2" fill="currentColor"/><circle cx="12" cy="13.5" r="2" fill="currentColor"/><line x1="3" y1="8" x2="12" y2="2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="3" y1="8" x2="12" y2="13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
       buttonRow += `<button class="btn-primary" id="share-btn" type="button">share ${shareIcon}</button>`;
-
-      const titleClass = solved ? 'results-title results-title--success'
-        : 'results-title results-title--warning';
+      const titleClass = solved ? 'results-title results-title--success' : 'results-title results-title--warning';
       resultsScreen.innerHTML = `
         <div class="results-game-title">Ladder</div>
         <div class="${titleClass}">${titleText}</div>
@@ -1625,31 +1259,171 @@
         <div class="results-optimal-path">${pathHTML}</div>
         ${optimalSection}
         <div class="results-actions">${buttonRow}</div>`;
-
       resultsScreen.hidden = false;
-
       const tryAgainBtn = resultsScreen.querySelector('#try-again-btn');
-      if (tryAgainBtn) tryAgainBtn.addEventListener('click', resetGame);
-
+      if (tryAgainBtn) tryAgainBtn.addEventListener('click', handleResetGame);
       const shareBtn = resultsScreen.querySelector('#share-btn');
       if (shareBtn) shareBtn.addEventListener('click', () => shareResult({ solved, steps, delta }));
-
-      // Animate optimal path on first give-up view (not lost)
-      if (!solved && !lost && !skipAnimation) {
-        await animateOptimalPath(resultsScreen.querySelector('#results-optimal-path'));
-      }
-
-      // Fire confetti on every solve visit
-      if (solved) {
-        fireConfetti();
-      }
+      if (!solved && !lost && !skipAnimation) await animateOptimalPath(resultsScreen.querySelector('#results-optimal-path'));
+      if (solved) fireConfetti();
     }
 
     /* ============================================================
-       SECTION: PROGRESS RESTORE
+       SECTION: EVENT HANDLERS
+    ============================================================ */
+    function handleTileSelect(index) {
+      if (gameState.completed || gameState.gaveUp) return;
+      if (gameState.pendingTileIndex !== null && gameState.pendingTileIndex !== index) {
+        tileElements[gameState.pendingTileIndex].textContent = gameState.currentWord[gameState.pendingTileIndex].toUpperCase();
+        tileElements[gameState.pendingTileIndex].classList.remove('selected');
+        gameState.pendingLetter = null;
+      }
+      gameState.pendingTileIndex = index;
+      tileElements[index].classList.add('selected');
+      hiddenInput.value = '';
+      hiddenInput.focus();
+      clearError();
+    }
+
+    function handleSubmitWord() {
+      if (gameState.completed || gameState.gaveUp) return;
+      if (gameState.pendingTileIndex === null) {
+        showError('Tap a tile to change a letter');
+        return;
+      }
+      const letters = gameState.currentWord.toUpperCase().split('');
+      if (gameState.pendingLetter) letters[gameState.pendingTileIndex] = gameState.pendingLetter;
+      const candidate = letters.join('');
+      const diffs = countLetterDiffs(gameState.currentWord, candidate);
+      if (diffs === 0 || diffs > 1) {
+        showError('Change exactly one letter');
+        gameState.pendingLetter = null;
+        renderTiles(gameState.currentWord);
+        shakeTiles();
+        return;
+      }
+      if (!isValidNextWord(gameState.currentWord, candidate)) {
+        showError('Not a valid word');
+        gameState.pendingLetter = null;
+        renderTiles(gameState.currentWord);
+        shakeTiles();
+        return;
+      }
+      clearError();
+      addToHistory(candidate);
+      const isWin = candidate === gameState.targetWord;
+      doStampAnimation(candidate, isWin ? () => {
+        gameState.completed = true;
+        DailyStatus.markCompleted('ladder');
+        const steps = gameState.playerPath.length - 1;
+        setTimeout(() => showResults({ solved: true, steps, delta: steps - OPTIMAL_STEPS, playerPath: gameState.playerPath.slice() }), 500);
+      } : null);
+    }
+
+    function handleResetGame() {
+      if (!dailyPuzzle) return;
+      LadderResult.clear();
+      LadderProgress.clear();
+      gameState.currentWord = dailyPuzzle.start;
+      gameState.pendingTileIndex = null;
+      gameState.pendingLetter = null;
+      gameState.playerPath = [dailyPuzzle.start];
+      gameState.completed = false;
+      gameState.gaveUp = false;
+      historyContainer.innerHTML = '';
+      clearError();
+      giveUpBar.style.width = '0%';
+      updateUndoButton();
+      giveUpBtn.disabled = false;
+      addToHistory(dailyPuzzle.start, true);
+      renderTiles(dailyPuzzle.start);
+      const resultsScreen = document.getElementById('results-screen');
+      resultsScreen.hidden = true;
+      resultsScreen.innerHTML = '';
+    }
+
+    function handleTriggerGiveUp() {
+      if (gameState.gaveUp || gameState.completed) return;
+      gameState.gaveUp = true;
+      updateUndoButton();
+      DailyStatus.markCompleted('ladder');
+      const steps = gameState.playerPath.length - 1;
+      showResults({ solved: false, steps, delta: steps - OPTIMAL_STEPS, playerPath: gameState.playerPath.slice() });
+    }
+
+    function handleCloseHelpModal() {
+      helpModal.classList.remove('visible');
+      helpModal.setAttribute('aria-hidden', 'true');
+    }
+
+    function setupGiveUp() {
+      const HOLD_DURATION_MS = 1500;
+      let holdState = { active: false, startTime: null, timerId: null };
+      giveUpBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        if (gameState.completed || gameState.gaveUp) return;
+        holdState.active = true;
+        holdState.startTime = Date.now();
+        giveUpBar.style.width = '0%';
+        holdState.timerId = setInterval(() => {
+          const elapsed = Date.now() - holdState.startTime;
+          const progress = Math.min(elapsed / HOLD_DURATION_MS, 1);
+          giveUpBar.style.width = (progress * 100) + '%';
+          if (progress >= 1) {
+            clearInterval(holdState.timerId);
+            holdState.active = false;
+            handleTriggerGiveUp();
+          }
+        }, 16);
+      });
+      document.addEventListener('pointerup', () => {
+        if (holdState.active) {
+          clearInterval(holdState.timerId);
+          giveUpBar.style.width = '0%';
+          holdState.active = false;
+        }
+      });
+      document.addEventListener('pointercancel', () => {
+        if (holdState.active) {
+          clearInterval(holdState.timerId);
+          giveUpBar.style.width = '0%';
+          holdState.active = false;
+        }
+      });
+    }
+
+    /* Event Listeners */
+    hiddenInput.addEventListener('input', (e) => {
+      if (gameState.pendingTileIndex === null) return;
+      const raw = e.target.value;
+      const char = raw.slice(-1).toUpperCase();
+      if (char && /[A-Z]/.test(char)) {
+        gameState.pendingLetter = char;
+        tileElements[gameState.pendingTileIndex].textContent = char;
+        handleSubmitWord();
+      }
+      e.target.value = '';
+    });
+
+    undoBtn.addEventListener('click', () => {
+      if (!undoBtn.disabled) doUndoAnimation();
+    });
+
+    helpBtn.addEventListener('click', () => {
+      helpModal.classList.add('visible');
+      helpModal.setAttribute('aria-hidden', 'false');
+    });
+
+    helpModalClose.addEventListener('click', handleCloseHelpModal);
+
+    helpModal.addEventListener('click', (e) => {
+      if (e.target === helpModal) handleCloseHelpModal();
+    });
+
+    /* ============================================================
+       SECTION: INIT
     ============================================================ */
     function restoreProgress(playerPath) {
-      // Render target tiles (same as initGame)
       targetDisplay.innerHTML = '';
       gameState.targetWord.toUpperCase().split('').forEach((letter, idx) => {
         const tile = document.createElement('div');
@@ -1660,21 +1434,13 @@
         targetDisplay.appendChild(tile);
       });
       targetDisplay.setAttribute('aria-label', 'Target: ' + gameState.targetWord);
-
-      // Restore state
       gameState.playerPath  = [...playerPath];
       gameState.currentWord = playerPath[playerPath.length - 1];
-
-      // Rebuild history — iterate oldest→newest so prepend gives newest-at-top
       playerPath.forEach((word, i) => addToHistory(word, i === 0));
-
       renderTiles(gameState.currentWord);
       updateUndoButton();
     }
 
-    /* ============================================================
-       SECTION: GAME INIT
-    ============================================================ */
     function initGame() {
       targetDisplay.innerHTML = '';
       gameState.targetWord.toUpperCase().split('').forEach((letter, idx) => {
@@ -1686,20 +1452,23 @@
         targetDisplay.appendChild(tile);
       });
       targetDisplay.setAttribute('aria-label', 'Target: ' + gameState.targetWord);
-      addToHistory(gameState.currentWord, true); // Start word as first history entry (isStart=true)
+      addToHistory(gameState.currentWord, true);
       renderTiles(gameState.currentWord);
       updateUndoButton();
     }
 
-    /* ============================================================
-       SECTION: DOMCONTENTLOADED — boot the game
-    ============================================================ */
     document.addEventListener('DOMContentLoaded', () => {
-      if (IS_DEBUG) document.getElementById('back-link').href = 'index.html?debug';
+      if (IS_DEBUG) {
+        const backLink = document.getElementById('back-link');
+        if (backLink) backLink.href = 'index.html?debug';
+        console.log('[WordLadder] Today\'s puzzle:', dailyPuzzle ? dailyPuzzle.start : 'NONE', '→', dailyPuzzle ? dailyPuzzle.target : 'NONE');
+        console.log('[WordLadder] Optimal path:', OPTIMAL_PATH ? OPTIMAL_PATH.join(' → ') : 'NONE', '(' + OPTIMAL_STEPS + ' steps)');
+        console.log('[WordLadder] Optimal steps:', OPTIMAL_STEPS);
+        console.log('[WordLadder] ADJACENCY sample:', Object.keys(ADJACENCY).slice(0, 3));
+      }
       setupGiveUp();
       const saved = !IS_DEBUG && LadderResult.load();
       if (saved) {
-        // Already finished today — skip to results screen
         gameState.completed = saved.solved;
         gameState.gaveUp    = !saved.solved;
         initGame();
@@ -1707,12 +1476,8 @@
         showResults({ solved: saved.solved, steps: saved.steps, delta, playerPath: saved.playerPath, skipAnimation: true });
       } else {
         const progress = !IS_DEBUG && LadderProgress.load();
-        if (progress && progress.length > 1) {
-          // In-progress game — restore history
-          restoreProgress(progress);
-        } else {
-          initGame();
-        }
+        if (progress && progress.length > 1) restoreProgress(progress);
+        else initGame();
       }
     });
   </script>
