@@ -258,6 +258,9 @@
     /* ============================================================
        SECTION: HISTORY
     ============================================================ */
+    /* Equal-weight spacer above the game so it sits centered between title and history */
+    #game-spacer { flex: 1; }
+
     #history-outer {
       flex: 1;
       min-height: 0; /* allow flex child to scroll below its content size */
@@ -737,6 +740,9 @@
   <h1 id="game-title">Ladder</h1>
 
   <main>
+    <!-- Flex spacer: shares remaining space equally with #history-outer, centering the game -->
+    <div id="game-spacer" aria-hidden="true"></div>
+
     <!-- Static game: target + current word — never scrolls -->
     <div id="game-container">
       <div id="target-container">
