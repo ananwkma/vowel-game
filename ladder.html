@@ -501,17 +501,17 @@
     ============================================================ */
     #results-screen {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      inset: 0;
       background-color: var(--color-bg);
-      z-index: 8000;
+      z-index: 5000;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 40px 24px;
+      padding: var(--spacing-xl) var(--spacing-lg);
+      padding-top: max(96px, calc(env(safe-area-inset-top) + 72px));
+      overflow-y: auto;
+      gap: 8px;
       text-align: center;
     }
 
@@ -520,22 +520,29 @@
     #results-screen[hidden] { display: none; }
 
     .results-game-title {
-      font-size: 0.7rem;
+      position: absolute;
+      top: max(48px, env(safe-area-inset-top));
+      left: 0;
+      right: 0;
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
       text-transform: uppercase;
-      letter-spacing: 0.3em;
-      opacity: 0.5;
-      margin-bottom: 8px;
+      color: var(--color-primary-text);
+      text-align: center;
     }
 
     .results-title {
       font-size: 1.5rem;
       font-weight: 700;
       letter-spacing: 0.1em;
+      text-transform: uppercase;
       margin-bottom: 4px;
     }
 
     .results-title--success { color: var(--color-ladder-success); }
-    .results-title--warning { color: var(--color-ladder-primary); }
+    .results-title--warning { color: var(--color-warning); }
 
     .results-steps {
       font-size: 1.1rem;
@@ -554,11 +561,10 @@
 
     .results-optimal-path {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 32px;
-      max-width: 320px;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 24px;
     }
 
     .optimal-word {
@@ -571,9 +577,11 @@
       border: none;
       border-radius: var(--block-radius);
       box-shadow: var(--shadow-md);
+      min-width: 80px;
       opacity: 0;
       transform: translateY(10px);
-      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
     .optimal-word.revealed {
@@ -581,59 +589,57 @@
       transform: translateY(0);
     }
 
-    .optimal-start { opacity: 0.5; }
+    .optimal-start.revealed { opacity: 0.5; }
     .optimal-end   { background: var(--color-ladder-success); color: var(--color-primary-text); }
 
-    /* Arrow connector between words in optimal path */
-    .optimal-word:not(:last-child)::after {
-      content: '→';
-      position: absolute;
-      right: -14px;
+    .path-arrow {
+      font-size: 0.75rem;
       opacity: 0.3;
-      font-size: 0.8rem;
+      line-height: 1.6;
     }
 
     .results-actions {
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      width: 100%;
-      max-width: 240px;
-      margin-top: 16px;
+      align-items: center;
+      gap: 16px;
+      margin-top: var(--spacing-lg);
     }
 
     .btn-primary {
-      background: var(--color-ladder-primary);
-      border: none;
-      color: var(--color-primary-text);
-      padding: 16px;
-      border-radius: var(--block-radius);
-      font-family: var(--font-serif);
-      font-size: 0.85rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-    }
-
-    .btn-secondary {
-      background-color: var(--color-secondary);
-      color: var(--color-secondary-text);
+      gap: 8px;
+      padding: 12px 48px;
+      background: var(--color-primary);
+      color: #ffffff;
       border: none;
-      padding: 14px;
-      border-radius: var(--block-radius);
+      border-radius: 6px;
       font-family: var(--font-serif);
-      font-size: 0.8rem;
+      font-size: 1rem;
       font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
       cursor: pointer;
       box-shadow: var(--shadow-md);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      transition: transform 0.1s, filter 0.15s;
     }
+    .btn-primary:hover  { filter: brightness(0.96); }
+    .btn-primary:active { transform: translateY(2px); }
+
+    .btn-secondary {
+      font-family: var(--font-serif);
+      font-size: 0.85rem;
+      color: var(--color-primary-text);
+      opacity: 0.5;
+      background: none;
+      border: none;
+      border-bottom: 1px solid transparent;
+      cursor: pointer;
+      transition: opacity 0.15s, border-color 0.15s;
+    }
+    .btn-secondary:hover { opacity: 0.8; border-bottom-color: currentColor; }
 
     /* ============================================================
        SECTION: TILE SWIPE-IN ANIMATION
@@ -1231,6 +1237,12 @@
         container.appendChild(el);
         await new Promise(resolve => setTimeout(resolve, 300));
         el.classList.add('revealed');
+        if (i < OPTIMAL_PATH.length - 1) {
+          const arrow = document.createElement('div');
+          arrow.className = 'path-arrow';
+          arrow.textContent = '↓';
+          container.appendChild(arrow);
+        }
       }
     }
 
@@ -1248,14 +1260,18 @@
         subtitleText = steps > 0 ? `${steps} steps` : '';
       }
       const pathLabel = solved ? `Your path (${steps} step${steps !== 1 ? 's' : ''})` : 'Your path';
-      const pathHTML = (playerPath || []).map((w, i) => {
-        const isStart = i === 0;
-        const isEnd   = solved && i === playerPath.length - 1;
-        return `<div class="optimal-word revealed ${isStart ? 'optimal-start' : ''} ${isEnd ? 'optimal-end' : ''}">${w}</div>`;
-      }).join('');
+      const buildPathHTML = (words, isPlayerPath, isSolved) =>
+        words.map((w, i, arr) => {
+          const isStart = i === 0;
+          const isEnd   = isSolved && i === arr.length - 1;
+          const tile = `<div class="optimal-word revealed ${isStart ? 'optimal-start' : ''} ${isEnd ? 'optimal-end' : ''}">${w}</div>`;
+          const arrow = i < arr.length - 1 ? `<div class="path-arrow">↓</div>` : '';
+          return tile + arrow;
+        }).join('');
+      const pathHTML = buildPathHTML(playerPath || [], true, solved);
       const optimalSection = !solved && !lost ? `
         <div class="results-section-label">Optimal path (${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''})</div>
-        <div class="results-optimal-path" id="results-optimal-path">${skipAnimation ? OPTIMAL_PATH.map((w, i) => `<div class="optimal-word revealed ${i === 0 ? 'optimal-start' : ''} ${i === OPTIMAL_PATH.length - 1 ? 'optimal-end' : ''}">${w}</div>`).join('') : ''}</div>` : '';
+        <div class="results-optimal-path" id="results-optimal-path">${skipAnimation ? buildPathHTML(OPTIMAL_PATH, false, true) : ''}</div>` : '';
       const shareIcon = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="2.5" r="2" fill="currentColor"/><circle cx="3" cy="8" r="2" fill="currentColor"/><circle cx="12" cy="13.5" r="2" fill="currentColor"/><line x1="3" y1="8" x2="12" y2="2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="3" y1="8" x2="12" y2="13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
       buttonRow += `<button class="btn-primary" id="share-btn" type="button">share ${shareIcon}</button>`;
       const titleClass = solved ? 'results-title results-title--success' : 'results-title results-title--warning';
