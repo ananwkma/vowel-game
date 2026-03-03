@@ -42,7 +42,7 @@
     }
 
     /* ============================================================
-       SECTION: GLOBAL RESET & BASE
+       SECTION: GLOBAL RESET
     ============================================================ */
     *, *::before, *::after {
       box-sizing: border-box;
@@ -630,6 +630,9 @@
     #results-screen .btn-share:hover  { filter: brightness(0.96); }
     #results-screen .btn-share:active { transform: translateY(2px); }
 
+    /* ============================================================
+       SECTION: RESPONSIVE
+    ============================================================ */
     @media (max-width: 425px) {
       :root {
         --block-size: 42px;
@@ -708,9 +711,10 @@
     <div class="vowel-option" data-vowel="O">O</div>
     <div class="vowel-option" data-vowel="U">U</div>
   </div>
+  <script src="/shared.js"></script>
   <script>
     /* ============================================================
-       SECTION 1: WORD LIST
+       SECTION: WORD LIST
        1000+ common English words, 4-10 letters, vowel-containing,
        no proper nouns, no slang, no obscure technical terms
     ============================================================ */
@@ -989,7 +993,14 @@
     ];
 
     /* ============================================================
-       SECTION 2: WORD ENGINE
+       SECTION: CONSTANTS & CONFIG
+    ============================================================ */
+    // VOWEL_DATE_SEED: game-specific seed using shared DATE_SEED from shared.js
+    // seededRandom, DATE_SEED, IS_DEBUG, DailyStatus come from shared.js — no redefinition here
+    const VOWEL_DATE_SEED = DATE_SEED;
+
+    /* ============================================================
+       SECTION: WORD ENGINE
     ============================================================ */
     const WordEngine = {
       // Reference the pre-curated word list
@@ -1072,42 +1083,18 @@
       console.assert(WordEngine.isValidGameWord('PLAY') === true, 'isValidGameWord: PLAY should be true');
       console.assert(WordEngine.isValidGameWord('IT') === false, 'isValidGameWord: IT too short');
       console.assert(WordEngine.isValidGameWord('CRWD') === false, 'isValidGameWord: CRWD no vowel');
-      console.log('[WordEngine] Sanity checks passed. Word list size:', WordEngine.wordList.length);
+      if (IS_DEBUG) console.log('[WordEngine] Sanity checks passed. Word list size:', WordEngine.wordList.length);
     })();
 
     /* ============================================================
-       SECTION 2.5: DAILY ENGINE
+       SECTION: DAILY ENGINE
        Deterministic daily word selection seeded from the local date.
        getDailyWords() returns 5 unique words that are the same for all
        players on a given calendar day and change the next day.
+       Uses seededRandom and DATE_SEED from shared.js.
     ============================================================ */
-    const DATE_SEED = (function() {
-      const params = new URLSearchParams(location.search);
-      const dateParam = params.get('date');
-      if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
-        return dateParam;
-      }
-      return new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
-    })();
-
-    const IS_DEBUG = new URLSearchParams(location.search).has('debug');
-
-    function seededRandom(seedStr) {
-      let h = 0;
-      for (let i = 0; i < seedStr.length; i++) {
-        h = Math.imul(31, h) + seedStr.charCodeAt(i) | 0;
-      }
-      let s = h >>> 0;
-      return function() {
-        s += 0x6D2B79F5;
-        let t = Math.imul(s ^ s >>> 15, 1 | s);
-        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
-        return ((t ^ t >>> 14) >>> 0) / 4294967296;
-      };
-    }
-
     function getDailyWords() {
-      const rng = seededRandom(DATE_SEED);
+      const rng = seededRandom(VOWEL_DATE_SEED);
       
       // Select 1 warm-up word (1 vowel)
       const pool1 = [...WordEngine.words1];
@@ -1132,16 +1119,26 @@
     }
 
     const DailyEngine = {
-      dateSeed: DATE_SEED,
+      dateSeed: VOWEL_DATE_SEED,
       isDebug: IS_DEBUG,
       dailyWords: getDailyWords(),
     };
 
-    console.log('[DailyEngine] Date seed:', DATE_SEED, '| Words:', DailyEngine.dailyWords.join(', '), '| Debug:', IS_DEBUG);
+    if (IS_DEBUG) console.log('[DailyEngine] Date seed:', VOWEL_DATE_SEED, '| Words:', DailyEngine.dailyWords.join(', '), '| Debug:', IS_DEBUG);
 
     /* ============================================================
-       SECTION 2.1: VOWEL PICKER JS
-       Manages the vowel selection UI.
+       SECTION: UTILITY FUNCTIONS
+       Local helpers not in shared.js.
+    ============================================================ */
+
+    /* ============================================================
+       SECTION: DOM REFERENCES
+    ============================================================ */
+    const gameBoard = document.getElementById('game-board');
+
+    /* ============================================================
+       SECTION: ENGINE
+       Vowel picker — manages the vowel selection UI.
     ============================================================ */
     const vowelPicker = (function() {
       const pickerEl = document.querySelector('.vowel-picker');
@@ -1202,7 +1199,7 @@
     })();
 
     /* ============================================================
-       SECTION 3: GAME STATE
+       SECTION: STATE
        Single source of truth for all rendering.
        renderBoard() reads from this object exclusively.
     ============================================================ */
@@ -1218,7 +1215,6 @@
     let currentDraggable = null;
     let placeholderEl = null;
     let guideEl = null;
-    const gameBoard = document.getElementById('game-board');
     let dragStartX, dragStartY;
     let initialDraggableRect;
     let initialDraggableXOffset = 0;
@@ -1242,7 +1238,7 @@
       : 'Drag an orange block over a vowel to select it, then drop it in the correct spot.';
 
     /* ============================================================
-       SECTION 4: DOM RENDERING
+       SECTION: UI RENDERING
        renderBoard(state) — pure function converting state to DOM.
        Always clear and re-render; never patch.
     ============================================================ */
@@ -1310,9 +1306,8 @@
     }
 
     /* ============================================================
-       SECTION 5: EVENT LISTENERS
-       Give Up handler — no-op shell for Phase 2 wiring.
-       Drag events handled in Phase 2.
+       SECTION: EVENT HANDLERS
+       Give Up handler and drag events.
     ============================================================ */
     document.getElementById('give-up-btn').addEventListener('click', function() {
       // Block clicks during feedback window (won / gaveup phases)
@@ -1333,7 +1328,7 @@
         elapsedTimer.setBase(puzzleState.timerElapsed);
       }
 
-      console.log('[GiveUp] word=%s penalty=%d frozen=%d new_total=%d',
+      if (IS_DEBUG) console.log('[GiveUp] word=%s penalty=%d frozen=%d new_total=%d',
         gameState.currentWord, penalty, frozenElapsed, puzzleState.timerElapsed);
 
       puzzleState.outcomes.push('gaveup');
@@ -1353,7 +1348,7 @@
     }
 
     /* ============================================================
-       SECTION 5.5: DRAG AND DROP
+       SECTION: DRAG AND DROP
     ============================================================ */
 
     // Returns all board children except the dragged block and placeholder
@@ -1651,7 +1646,7 @@
     });
 
     /* ============================================================
-       SECTION 5.8: ELAPSED TIMER
+       SECTION: ELAPSED TIMER
        Counts up from puzzleState.timerElapsed (restored on reload).
        Displays M:SS format. Runs continuously through word transitions.
        Stops when showPuzzleComplete() is called.
@@ -1720,7 +1715,7 @@
     })();
 
     /* ============================================================
-       SECTION 5.9: GIVE UP COUNTDOWN
+       SECTION: GIVE UP COUNTDOWN
        Per-word penalty countdown: starts at 60, counts down to 0 each second.
        When > 0: Give Up button shows "Give Up (N)".
        When 0: number disappears, Give Up is free (no penalty).
@@ -1790,7 +1785,7 @@
     })();
 
     /* ============================================================
-       SECTION 6: INIT
+       SECTION: INIT
        initGame() — called once on load and after each round ends.
        Selects a word, extracts letters, updates state, renders board.
     ============================================================ */
@@ -1820,7 +1815,7 @@
       renderBoard(gameState);
       renderProgress();
 
-      console.log('[Game] New word loaded:', word,
+      if (IS_DEBUG) console.log('[Game] New word loaded:', word,
         '| Consonants:', gameState.consonants.join(''),
         '| Vowel count:', gameState.vowelCount);
 
@@ -1829,9 +1824,6 @@
       giveUpCountdown.reset(puzzleState.giveUpRemaining);
     }
 
-  </script>
-
-  <script>
     /* ============================================================
        SECTION: PERFORMANCE STATS
        Provides simulated global averages and percentile rankings.
@@ -1878,7 +1870,7 @@
     })();
 
     /* ============================================================
-       SECTION 3.5: PUZZLE STATE
+       SECTION: PUZZLE STATE
        Daily puzzle bookkeeping — tracks which word we're on,
        per-word outcomes, and completion. Persisted to localStorage
        keyed by today's date so mid-puzzle reloads resume correctly.
@@ -1938,7 +1930,7 @@
       } catch (e) {
         console.warn('[PuzzleState] Failed to load:', e);
       }
-      console.log('[PuzzleState] Loaded:', JSON.stringify(puzzleState));
+      if (IS_DEBUG) console.log('[PuzzleState] Loaded:', JSON.stringify(puzzleState));
     }
 
     /* ============================================================
@@ -1971,32 +1963,10 @@
       }
     };
 
-    /* ============================================================
-       SECTION: DAILY STATUS
-       Writes to the shared wordGames_dailyStatus localStorage key
-       so the hub can show which games have been completed today.
-
-       localStorage namespace:
-       - wordGames_dailyStatus: { vowel: { completed, dateKey, timestamp }, ... }
-       - vowel_user_id, vowel_puzzle_*, vowel_best_ms, vowel_introduced: VOWEL-specific
-    ============================================================ */
-    const DailyStatus = {
-      KEY: 'wordGames_dailyStatus',
-
-      markCompleted(gameId) {
-        const today = new Date().toISOString().split('T')[0];
-        let status = {};
-        try {
-          status = JSON.parse(localStorage.getItem(this.KEY) || '{}');
-        } catch(e) {}
-        status[gameId] = { completed: true, dateKey: today, timestamp: Date.now() };
-        try {
-          localStorage.setItem(this.KEY, JSON.stringify(status));
-        } catch(e) {
-          console.warn('[DailyStatus] Save error:', e);
-        }
-      }
-    };
+    // DailyStatus is provided by shared.js — no redefinition here.
+    // localStorage namespace:
+    // - wordGames_dailyStatus: { vowel: { completed, dateKey, timestamp }, ... }
+    // - vowel_user_id, vowel_puzzle_*, vowel_best_ms, vowel_introduced: VOWEL-specific
 
     /* ============================================================
        SECTION: API SERVICE
@@ -2036,7 +2006,7 @@
     };
 
     /* ============================================================
-       SECTION 7: VALIDATION & STATE MANAGEMENT
+       SECTION: VALIDATION & STATE MANAGEMENT
     ============================================================ */
     // O(1) word membership lookup — built once at startup from the WORDS array
     const WordSet = new Set(WORDS);
@@ -2078,7 +2048,7 @@
       if (allPlaced && allHaveVowels) {
         const word = constructedWord();
         if (WordSet.has(word)) {
-          console.log('[Validation] Word SUCCESS:', word);
+          if (IS_DEBUG) console.log('[Validation] Word SUCCESS:', word);
           gameState.phase = 'won';
           applyStateVisuals('won');
           elapsedTimer.pause();
@@ -2092,14 +2062,14 @@
           scheduleAutoAdvance(2000); // Auto-advance after 2 seconds
           return true;
         } else {
-          console.log('[Validation] Word FAIL:', word);
+          if (IS_DEBUG) console.log('[Validation] Word FAIL:', word);
         }
       }
       return false;
     }
 
     /* ============================================================
-       SECTION 8: ANIMATION & TIMING
+       SECTION: ANIMATION & TIMING
     ============================================================ */
 
     // Single timer reference — prevents overlapping auto-advances
@@ -2315,7 +2285,7 @@
 
       document.getElementById('give-up-btn').style.display = 'none';
       renderProgress();
-      console.log('[Puzzle] Complete! Time:', timeString, '— Outcomes:', puzzleState.outcomes.join(', '));
+      if (IS_DEBUG) console.log('[Puzzle] Complete! Time:', timeString, '— Outcomes:', puzzleState.outcomes.join(', '));
     }
 
     /* ============================================================
@@ -2364,7 +2334,7 @@
     }
 
     /* ============================================================
-       SECTION 8.1: GIVE UP REVEAL
+       SECTION: GIVE UP REVEAL
        Re-renders the board to show the target word in its correct
        structure: vowels (amber) interleaved with consonants (charcoal)
        exactly as the word was intended.
@@ -2405,7 +2375,7 @@
       }
 
       board.appendChild(fragment);
-      console.log('[GiveUp] Board revealed as:', word);
+      if (IS_DEBUG) console.log('[GiveUp] Board revealed as:', word);
     }
 
     // Start the game when the DOM is ready
@@ -2415,7 +2385,7 @@
 
       if (puzzleState.complete && !DailyEngine.isDebug) {
         // Today's puzzle already finished — skip straight to results
-        console.log('[Puzzle] Already complete for', puzzleState.dateKey, '— showing results');
+        if (IS_DEBUG) console.log('[Puzzle] Already complete for', puzzleState.dateKey, '— showing results');
         elapsedTimer.setBase(puzzleState.timerElapsed);
         showPuzzleComplete();
         renderProgress(); // Show correct pip state on the results screen
@@ -2429,7 +2399,7 @@
         puzzleState.complete = false;
         puzzleState.timerElapsed = 0;
         puzzleState.giveUpRemaining = 60;
-        console.log('[Debug] Puzzle was complete — resetting for replay');
+        if (IS_DEBUG) console.log('[Debug] Puzzle was complete — resetting for replay');
       }
 
       elapsedTimer.setBase(puzzleState.timerElapsed);
