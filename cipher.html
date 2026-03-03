@@ -553,9 +553,22 @@
         /* ============================================================
            SECTION: CONSTANTS & CONFIG
            CIPHER_DATE_SEED: namespaced seed for daily puzzle isolation.
-           Appends _cipher_v1 suffix to shared DATE_SEED.
+           Uses 150-day rolling window offset to guarantee no repeat within window.
         ============================================================ */
-        const CIPHER_DATE_SEED = DATE_SEED + '_cipher_v1';
+        function daysSinceEpoch(date) {
+            const epoch = new Date('2000-01-01T00:00:00Z');
+            return Math.floor((date - epoch) / (24 * 60 * 60 * 1000));
+        }
+
+        const CIPHER_DATE_SEED = (() => {
+            const targetDate = new Date(DATE_SEED + 'T00:00:00Z');
+            const year = targetDate.getUTCFullYear();
+            const month = String(targetDate.getUTCMonth() + 1).padStart(2, '0');
+            const day = String(targetDate.getUTCDate()).padStart(2, '0');
+            const days = daysSinceEpoch(targetDate);
+            const windowOffset = Math.floor(days / 150); // Rotates every 150 days
+            return `${year}-${month}-${day}_cipher_v2_offset_${windowOffset}`;
+        })();
 
         /* ============================================================
            SECTION: QUOTE CORPUS
@@ -1251,10 +1264,23 @@
             const rng = seededRandom(CIPHER_DATE_SEED);
 
             // 1. Pick quote — prefer high letter-repetition (more helpful reveals per solved letter)
-            const highRepQuotes = QUOTES.filter(q => hasHighLetterRepetition(q.text, 0.35));
-            const quotePool = highRepQuotes.length >= 5 ? highRepQuotes : QUOTES; // fallback if filter too strict
-            const quoteIndex = Math.floor(rng() * quotePool.length);
-            gameState.quote = quotePool[quoteIndex];
+            // 1. Pick quote using Fisher-Yates shuffle for 150-day no-repeat guarantee.
+            // Shuffle all QUOTES with the window-offset seed, pick by dayOfWindow position.
+            // Prefer high letter-repetition — filter from shuffled order to keep determinism.
+            const shuffledQuotes = (() => {
+                const arr = QUOTES.slice();
+                const shuffleRng = seededRandom(CIPHER_DATE_SEED + '_shuffle');
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(shuffleRng() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
+            })();
+            const targetDate = new Date(DATE_SEED + 'T00:00:00Z');
+            const dayOfWindow = daysSinceEpoch(targetDate) % 150; // 0-149 within 150-day window
+            const highRepQuotes = shuffledQuotes.filter(q => hasHighLetterRepetition(q.text, 0.35));
+            const quotePool = highRepQuotes.length >= 150 ? highRepQuotes : shuffledQuotes;
+            gameState.quote = quotePool[dayOfWindow % quotePool.length];
 
             // 2. Extract unique letters (uppercase)
             const uniqueLetters = [...new Set(gameState.quote.text.toUpperCase().replace(/[^A-Z]/g, '').split(''))].sort();
