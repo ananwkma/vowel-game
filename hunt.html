@@ -858,7 +858,20 @@
        SECTION: CONSTANTS & CONFIG
        Game-specific seed namespace — appends suffix to shared DATE_SEED.
     ============================================================ */
-    const HUNT_DATE_SEED = DATE_SEED + '_hunt_v1';
+    function daysSinceEpoch(date) {
+      const epoch = new Date('2000-01-01T00:00:00Z');
+      return Math.floor((date - epoch) / (24 * 60 * 60 * 1000));
+    }
+
+    const HUNT_DATE_SEED = (() => {
+      const targetDate = new Date(DATE_SEED + 'T00:00:00Z');
+      const year = targetDate.getUTCFullYear();
+      const month = String(targetDate.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(targetDate.getUTCDate()).padStart(2, '0');
+      const days = daysSinceEpoch(targetDate);
+      const windowOffset = Math.floor(days / 60); // Rotates every 60 days
+      return `${year}-${month}-${day}_hunt_v2_offset_${windowOffset}`;
+    })();
 
     /* ============================================================
        SECTION: STATE
@@ -883,8 +896,19 @@
        Local helpers not provided by shared.js.
     ============================================================ */
     function getDailyPuzzle(rng) {
-      const idx = Math.floor(rng() * CATEGORIES.length);
-      const { category, easy, hard } = CATEGORIES[idx];
+      // Fisher-Yates shuffle with window-offset seed for 60-day no-repeat guarantee.
+      const shuffledCategories = (() => {
+        const arr = CATEGORIES.slice();
+        const shuffleRng = seededRandom(HUNT_DATE_SEED + '_shuffle');
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(shuffleRng() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      })();
+      const targetDate = new Date(DATE_SEED + 'T00:00:00Z');
+      const dayOfWindow = daysSinceEpoch(targetDate) % 60; // 0-59 position within 60-day window
+      const { category, easy, hard } = shuffledCategories[dayOfWindow];
       if (IS_DEBUG) {
         console.log(`[Hunt] Date seed: ${HUNT_DATE_SEED}`);
         console.log(`[Hunt] Category: ${category}`);
