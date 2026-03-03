@@ -8,7 +8,7 @@
   <!-- Web app manifest (PWA / home screen pinning) -->
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
-  <link rel="apple-touch-icon" href="icons/lexicon-192.png">
+  <link rel="apple-touch-icon" href="icons/lexicon-icon.svg">
 
   <!-- iOS standalone mode -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -25,7 +25,7 @@
       background-color: var(--color-bg);
       color: var(--color-primary-text);
       min-height: 100vh;
-      padding: var(--spacing-xl) var(--spacing-md);
+      padding: max(var(--spacing-xl), env(safe-area-inset-top)) var(--spacing-md) max(var(--spacing-xl), env(safe-area-inset-bottom));
       animation: fadeIn 0.3s ease-out;
     }
 
