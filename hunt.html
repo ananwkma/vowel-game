@@ -388,7 +388,7 @@
     }
 
     .btn-giveup:hover { opacity: 0.85; }
-    
+
     #give-up-bar {
       position: absolute;
       left: 0;
@@ -774,9 +774,11 @@
     </div>
   </div>
 
+  <script src="/shared.js"></script>
   <script>
     /* ============================================================
        SECTION: CONSTANTS & WORD DATA
+       Word lists and category data for all daily puzzles.
     ============================================================ */
     const CATEGORIES = [
       { category: 'PLANETS',   easy: ['MARS', 'EARTH', 'VENUS'],     hard: ['SATURN', 'URANUS', 'PLUTO'] },
@@ -811,44 +813,55 @@
     const HINT_PENALTY_MS = 30000; // 30-second penalty per hint
 
     /* ============================================================
-       SECTION: SEEDED PRNG
-       Copied verbatim from ladder.html (which copied from vowel.html)
+       SECTION: CONSTANTS & CONFIG
+       Game-specific seed namespace — appends suffix to shared DATE_SEED.
     ============================================================ */
-    function seededRandom(seedStr) {
-      let h = 0;
-      for (let i = 0; i < seedStr.length; i++) {
-        h = Math.imul(31, h) + seedStr.charCodeAt(i) | 0;
+    const HUNT_DATE_SEED = DATE_SEED + '_hunt_v1';
+
+    /* ============================================================
+       SECTION: STATE
+       Runtime game state — reset on each new puzzle.
+    ============================================================ */
+    let dailyPuzzle = null;
+    let gridData = null;       // 2D array of letters
+    let wordPlacements = [];   // [{word, cells:[{row,col}]}]
+    let currentGridSize = 10;
+    let currentCellSize = 34;
+
+    let gameState = {
+      phase: 'easy',            // 'easy' | 'hard' | 'done'
+      wordsFound: [],            // [{word, usedHint}]
+      hintIndex: 0,              // round-robin index for hint rotation
+      giveUpConfirming: false,
+      giveUpTimeout: null,
+    };
+
+    /* ============================================================
+       SECTION: UTILITY FUNCTIONS
+       Local helpers not provided by shared.js.
+    ============================================================ */
+    function getDailyPuzzle(rng) {
+      const idx = Math.floor(rng() * CATEGORIES.length);
+      const { category, easy, hard } = CATEGORIES[idx];
+      if (IS_DEBUG) {
+        console.log(`[Hunt] Date seed: ${HUNT_DATE_SEED}`);
+        console.log(`[Hunt] Category: ${category}`);
+        console.log(`[Hunt] Easy words: ${easy.join(', ')}`);
+        console.log(`[Hunt] Hard words: ${hard.join(', ')}`);
       }
-      let s = h >>> 0;
-      return function() {
-        s += 0x6D2B79F5;
-        let t = Math.imul(s ^ s >>> 15, 1 | s);
-        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
-        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      return {
+        category,
+        words: [
+          ...easy.map(w => ({ word: w, phase: 'easy' })),
+          ...hard.map(w => ({ word: w, phase: 'hard' })),
+        ],
+        rng,
       };
     }
 
     /* ============================================================
-       SECTION: DEBUG MODE
-    ============================================================ */
-    const DEBUG = new URLSearchParams(window.location.search).has('debug');
-
-    /* ============================================================
-       SECTION: DAILY SEED
-    ============================================================ */
-    const urlParams = new URLSearchParams(window.location.search);
-    const _overrideDate = urlParams.get('date'); // e.g. ?date=2026-03-01
-
-    const DATE_SEED = (() => {
-      const targetDate = _overrideDate ? new Date(_overrideDate) : new Date();
-      const year = targetDate.getUTCFullYear();
-      const month = String(targetDate.getUTCMonth() + 1).padStart(2, '0');
-      const day = String(targetDate.getUTCDate()).padStart(2, '0');
-      return `${year}-${month}-${day}_hunt_v1`;
-    })();
-
-    /* ============================================================
-       SECTION: GRID GENERATION
+       SECTION: ENGINE
+       Grid generation — backtracking letter placement algorithm.
     ============================================================ */
     const GRID_SIZES = [10, 8];
 
@@ -924,92 +937,9 @@
       return { grid, placements };
     }
 
-    function getDailyPuzzle(rng) {
-      const idx = Math.floor(rng() * CATEGORIES.length);
-      const { category, easy, hard } = CATEGORIES[idx];
-      if (DEBUG) {
-        console.log(`[Hunt] Date seed: ${DATE_SEED}`);
-        console.log(`[Hunt] Category: ${category}`);
-        console.log(`[Hunt] Easy words: ${easy.join(', ')}`);
-        console.log(`[Hunt] Hard words: ${hard.join(', ')}`);
-      }
-      return {
-        category,
-        words: [
-          ...easy.map(w => ({ word: w, phase: 'easy' })),
-          ...hard.map(w => ({ word: w, phase: 'hard' })),
-        ],
-        rng,
-      };
-    }
-
-    /* ============================================================
-       SECTION: GAME STATE
-    ============================================================ */
-    let dailyPuzzle = null;
-    let gridData = null;       // 2D array of letters
-    let wordPlacements = [];   // [{word, cells:[{row,col}]}]
-    let currentGridSize = 10;
-    let currentCellSize = 34;
-
-    let gameState = {
-      phase: 'easy',            // 'easy' | 'hard' | 'done'
-      wordsFound: [],            // [{word, usedHint}]
-      hintIndex: 0,              // round-robin index for hint rotation
-      giveUpConfirming: false,
-      giveUpTimeout: null,
-    };
-
-    /* ============================================================
-       SECTION: PROGRESS (pips)
-    ============================================================ */
-    function renderPips() {
-      if (!dailyPuzzle) return;
-      dailyPuzzle.words.forEach((wordObj, i) => {
-        const pip = document.querySelector(`.pip[data-word="${i}"]`);
-        if (!pip) return;
-        const found = gameState.wordsFound.find(f => f.word === wordObj.word);
-        const wasHinted = found && found.usedHint;
-        const wasFound = !!found;
-
-        const prevSolved = pip.classList.contains('solved');
-        const prevHinted = pip.classList.contains('hinted');
-
-        pip.className = 'pip';
-        if (wasFound) {
-          pip.classList.add(wasHinted ? 'hinted' : 'solved');
-          if (!prevSolved && !prevHinted) {
-            // Newly found — trigger pop animation
-            pip.classList.add('pip-pop');
-            pip.addEventListener('animationend', () => pip.classList.remove('pip-pop'), { once: true });
-          }
-        }
-      });
-    }
-
-    /* ============================================================
-       SECTION: DAILY STATUS
-       Copied verbatim from cipher.html
-    ============================================================ */
-    const DailyStatus = {
-      KEY: 'wordGames_dailyStatus',
-      markCompleted(gameId) {
-        const today = new Date().toISOString().split('T')[0];
-        let status = {};
-        try {
-          status = JSON.parse(localStorage.getItem(this.KEY) || '{}');
-        } catch(e) {}
-        status[gameId] = { completed: true, dateKey: today, timestamp: Date.now() };
-        try {
-          localStorage.setItem(this.KEY, JSON.stringify(status));
-        } catch(e) {
-          console.warn('[DailyStatus] Save error:', e);
-        }
-      }
-    };
-
     /* ============================================================
        SECTION: RESULT PERSISTENCE
+       localStorage save/load for hunt completion state.
     ============================================================ */
     const HuntResult = {
       _key() { return `hunt_result_${new Date().toISOString().split('T')[0]}`; },
@@ -1025,7 +955,8 @@
     };
 
     /* ============================================================
-       SECTION: DOM RENDER
+       SECTION: UI RENDERING
+       Grid, canvas, category display, results screen, and share.
     ============================================================ */
     function renderGrid(gridSize, cellSize) {
       const letterGrid = document.getElementById('letter-grid');
@@ -1062,10 +993,30 @@
       }
     }
 
-    /* ============================================================
-       SECTION: RESULTS SCREEN
-       (Stub — full wiring in Plan 02)
-    ============================================================ */
+    function renderPips() {
+      if (!dailyPuzzle) return;
+      dailyPuzzle.words.forEach((wordObj, i) => {
+        const pip = document.querySelector(`.pip[data-word="${i}"]`);
+        if (!pip) return;
+        const found = gameState.wordsFound.find(f => f.word === wordObj.word);
+        const wasHinted = found && found.usedHint;
+        const wasFound = !!found;
+
+        const prevSolved = pip.classList.contains('solved');
+        const prevHinted = pip.classList.contains('hinted');
+
+        pip.className = 'pip';
+        if (wasFound) {
+          pip.classList.add(wasHinted ? 'hinted' : 'solved');
+          if (!prevSolved && !prevHinted) {
+            // Newly found — trigger pop animation
+            pip.classList.add('pip-pop');
+            pip.addEventListener('animationend', () => pip.classList.remove('pip-pop'), { once: true });
+          }
+        }
+      });
+    }
+
     function showResults(opts = {}) {
       const { solved = false } = opts;
 
@@ -1080,16 +1031,18 @@
         date: new Date().toISOString().split('T')[0],
       });
 
-            // Populate results screen
-            const rs = document.getElementById('results-screen');
-            const statusEl = document.getElementById('results-status');
-            const subtitleEl = document.getElementById('results-subtitle');
-            statusEl.textContent = solved ? 'CONGRATULATIONS' : 'THANKS FOR PLAYING';
-            statusEl.className = 'results-status ' + (solved ? 'solved' : 'revealed');
-      
-                        const foundCount = gameState.wordsFound.filter(f => !f.usedHint).length;
-                        subtitleEl.textContent = `FOUND ${foundCount}/6 WORDS`;
-                        subtitleEl.style.display = 'block';            document.getElementById('results-category').textContent = dailyPuzzle ? dailyPuzzle.category : '';
+      // Populate results screen
+      const rs = document.getElementById('results-screen');
+      const statusEl = document.getElementById('results-status');
+      const subtitleEl = document.getElementById('results-subtitle');
+      statusEl.textContent = solved ? 'CONGRATULATIONS' : 'THANKS FOR PLAYING';
+      statusEl.className = 'results-status ' + (solved ? 'solved' : 'revealed');
+
+      const foundCount = gameState.wordsFound.filter(f => !f.usedHint).length;
+      subtitleEl.textContent = `FOUND ${foundCount}/6 WORDS`;
+      subtitleEl.style.display = 'block';
+      document.getElementById('results-category').textContent = dailyPuzzle ? dailyPuzzle.category : '';
+
       // Results words list — populate into column divs
       const easyColEl = document.getElementById('results-col-easy');
       const hardColEl = document.getElementById('results-col-hard');
@@ -1118,8 +1071,38 @@
       if (solved) spawnConfetti();
     }
 
+    function setupShare() {
+      document.getElementById('results-share-btn').addEventListener('click', async () => {
+        if (!dailyPuzzle) return;
+        const today = new Date().toISOString().split('T')[0];
+        const pipEmoji = dailyPuzzle.words.map(w => {
+          const found = gameState.wordsFound.find(f => f.word === w.word);
+          if (!found) return '⬜';
+          return found.usedHint ? '🔴' : '🟢';
+        }).join('');
+        const text = `Lexicon Hunt ${today}\n${dailyPuzzle.category}\n${pipEmoji}`;
+
+        try {
+          if (navigator.share) {
+            await navigator.share({ text });
+          } else if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(text);
+            const btn = document.getElementById('results-share-btn');
+            const orig = btn.innerHTML;
+            btn.innerHTML = 'Copied!';
+            setTimeout(() => { btn.innerHTML = orig; }, 1500);
+          } else {
+            prompt('Copy result:', text);
+          }
+        } catch(e) {
+          try { prompt('Copy result:', text); } catch(err) {}
+        }
+      });
+    }
+
     /* ============================================================
        SECTION: DRAG SELECTION
+       Pointer Events-based drag-to-select cells in the letter grid.
     ============================================================ */
     let isDragging = false;
     let selectedCells = []; // [{row, col, el}]
@@ -1243,6 +1226,7 @@
 
     /* ============================================================
        SECTION: CANVAS
+       Canvas overlay drawing helpers for the lasso trace line.
     ============================================================ */
     function drawTraceLine() {
       const canvas = document.getElementById('lasso-canvas');
@@ -1276,6 +1260,7 @@
 
     /* ============================================================
        SECTION: SELECTION EVALUATION
+       Word matching and cell locking after drag completes.
     ============================================================ */
     function evaluateSelection() {
       if (selectedCells.length === 0) return;
@@ -1342,6 +1327,7 @@
 
     /* ============================================================
        SECTION: HINT SYSTEM
+       Round-robin first-letter hint with visual pulse.
     ============================================================ */
     function useHint() {
       if (gameState.phase === 'done') return;
@@ -1380,6 +1366,7 @@
 
     /* ============================================================
        SECTION: PHASE MANAGEMENT
+       Phase transition logic — easy phase to hard phase reveal.
     ============================================================ */
     function revealCategory() {
       gameState.phase = 'hard';
@@ -1407,13 +1394,13 @@
 
     /* ============================================================
        SECTION: GIVE-UP
+       Hold-to-confirm give-up with progress bar fill.
     ============================================================ */
     function triggerGiveUp() {
       if (gameState.phase === 'done') return;
-      
-      const btn = document.getElementById('giveup-btn');
+
       const giveUpBar = document.getElementById('give-up-bar');
-      
+
       // Clear progress bar
       giveUpBar.style.width = '0%';
 
@@ -1480,25 +1467,8 @@
     }
 
     /* ============================================================
-       SECTION: HELP MODAL
-    ============================================================ */
-    function setupHelpModal() {
-      document.getElementById('help-btn').addEventListener('click', () => {
-        document.getElementById('help-modal').style.display = 'flex';
-      });
-      document.getElementById('help-modal-close').addEventListener('click', () => {
-        document.getElementById('help-modal').style.display = 'none';
-      });
-      document.getElementById('help-modal').addEventListener('click', (e) => {
-        if (e.target === document.getElementById('help-modal')) {
-          document.getElementById('help-modal').style.display = 'none';
-        }
-      });
-    }
-
-    /* ============================================================
        SECTION: CONFETTI
-       CSS-based fixed-position div confetti — matches ladder.html pattern
+       CSS-based fixed-position div confetti — hunt-specific closure.
     ============================================================ */
     function spawnConfetti() {
       const colors = ['#D4A574', '#E8C99A', '#C49060', '#F5F0E8', '#8BAF7C', '#1C1B18'];
@@ -1516,52 +1486,39 @@
     }
 
     /* ============================================================
-       SECTION: SHARE
+       SECTION: HELP MODAL
+       Help overlay toggle handlers.
     ============================================================ */
-    function setupShare() {
-      document.getElementById('results-share-btn').addEventListener('click', async () => {
-        if (!dailyPuzzle) return;
-        const today = new Date().toISOString().split('T')[0];
-        const pipEmoji = dailyPuzzle.words.map(w => {
-          const found = gameState.wordsFound.find(f => f.word === w.word);
-          if (!found) return '⬜';
-          return found.usedHint ? '🔴' : '🟢';
-        }).join('');
-        const text = `Lexicon Hunt ${today}\n${dailyPuzzle.category}\n${pipEmoji}`;
-
-        try {
-          if (navigator.share) {
-            await navigator.share({ text });
-          } else if (navigator.clipboard && navigator.clipboard.writeText) {
-            await navigator.clipboard.writeText(text);
-            const btn = document.getElementById('results-share-btn');
-            const orig = btn.innerHTML;
-            btn.innerHTML = 'Copied!';
-            setTimeout(() => { btn.innerHTML = orig; }, 1500);
-          } else {
-            prompt('Copy result:', text);
-          }
-        } catch(e) {
-          try { prompt('Copy result:', text); } catch(err) {}
+    function setupHelpModal() {
+      document.getElementById('help-btn').addEventListener('click', () => {
+        document.getElementById('help-modal').style.display = 'flex';
+      });
+      document.getElementById('help-modal-close').addEventListener('click', () => {
+        document.getElementById('help-modal').style.display = 'none';
+      });
+      document.getElementById('help-modal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('help-modal')) {
+          document.getElementById('help-modal').style.display = 'none';
         }
       });
     }
 
     /* ============================================================
-       SECTION: DOMCONTENTLOADED — boot
+       SECTION: INIT
+       DOMContentLoaded boot — puzzle setup and UI wiring.
     ============================================================ */
     document.addEventListener('DOMContentLoaded', () => {
-      if (DEBUG) document.getElementById('back-link').href = 'index.html?debug';
+      if (IS_DEBUG) document.getElementById('back-link').href = 'index.html?debug';
 
       // 1. Check saved result (skipped in debug mode)
-      const saved = !DEBUG && HuntResult.load();
+      const saved = !IS_DEBUG && HuntResult.load();
       if (saved) {
         // Restore state from saved result
         gameState.wordsFound = saved.wordsFound || [];
         gameState.phase = 'done';
 
         // Reconstruct dailyPuzzle for display
-        const rng = seededRandom(DATE_SEED);
+        const rng = seededRandom(HUNT_DATE_SEED);
         dailyPuzzle = getDailyPuzzle(rng);
 
         // Still render the grid so results screen has context
@@ -1570,7 +1527,7 @@
         currentCellSize = cellSize;
         let gridResult = null;
         for (let attempt = 0; attempt < 20 && !gridResult; attempt++) {
-          const gridRng = seededRandom(DATE_SEED + '_grid_' + attempt);
+          const gridRng = seededRandom(HUNT_DATE_SEED + '_grid_' + attempt);
           gridResult = placeWords(dailyPuzzle.words.map(w => w.word), gridSize, gridRng);
         }
         if (gridResult) {
@@ -1590,13 +1547,13 @@
       currentCellSize = cellSize;
 
       // 3. Get daily puzzle
-      const rng = seededRandom(DATE_SEED);
+      const rng = seededRandom(HUNT_DATE_SEED);
       dailyPuzzle = getDailyPuzzle(rng);
 
       // 4. Place words with retry (up to 20 attempts)
       let gridResult = null;
       for (let attempt = 0; attempt < 20 && !gridResult; attempt++) {
-        const gridRng = seededRandom(DATE_SEED + '_grid_' + attempt);
+        const gridRng = seededRandom(HUNT_DATE_SEED + '_grid_' + attempt);
         gridResult = placeWords(dailyPuzzle.words.map(w => w.word), gridSize, gridRng);
       }
       if (!gridResult) {
