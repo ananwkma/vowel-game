@@ -15,7 +15,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Lexicon">
 
-  <title>Letter Hunt — Lexicon</title>
+  <title>Lexicon / HUNT</title>
   <!-- REQUIRED: Shared design tokens for visual consistency across all games -->
   <link rel="stylesheet" href="styles/design-tokens.css">
   <style>
@@ -109,7 +109,7 @@
       align-items: center;
       min-height: 100vh;
       padding-top: max(52px, calc(env(safe-area-inset-top) + 48px));
-      padding-bottom: max(24px, env(safe-area-inset-bottom));
+      padding-bottom: max(48px, env(safe-area-inset-bottom));
       gap: 12px;
     }
 
@@ -662,6 +662,18 @@
       60%  { transform: translateX(-3px); }
       80%  { transform: translateX(3px); }
       100% { transform: translateX(0); opacity: 0; }
+    }
+
+    @keyframes cell-wave {
+      0%   { transform: translateY(0);    }
+      35%  { transform: translateY(-6px); }
+      65%  { transform: translateY(2px);  }
+      100% { transform: translateY(0);    }
+    }
+    .grid-cell.reveal-pop {
+      animation: cell-wave 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      position: relative;
+      z-index: 1;
     }
 
     @keyframes pip-pop {
@@ -1261,14 +1273,14 @@
         const cell = getCellAt(e.clientX, e.clientY);
         if (!cell) return;
 
-        // BACKTRACKING: If we move back to the previous cell, pop the current one
-        if (selectedCells.length >= 2) {
-          const secondToLast = selectedCells[selectedCells.length - 2];
-          if (cell.row === secondToLast.row && cell.col === secondToLast.col) {
+        // BACKTRACKING: Trim back to any already-selected cell (handles skipped cells)
+        const existingIdx = selectedCells.findIndex(c => c.row === cell.row && c.col === cell.col);
+        if (existingIdx !== -1 && existingIdx < selectedCells.length - 1) {
+          while (selectedCells.length > existingIdx + 1) {
             removeLastCell();
-            drawTraceLine();
-            return;
           }
+          drawTraceLine();
+          return;
         }
 
         // Add new cell if valid
@@ -1464,27 +1476,43 @@
     ============================================================ */
     function triggerGiveUp() {
       if (gameState.phase === 'done') return;
+      document.getElementById('give-up-bar').style.width = '0%';
 
-      const giveUpBar = document.getElementById('give-up-bar');
+      const WORD_GAP = 150; // ms gap between each word's reveal
+      const CELL_GAP = 50;  // ms gap between cells within a word
+      let maxDelay = 0;
+      let wordIdx = 0;
 
-      // Clear progress bar
-      giveUpBar.style.width = '0%';
-
-      // Reveal all unfound words (highlight in rose)
       dailyPuzzle.words.forEach(w => {
-        if (!gameState.wordsFound.find(f => f.word === w.word)) {
-          const placement = wordPlacements.find(p => p.word === w.word);
-          if (placement) {
-            placement.cells.forEach(({ row, col }) => {
-              const el = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-              if (el) { el.classList.remove('active'); el.classList.add('found-hint'); }
-            });
-            gameState.wordsFound.push({ word: w.word, usedHint: true });
-          }
-        }
+        if (gameState.wordsFound.find(f => f.word === w.word)) return;
+        const placement = wordPlacements.find(p => p.word === w.word);
+        if (!placement) return;
+
+        // Apply found-hint class and track as found immediately
+        placement.cells.forEach(({ row, col }) => {
+          const el = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+          if (el) { el.classList.remove('active'); el.classList.add('found-hint'); }
+        });
+        gameState.wordsFound.push({ word: w.word, usedHint: true });
+
+        // Staggered pop animation per cell
+        placement.cells.forEach(({ row, col }, cellIdx) => {
+          const delay = wordIdx * WORD_GAP + cellIdx * CELL_GAP;
+          if (delay > maxDelay) maxDelay = delay;
+          setTimeout(() => {
+            const el = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            if (el) {
+              el.classList.add('reveal-pop');
+              el.addEventListener('animationend',
+                () => el.classList.remove('reveal-pop'), { once: true });
+            }
+          }, delay);
+        });
+        wordIdx++;
       });
+
       renderPips();
-      endGame(true); // gaveUp = true
+      setTimeout(() => endGame(true), maxDelay + 550); // wait for last pop to finish
     }
 
     function setupGiveUp() {
