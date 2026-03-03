@@ -1290,7 +1290,10 @@
             // Shuffle all QUOTES with the window-offset seed, pick by dayOfWindow position.
             // Prefer high letter-repetition — filter from shuffled order to keep determinism.
             const shuffledQuotes = (() => {
-                const arr = QUOTES.filter(q => q.text.trim().split(/\s+/).length <= 12);
+                const arr = QUOTES.filter(q => {
+                    const words = q.text.trim().split(/\s+/);
+                    return words.length <= 12 && words.every(w => w.replace(/[^a-z]/gi, '').length <= 7);
+                });
                 const shuffleRng = seededRandom(CIPHER_DATE_SEED + '_shuffle');
                 for (let i = arr.length - 1; i > 0; i--) {
                     const j = Math.floor(shuffleRng() * (i + 1));
