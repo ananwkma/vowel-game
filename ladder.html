@@ -947,9 +947,23 @@
     ]);
 
     /* ============================================================
+       SECTION: HELPERS
+    ============================================================ */
+    function daysSinceEpoch(date) {
+        const epoch = new Date('2000-01-01T00:00:00Z');
+        return Math.floor((date - epoch) / (24 * 60 * 60 * 1000));
+    }
+
+    /* ============================================================
        SECTION: CONSTANTS & CONFIG
     ============================================================ */
-    const LADDER_DATE_SEED = DATE_SEED + '_ladder_v1';
+    const LADDER_DATE_SEED = (() => {
+        // DATE_SEED from shared.js is 'YYYY-MM-DD' (UTC-based, overridable via ?date=)
+        const targetDate = new Date(DATE_SEED + 'T00:00:00Z');
+        const days = daysSinceEpoch(targetDate);
+        const windowOffset = Math.floor(days / 150); // Rotates every 150 days
+        return `${DATE_SEED}_ladder_v2_offset_${windowOffset}`;
+    })();
 
     const ADJACENCY = buildAdjacencyMap(DICTIONARY);
     const COMMON_ADJACENCY = buildAdjacencyMap([...PUZZLE_WORDS]);
