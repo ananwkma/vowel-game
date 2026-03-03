@@ -5,15 +5,15 @@
 See: .planning/PROJECT.md (updated 2026-03-01)
 
 **Core value:** Players can instantly understand and interact with any puzzle — the mechanics are intuitive, the win/lose feedback is immediate and satisfying.
-**Current focus:** Planning next milestone (v2.1 or v3.0)
+**Current focus:** Phase 21 — Feature Updates & Bug Fixes
 
 ## Current Position
 
-Phase: 20-codebase-cleanup — Plan 06 of N complete (phase complete — all gaps closed)
-Status: Phase 20 complete — all 3 verification gaps closed; all 5 HTML files fully restructured
-Last activity: 2026-03-03 — Phase 20, Plan 06 complete; index.html wired to shared.js, vowel.html sections reordered
+Phase: 21-feature-updates-and-bug-fixes — Plans planned, not yet executed
+Status: Phase 21 planned — 3 plans ready to execute (wave 1, all parallel)
+Last activity: 2026-03-03 — Phase 21 plans created (21-01 Cipher, 21-02 Hunt, 21-03 Ladder)
 
-Progress: [████████████████] Phase 20 complete — Plans 20-01, 20-02, 20-03, 20-04, 20-05, 20-06 complete
+Progress: [░░░░░░░░░░░░░░░░] Phase 21 ready — Plans 21-01, 21-02, 21-03 planned, 0/3 executed
 
 ## Accumulated Context
 
@@ -44,5 +44,5 @@ Progress: [████████████████] Phase 20 complete �
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Completed 20-codebase-cleanup/20-06-PLAN.md
-Resume: Phase 20 complete — plan next phase
+Stopped at: Phase 21 plans created (21-01, 21-02, 21-03 all written)
+Resume: Execute Phase 21 — run `/gsd:execute-phase 21` (all 3 plans are wave 1, run in parallel)
