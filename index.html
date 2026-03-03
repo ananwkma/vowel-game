@@ -233,6 +233,7 @@
     </div>
   </div>
 
+  <script src="/shared.js"></script>
   <script>
   (function() {
     // Propagate ?debug to all game links
@@ -245,11 +246,8 @@
 
     // Mark completed games
     try {
-      const status = JSON.parse(localStorage.getItem('wordGames_dailyStatus') || '{}');
-      const today = new Date().toISOString().split('T')[0];
       ['vowel', 'ladder', 'hunt', 'cipher'].forEach(function(gameId) {
-        const record = status[gameId];
-        if (record && record.completed && record.dateKey === today) {
+        if (DailyStatus.isCompleted(gameId)) {
           const card = document.getElementById('card-' + gameId);
           if (card) card.classList.add('completed');
         }
