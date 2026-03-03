@@ -758,6 +758,19 @@
             checkWin();
         }
 
+        function clearLetter(num) {
+            if (!gameState.guesses[num]) return; // Nothing assigned to this number
+            delete gameState.guesses[num];
+            document.querySelectorAll(`.cipher-block[data-number="${num}"]`).forEach(block => {
+                if (block.classList.contains('anchor')) return;
+                block.textContent = num;
+                block.classList.remove('guessed');
+                block.classList.add('unsolved');
+            });
+            CipherProgress.save(gameState.guesses);
+            checkWin();
+        }
+
         function calculatePercent() {
             let correctCount = 0;
             const uniqueLetters = [...new Set(gameState.quote.text.toUpperCase().replace(/[^A-Z]/g, '').split(''))];
@@ -975,20 +988,34 @@
             if (e.target === e.currentTarget) e.currentTarget.classList.remove('visible');
         });
 
-        // Tab: advance to next unsolved block
+        // Tab: advance to next unsolved block; Backspace/Delete: clear current assignment
         elHiddenInput.addEventListener('keydown', (e) => {
-            if (e.key !== 'Tab' || gameState.won) return;
-            e.preventDefault();
-            const allBlocks = Array.from(document.querySelectorAll('.cipher-block'));
-            const currentIdx = gameState.selectedNumber !== null
-                ? allBlocks.findIndex(b => parseInt(b.dataset.number) === gameState.selectedNumber)
-                : -1;
-            for (let offset = 1; offset <= allBlocks.length; offset++) {
-                const candidate = allBlocks[(currentIdx + offset) % allBlocks.length];
-                if (candidate.classList.contains('unsolved')) {
-                    selectBlock(parseInt(candidate.dataset.number));
-                    return;
+            if (gameState.won) return;
+
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const allBlocks = Array.from(document.querySelectorAll('.cipher-block'));
+                const currentIdx = gameState.selectedNumber !== null
+                    ? allBlocks.findIndex(b => parseInt(b.dataset.number) === gameState.selectedNumber)
+                    : -1;
+                for (let offset = 1; offset <= allBlocks.length; offset++) {
+                    const candidate = allBlocks[(currentIdx + offset) % allBlocks.length];
+                    if (candidate.classList.contains('unsolved')) {
+                        selectBlock(parseInt(candidate.dataset.number));
+                        return;
+                    }
                 }
+                return;
+            }
+
+            if ((e.key === 'Backspace' || e.key === 'Delete') && gameState.selectedNumber !== null) {
+                e.preventDefault();
+                const num = gameState.selectedNumber;
+                // Anchor protection: pre-revealed blocks cannot be cleared
+                const blockEl = document.querySelector(`.cipher-block[data-number="${num}"]`);
+                if (blockEl && blockEl.classList.contains('anchor')) return;
+                guessHistory.push(Object.assign({}, gameState.guesses));
+                clearLetter(num);
             }
         });
 
