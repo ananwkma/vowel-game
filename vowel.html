@@ -1000,6 +1000,45 @@
     const VOWEL_DATE_SEED = DATE_SEED;
 
     /* ============================================================
+       SECTION: STATE
+       Single source of truth for all rendering.
+       renderBoard() reads from this object exclusively.
+    ============================================================ */
+    const gameState = {
+      currentWord: null,      // e.g. 'CROWD'
+      consonants: [],         // e.g. ['C', 'R', 'W', 'D']
+      vowels: [],             // e.g. ['O'] (original vowels, for Give Up reveal in Phase 3)
+      vowelCount: 0,          // e.g. 1 (number of blank yellow blocks to show)
+      phase: 'playing',       // 'playing' | 'won' | 'gaveup' (used in Phase 3)
+    };
+
+    // Global variables for drag and drop state
+    let currentDraggable = null;
+    let placeholderEl = null;
+    let guideEl = null;
+    let dragStartX, dragStartY;
+    let initialDraggableRect;
+    let initialDraggableXOffset = 0;
+    let gameBoardRect;
+    let dragStartText = '_'; // value of the block before dragging started
+    let dragInitiated = false; // true once the pointer has actually moved after pointerdown
+    let prevPointerX = 0;    // tracks horizontal pointer direction for leading-edge detection
+    let rafPending = false;
+    let latestPointerEvent = null;
+
+    // Mobile detection — coarse pointer = touch device
+    const isMobile = window.matchMedia('(pointer: coarse)').matches;
+    // Mobile interaction state machine: 'idle' | 'tap-pending' | 'picker-open' | 'dragging'
+    let mobileState = 'idle';
+    let mobileTapBlock = null;
+    const MOBILE_DRAG_THRESHOLD = 8; // px before tap becomes a drag
+
+    // Set device-appropriate instruction text
+    document.getElementById('instruction-main-text').textContent = isMobile
+      ? 'Tap an orange block to pick a vowel. Then drag it into the correct spot to solve the word.'
+      : 'Drag an orange block over a vowel to select it, then drop it in the correct spot.';
+
+    /* ============================================================
        SECTION: WORD ENGINE
     ============================================================ */
     const WordEngine = {
@@ -1197,45 +1236,6 @@
 
       return { show, hide, positionAround, trackX, trackXAt, getVowelAtPoint };
     })();
-
-    /* ============================================================
-       SECTION: STATE
-       Single source of truth for all rendering.
-       renderBoard() reads from this object exclusively.
-    ============================================================ */
-    const gameState = {
-      currentWord: null,      // e.g. 'CROWD'
-      consonants: [],         // e.g. ['C', 'R', 'W', 'D']
-      vowels: [],             // e.g. ['O'] (original vowels, for Give Up reveal in Phase 3)
-      vowelCount: 0,          // e.g. 1 (number of blank yellow blocks to show)
-      phase: 'playing',       // 'playing' | 'won' | 'gaveup' (used in Phase 3)
-    };
-
-    // Global variables for drag and drop state
-    let currentDraggable = null;
-    let placeholderEl = null;
-    let guideEl = null;
-    let dragStartX, dragStartY;
-    let initialDraggableRect;
-    let initialDraggableXOffset = 0;
-    let gameBoardRect;
-    let dragStartText = '_'; // value of the block before dragging started
-    let dragInitiated = false; // true once the pointer has actually moved after pointerdown
-    let prevPointerX = 0;    // tracks horizontal pointer direction for leading-edge detection
-    let rafPending = false;
-    let latestPointerEvent = null;
-
-    // Mobile detection — coarse pointer = touch device
-    const isMobile = window.matchMedia('(pointer: coarse)').matches;
-    // Mobile interaction state machine: 'idle' | 'tap-pending' | 'picker-open' | 'dragging'
-    let mobileState = 'idle';
-    let mobileTapBlock = null;
-    const MOBILE_DRAG_THRESHOLD = 8; // px before tap becomes a drag
-
-    // Set device-appropriate instruction text
-    document.getElementById('instruction-main-text').textContent = isMobile
-      ? 'Tap an orange block to pick a vowel. Then drag it into the correct spot to solve the word.'
-      : 'Drag an orange block over a vowel to select it, then drop it in the correct spot.';
 
     /* ============================================================
        SECTION: UI RENDERING
