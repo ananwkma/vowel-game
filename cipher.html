@@ -1340,7 +1340,8 @@
             const quoteLen = gameState.quote.text.length;
             const sliceStart = quoteLen < 60 ? 2 : 1;
             const sliceEnd = quoteLen < 60 ? -3 : -2;
-            const maxReveal = quoteLen < 60 ? 2 : quoteLen <= 100 ? 3 : 4;
+            const wordCount = gameState.quote.text.trim().split(/\s+/).length;
+            const maxReveal = wordCount < 6 ? 2 : wordCount < 8 ? 3 : 4;
             const revealCandidates = letterFreqs.slice(sliceStart, sliceEnd).map(f => f.letter);
             const preRevealCount = Math.min(maxReveal, revealCandidates.length >= 2 ? revealCandidates.length : 0);
             const preRevealLetters = [];
@@ -1356,7 +1357,7 @@
                 const repRatio = ((letters.length - unique) / letters.length).toFixed(2);
                 console.log(`[Cipher] Quote: "${gameState.quote.text}" — ${gameState.quote.author}`);
                 console.log(`[Cipher] Letters: ${letters.length} total, ${unique} unique, repetition ratio: ${repRatio}`);
-                console.log(`[Cipher] Pre-reveal: ${preRevealLetters.join(', ')} (${preRevealCount}/${maxReveal} letters, quoteLen=${quoteLen})`);
+                console.log(`[Cipher] Pre-reveal: ${preRevealLetters.join(', ')} (${preRevealCount}/${maxReveal} letters, wordCount=${wordCount}, quoteLen=${quoteLen})`);
                 console.log(`[Cipher] High-rep pool: ${highRepQuotes.length}/${QUOTES.length} quotes`);
             }
 
