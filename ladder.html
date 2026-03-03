@@ -515,6 +515,10 @@
       text-align: center;
     }
 
+    /* CSS specificity fix: [hidden] attr (UA: display:none) is overridden by display:flex above.
+       This rule restores the intended hidden state when the attribute is present. */
+    #results-screen[hidden] { display: none; }
+
     .results-game-title {
       font-size: 0.7rem;
       text-transform: uppercase;
