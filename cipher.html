@@ -983,6 +983,47 @@
             return Math.round((correctCount / playerLetters.length) * 100);
         }
 
+        function generateMaskedQuote() {
+            const text = gameState.quote.text.toUpperCase();
+            const words = text.split(' '); // Split the quote into individual words
+    
+                let finalOutput = "";
+            let currentLineLength = 0;
+            const LINE_LIMIT = 10;
+
+                words.forEach((word, index) => {
+                let maskedWord = "";
+
+                    // 1. Generate the masked version of the current word
+                for (let i = 0; i < word.length; i++) {
+                    const char = word[i];
+                    if (/[A-Z]/.test(char)) {
+                        const num = Object.keys(gameState.cipherMap).find(key => gameState.cipherMap[key] === char);
+                        maskedWord += (gameState.guesses[num] === char) ? "🟢" : "🔴";
+                    } else {
+                        maskedWord += char;
+                    }
+                }
+
+                    // 2. Determine if we need a newline
+                // We check the word length (using 1 for emojis) 
+                // Note: Emojis count as 1 character in strings, but visually take more space.
+                if (currentLineLength + word.length > LINE_LIMIT && currentLineLength > 0) {
+                    finalOutput += "\n";
+                    currentLineLength = 0;
+                } else if (index > 0) {
+                    // Add a space between words if it's not the start of a new line
+                    finalOutput += " ";
+                    currentLineLength += 1;
+                }
+
+                    finalOutput += maskedWord;
+                currentLineLength += word.length;
+            });
+
+                return finalOutput;
+        }
+
         function checkWin() {
             // Only check if ALL numbers have a guess
             const totalNumbers = Object.keys(gameState.cipherMap).length;
@@ -997,7 +1038,8 @@
             if (isWon) {
                 gameState.won = true;
                 const percent = calculatePercent();
-                DailyStatus.markCompleted('cipher', { solved: true, percentSolved: percent });
+                const sss = generateMaskedQuote();
+                DailyStatus.markCompleted('cipher', { solved: true, percentSolved: percent, solvedShareString: sss });
 
                 // Wave animation: line by line, with a subtle left-to-right
                 // stagger within each line
@@ -1030,7 +1072,7 @@
 
                 // Give the player 5 seconds to read the completed blocks
                 setTimeout(() => {
-                    showResults({ solved: true, percentSolved: percent });
+                    showResults({ solved: true, percentSolved: percent, solvedShareString: sss });
                 }, 5000);
             }
         }
@@ -1074,6 +1116,7 @@
             const statusText = options.solved ? 'CONGRATULATIONS' : 'THANKS FOR PLAYING';
 
             const percentSolved = options.percentSolved || 0;
+            const solvedShareString = options.solvedShareString || "";
 
             elResultsScreen.innerHTML = `
                 <div class="results-game-title">Cipher</div>
@@ -1089,7 +1132,13 @@
 
             elResultsScreen.querySelector('#share-btn').addEventListener('click', () => {
                 const status = options.solved ? 'solved' : 'revealed';
-                const text = `CIPHER:\n\n${status.charAt(0).toUpperCase() + status.slice(1)} \n${percentSolved}% solved!\n\nPlay at: ${window.location.href}`;
+                const today = new Date().toISOString().split('T')[0];
+
+                let text = `CIPHER // ${today}\n${percentSolved}% solved!`;
+                text += `\n${solvedShareString}`;
+                text += `\n-- ${gameState.quote.author}`;
+                text += `\n\nPlay at: ${window.location.href}`;
+
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(() => {
                 const shareBtn = document.getElementById('share-btn');
@@ -1168,6 +1217,7 @@
         async function handleGiveUp() {
             if (gameState.won) return;
             const percent = calculatePercent();
+            const sss = generateMaskedQuote();
             gameState.won = true; // Disable further input
 
             // Hide give-up button
@@ -1175,11 +1225,11 @@
 
             await animatedDecode();
 
-            DailyStatus.markCompleted('cipher', { solved: false, percentSolved: percent });
+            DailyStatus.markCompleted('cipher', { solved: false, percentSolved: percent, solvedShareString: sss });
 
             // Give the player 5 seconds to read the revealed blocks
             setTimeout(() => {
-                showResults({ solved: false, percentSolved: percent });
+                showResults({ solved: false, percentSolved: percent, solvedShareString: sss });
             }, 5000);
         }
 
@@ -1407,7 +1457,7 @@
                 const status = statusRaw ? JSON.parse(statusRaw) : {};
                 const today = new Date().toISOString().split('T')[0];
                 if (status.cipher && status.cipher.dateKey === today && status.cipher.completed) {
-                    showResults({ solved: status.cipher.solved ?? true, percentSolved: status.cipher.percentSolved ?? 100 });
+                    showResults({ solved: status.cipher.solved ?? true, percentSolved: status.cipher.percentSolved ?? 100, solvedShareString: status.cipher.solvedShareString });
                 }
             }
 

@@ -1160,7 +1160,7 @@
           if (!found) return '⬜';
           return found.usedHint ? '🔴' : '🟢';
         }).join('');
-        const text = `HUNT \n\n${today}\n${dailyPuzzle.category}\n${pipEmoji}\n\nPlay at: ${window.location.href}`;
+        const text = `HUNT // ${today}\n${dailyPuzzle.category}\n${pipEmoji}\n\nPlay at: ${window.location.href}`;
 
         if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {

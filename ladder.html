@@ -1144,20 +1144,51 @@
       }
     }
 
+    function maskWords(wordList, target) {
+        const targetWord = target.toLowerCase();
+
+          return wordList.map(word => {
+            const guess = word.toLowerCase();
+            let result = "";
+
+                // We loop based on the length of the guess
+            for (let i = 0; i < guess.length; i++) {
+            // Strict check: Is the letter at this index the same as the target?
+            if (guess[i] === targetWord[i]) {
+                result += '🟢';
+            } else {
+                result += '🔴';
+            }
+            }
+            return result;
+        });
+    }
+
+
     function shareResult({ solved, steps, delta }) {
+
       const today = new Date().toISOString().split('T')[0];
       const start = dailyPuzzle.start;
       const target = dailyPuzzle.target;
       let text;
+      
+      text = `LADDER // ${today}\n${start} → ${target} | `;
       if (solved) {
         if (delta === 0) {
-          text = `LADDER \n\n${today} | ${start} → ${target} | Solved in ${steps} step${steps !== 1 ? 's' : ''} (Optimal!) 🎯\n\nPlay at: ${window.location.href}`;
+          text += `Solved in ${steps} step${steps !== 1 ? 's' : ''} (Optimal!) 🎯`;
         } else {
-          text = `LADDER \n\n${today} | ${start} → ${target} | Solved in ${steps} step${steps !== 1 ? 's' : ''} (+${delta} from optimal)\n\nPlay at: ${window.location.href}`;
+          text += `Solved in ${steps} step${steps !== 1 ? 's' : ''} (+${delta} from optimal)`;
         }
       } else {
-        text = `LADDER \n\n${today} | ${start} → ${target} | Gave up | Optimal: ${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''}\n\nPlay at: ${window.location.href}`;
+        text += `Gave up | Optimal: ${OPTIMAL_STEPS} step${OPTIMAL_STEPS !== 1 ? 's' : ''}`;
       }
+      
+      for (let entry of maskWords(gameState.playerPath, dailyPuzzle.target)) {
+        text += `\n${entry}`;
+      }
+
+      text += `\n\nPlay at: ${window.location.href}`;
+
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {
           const shareBtn = document.getElementById('share-btn');
