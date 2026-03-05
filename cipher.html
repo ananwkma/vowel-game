@@ -1089,11 +1089,20 @@
 
             elResultsScreen.querySelector('#share-btn').addEventListener('click', () => {
                 const status = options.solved ? 'solved' : 'revealed';
-                const text = `Lexicon Cipher: ${status} today's quote!\n\n"${gameState.quote.text}" — ${gameState.quote.author}\n\nPlay at: ${window.location.href}`;
-                if (navigator.share) {
-                    navigator.share({ title: 'Lexicon Cipher', text });
+                const text = `CIPHER:\n\n${status.charAt(0).toUpperCase() + status.slice(1)} \n${percentSolved}% solved!\n\nPlay at: ${window.location.href}`;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                const shareBtn = document.getElementById('share-btn');
+                if (shareBtn) {
+                    const original = shareBtn.innerHTML;
+                    shareBtn.textContent = 'Copied!';
+                    setTimeout(() => { shareBtn.innerHTML = original; }, 1500);
+                }
+                }).catch(() => {
+                prompt('Copy this result:', text);
+                });
                 } else {
-                    navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
+                    prompt('Copy this result:', text);
                 }
             });
 
@@ -1162,7 +1171,7 @@
             gameState.won = true; // Disable further input
 
             // Hide give-up button
-            document.getElementById('give-up-container').style.display = 'none';
+            //document.getElementById('give-up-container').style.display = 'none';
 
             await animatedDecode();
 
@@ -1266,6 +1275,7 @@
         }
 
         function restartGame() {
+            if (gameState.won) return;
             localStorage.removeItem(CipherProgress._key());
             try {
                 const s = JSON.parse(localStorage.getItem(DailyStatus.KEY) || '{}');

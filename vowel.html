@@ -2258,7 +2258,7 @@
       shareBtn.addEventListener('click', () => {
         const today = new Date().toISOString().split('T')[0];
         const pips = puzzleState.outcomes.map(o => o === 'solved' ? '🟢' : '🔴').join('');
-        let text = `VOWEL ${today}\n${pips}\n⏱ ${timeString}`;
+        let text = `VOWEL \n\n${today}\n${pips}\n⏱ ${timeString}\n\nPlay at: ${window.location.href}`;
         if (isNewBest) text += ' 🏆';
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(text).then(() => {

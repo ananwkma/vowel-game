@@ -1144,6 +1144,8 @@
       }
 
       rs.style.display = 'flex';
+      const gc = document.getElementById('game-container');
+        
 
       // Confetti on win (not on give-up / revealed)
       if (solved) spawnConfetti();
@@ -1158,25 +1160,30 @@
           if (!found) return '⬜';
           return found.usedHint ? '🔴' : '🟢';
         }).join('');
-        const text = `Lexicon Hunt ${today}\n${dailyPuzzle.category}\n${pipEmoji}`;
+        const text = `HUNT \n\n${today}\n${dailyPuzzle.category}\n${pipEmoji}\n\nPlay at: ${window.location.href}`;
 
-        try {
-          if (navigator.share) {
-            await navigator.share({ text });
-          } else if (navigator.clipboard && navigator.clipboard.writeText) {
-            await navigator.clipboard.writeText(text);
-            const btn = document.getElementById('results-share-btn');
-            const orig = btn.innerHTML;
-            btn.innerHTML = 'Copied!';
-            setTimeout(() => { btn.innerHTML = orig; }, 1500);
-          } else {
-            prompt('Copy result:', text);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          const shareBtn = document.getElementById('results-share-btn');
+          if (shareBtn) {
+            const original = shareBtn.innerHTML;
+            shareBtn.textContent = 'Copied!';
+            setTimeout(() => { shareBtn.innerHTML = original; }, 1500);
           }
-        } catch(e) {
-          try { prompt('Copy result:', text); } catch(err) {}
+        }).catch(() => {
+          prompt('Copy this result:', text);
+        });
+        } else {
+            prompt('Copy this result:', text);
         }
       });
     }
+
+
+    function shareResult({ solved, steps, delta }) {
+
+    }
+
 
     /* ============================================================
        SECTION: DRAG SELECTION
@@ -1395,10 +1402,18 @@
       const hardFound = gameState.wordsFound.filter(f =>
         dailyPuzzle.words.find(w => w.word === f.word && w.phase === 'hard')
       ).length;
+        
 
-      if (gameState.phase === 'easy' && easyFound === 3) {
+      const el = document.getElementById('category-display');
+
+      if (gameState.phase === 'easy' && easyFound === 3 && el.textContent === '???') {
+        gameState.phase = 'hard';
+        revealCategory();
+      } else if (hardFound === 3 && el.textContent === '???') {
         revealCategory();
       } else if (gameState.phase === 'hard' && hardFound === 3) {
+        endGame(false);
+      } else if (easyFound === 3 && hardFound === 3) {
         endGame(false);
       }
     }
@@ -1409,7 +1424,7 @@
     ============================================================ */
     function useHint() {
       if (gameState.phase === 'done') return;
-
+        console.log(gameState.phase);
       const currentPhase = gameState.phase; // 'easy' or 'hard'
       const unfound = dailyPuzzle.words.filter(w =>
         w.phase === currentPhase &&
@@ -1447,8 +1462,6 @@
        Phase transition logic — easy phase to hard phase reveal.
     ============================================================ */
     function revealCategory() {
-      gameState.phase = 'hard';
-
       const el = document.getElementById('category-display');
       el.textContent = dailyPuzzle.category;
       el.classList.remove('category-stamp'); // reset in case of re-trigger guard
@@ -1480,6 +1493,7 @@
     function triggerGiveUp() {
       if (gameState.phase === 'done') return;
       document.getElementById('give-up-bar').style.width = '0%';
+      revealCategory();
 
       const WORD_GAP = 150; // ms gap between each word's reveal
       const CELL_GAP = 50;  // ms gap between cells within a word
@@ -1514,7 +1528,8 @@
         wordIdx++;
       });
 
-      renderPips();
+      renderPips();      
+        gameState.phase = 'done';
       setTimeout(() => endGame(true), maxDelay + 5500); // animation + 5s reading pause
     }
 
