@@ -640,10 +640,20 @@
       color: var(--color-vowel-bg);
     }
 
-    /* Guide separator (the "_" resting slot) between E and I — matches the real picker. */
-    .demo-picker-item.sep {
-      opacity: 0.3;
+    /* Guide slot between E and I — the empty vowel box holding "_". */
+    .demo-picker-item.sep { opacity: 1; }
+
+    .demo-picker-slot {
+      width: 30px;
+      height: 30px;
+      border-radius: 5px;
+      background: var(--color-vowel-bg);
+      color: var(--color-vowel-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 1rem;
+      font-weight: 700;
     }
 
     .demo-picker-highlight {
@@ -2481,11 +2491,18 @@
       picker.className = 'demo-picker';
       const list = document.createElement('div');
       list.className = 'demo-picker-list';
-      // Order matches the real picker: A, E, _ (guide), I, O, U.
+      // Order matches the real picker: A, E, [orange "_" box], I, O, U.
       const items = ['A', 'E', '_', 'I', 'O', 'U'].map(v => {
         const it = document.createElement('div');
         it.className = 'demo-picker-item' + (v === '_' ? ' sep' : '');
-        it.textContent = v;
+        if (v === '_') {
+          const box = document.createElement('div');
+          box.className = 'demo-picker-slot';
+          box.textContent = '_';
+          it.appendChild(box);
+        } else {
+          it.textContent = v;
+        }
         list.appendChild(it);
         return it;
       });
