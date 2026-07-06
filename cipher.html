@@ -423,6 +423,32 @@
             color: var(--color-primary-text);
         }
 
+        .help-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .help-toggle {
+            margin: 0 auto 4px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1.5px solid var(--color-primary);
+            background: transparent;
+            color: var(--color-primary);
+            font-size: 1.2rem;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s ease, transform 0.15s ease;
+        }
+
+        .help-toggle:hover { opacity: 0.75; }
+        .help-toggle:active { transform: scale(0.92); }
+
         /* ============================================================
            SECTION: RESULTS SCREEN
         ============================================================ */
@@ -594,6 +620,25 @@
             <div class="help-demo">
                 <div class="demo-cipher" id="demo-cipher" aria-hidden="true"></div>
             </div>
+            <div class="help-text" id="help-text" style="display:none">
+                <div class="instruction-step">
+                    <div class="step-num">1</div>
+                    <div class="step-text">Each number in the quote represents a letter. Every occurrence of the same number is the same letter.</div>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-num">2</div>
+                    <div class="step-text"><strong>Tap a number block</strong> to select it (all matching numbers highlight), then <strong>type a letter</strong> to assign it.</div>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-num">3</div>
+                    <div class="step-text">You can reassign any number at any time. Assigning a letter to one number automatically frees it from any other number.</div>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-num">4</div>
+                    <div class="step-text">When every number is correctly decoded, the quote is revealed and you win!</div>
+                </div>
+            </div>
+            <button class="help-toggle" id="help-toggle" type="button" aria-label="Show text instructions">→</button>
             <button id="help-modal-close">Got it</button>
         </div>
     </div>
@@ -1335,9 +1380,37 @@
             if (demoCipher) { demoCipher.innerHTML = ''; demoCipher.classList.remove('demo-fade'); }
         }
 
+        /* Toggle between the animated demo and the written instructions. */
+        const helpToggle = document.getElementById('help-toggle');
+        const helpTextEl = document.getElementById('help-text');
+        const helpDemoWrap = demoCipher ? demoCipher.closest('.help-demo') : null;
+
+        function setHelpView(showText) {
+            if (!helpTextEl || !helpDemoWrap) return;
+            if (showText) {
+                stopCipherDemo();
+                helpDemoWrap.style.display = 'none';
+                helpTextEl.style.display = 'flex';
+                helpToggle.textContent = '←';
+                helpToggle.setAttribute('aria-label', 'Show animation');
+            } else {
+                helpTextEl.style.display = 'none';
+                helpDemoWrap.style.display = 'flex';
+                helpToggle.textContent = '→';
+                helpToggle.setAttribute('aria-label', 'Show text instructions');
+                startCipherDemo();
+            }
+        }
+
+        if (helpToggle) {
+            helpToggle.addEventListener('click', () => {
+                setHelpView(helpTextEl.style.display === 'none');
+            });
+        }
+
         document.getElementById('help-btn').addEventListener('click', () => {
             elHelpModal.classList.add('visible');
-            startCipherDemo();
+            setHelpView(false);
         });
         document.getElementById('help-modal-close').addEventListener('click', () => {
             elHelpModal.classList.remove('visible');

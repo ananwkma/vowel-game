@@ -537,6 +537,33 @@
       min-height: 300px;
     }
 
+    .help-text {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .help-toggle {
+      margin: 0 auto;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1.5px solid var(--color-ladder-primary);
+      background: transparent;
+      color: var(--color-ladder-primary);
+      font-size: 1.2rem;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s ease, transform 0.15s ease;
+    }
+
+    .help-toggle:hover { opacity: 0.75; }
+    .help-toggle:active { transform: scale(0.92); }
+
     .demo-ladder {
       display: flex;
       flex-direction: column;
@@ -577,6 +604,17 @@
       background-color: var(--color-ladder-primary);
       color: var(--color-primary-text);
       transform: translateY(-4px);
+    }
+
+    .demo-tile--changing {
+      background-color: var(--color-ladder-primary);
+      color: var(--color-primary-text);
+      animation: demoPulse 0.7s ease-in-out infinite alternate;
+    }
+
+    @keyframes demoPulse {
+      from { transform: translateY(-4px) scale(1); }
+      to   { transform: translateY(-4px) scale(1.09); }
     }
 
     .demo-tile--target {
@@ -876,6 +914,25 @@
       <div class="help-demo">
         <div class="demo-ladder" id="demo-ladder" aria-hidden="true"></div>
       </div>
+      <div class="help-text" id="help-text" style="display:none">
+        <div class="help-step">
+          <div class="step-num">1</div>
+          <div class="step-text">Change one letter at a time to transform the starting word into the <strong>Target</strong>.</div>
+        </div>
+        <div class="help-step">
+          <div class="step-num">2</div>
+          <div class="step-text">Every step must be a <strong>valid 5-letter word</strong>.</div>
+        </div>
+        <div class="help-step">
+          <div class="step-num">3</div>
+          <div class="step-text">Try to reach the target in as few steps as possible.</div>
+        </div>
+        <div class="help-step">
+          <div class="step-num">4</div>
+          <div class="step-text">Made a mistake? Use <strong>Undo</strong> to take back your last step.</div>
+        </div>
+      </div>
+      <button class="help-toggle" id="help-toggle" type="button" aria-label="Show text instructions">→</button>
 
       <button id="help-modal-close">Got it</button>
     </div>
@@ -1591,7 +1648,7 @@
        Loops a slow solve of SCARE → STARE → STALE → STALL → STILL,
        one letter changing per step. Pure animation, no text.
     ============================================================ */
-    const DEMO_PATH = ['SCARE', 'STARE', 'STALE', 'STALL', 'STILL'];
+    const DEMO_PATH = ['CAT', 'COT', 'COY', 'CRY'];
     const demoLadder = document.getElementById('demo-ladder');
     let demoTimers = [];
     let demoRunning = false;
@@ -1617,20 +1674,33 @@
         row.appendChild(tile);
       });
       demoLadder.appendChild(row);
+      return row;
     }
 
     async function runHelpDemo() {
       while (demoRunning) {
         demoLadder.classList.remove('demo-fade');
         demoLadder.innerHTML = '';
-        demoRenderRow(DEMO_PATH[0], -1, false);
-        await demoWait(1500); if (!demoRunning) return;
+        let prevRow = demoRenderRow(DEMO_PATH[0], -1, false);
+        await demoWait(1100); if (!demoRunning) return;
         for (let i = 1; i < DEMO_PATH.length; i++) {
-          demoLadder.querySelectorAll('.demo-tile--changed')
-            .forEach(t => t.classList.remove('demo-tile--changed'));
           const idx = demoChangedIndex(DEMO_PATH[i - 1], DEMO_PATH[i]);
-          demoRenderRow(DEMO_PATH[i], idx, i === DEMO_PATH.length - 1);
-          await demoWait(1500); if (!demoRunning) return;
+          const isTarget = i === DEMO_PATH.length - 1;
+          // 1. Highlight the letter about to change in the current word.
+          const changingTile = prevRow.children[idx];
+          changingTile.classList.add('demo-tile--changing');
+          await demoWait(1000); if (!demoRunning) return;
+          // 2. It changes and the new word drops in below.
+          changingTile.classList.remove('demo-tile--changing');
+          const newRow = demoRenderRow(DEMO_PATH[i], idx, isTarget);
+          await demoWait(850); if (!demoRunning) return;
+          // 3. Settle the freshly-changed letter into a normal tile.
+          if (!isTarget) {
+            newRow.querySelectorAll('.demo-tile--changed')
+              .forEach(t => t.classList.remove('demo-tile--changed'));
+          }
+          prevRow = newRow;
+          await demoWait(700); if (!demoRunning) return;
         }
         await demoWait(1600); if (!demoRunning) return;
         demoLadder.classList.add('demo-fade');
@@ -1652,6 +1722,34 @@
         demoLadder.innerHTML = '';
         demoLadder.classList.remove('demo-fade');
       }
+    }
+
+    /* Toggle between the animated demo and the written instructions. */
+    const helpToggle = document.getElementById('help-toggle');
+    const helpTextEl = document.getElementById('help-text');
+    const helpDemoWrap = demoLadder ? demoLadder.closest('.help-demo') : null;
+
+    function setHelpView(showText) {
+      if (!helpTextEl || !helpDemoWrap) return;
+      if (showText) {
+        stopHelpDemo();
+        helpDemoWrap.style.display = 'none';
+        helpTextEl.style.display = 'flex';
+        helpToggle.textContent = '←';
+        helpToggle.setAttribute('aria-label', 'Show animation');
+      } else {
+        helpTextEl.style.display = 'none';
+        helpDemoWrap.style.display = 'flex';
+        helpToggle.textContent = '→';
+        helpToggle.setAttribute('aria-label', 'Show text instructions');
+        startHelpDemo();
+      }
+    }
+
+    if (helpToggle) {
+      helpToggle.addEventListener('click', () => {
+        setHelpView(helpTextEl.style.display === 'none');
+      });
     }
 
     function setupGiveUp() {
@@ -1710,7 +1808,7 @@
     helpBtn.addEventListener('click', () => {
       helpModal.classList.add('visible');
       helpModal.setAttribute('aria-hidden', 'false');
-      startHelpDemo();
+      setHelpView(false);
     });
 
     helpModalClose.addEventListener('click', handleCloseHelpModal);

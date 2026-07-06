@@ -545,19 +545,23 @@
 
     /* ============================================================
        SECTION: HELP DEMO (animated how-to)
-       An amber vowel block rises into the empty gap to complete a word.
+       Pick a vowel from the picker, then slide it into its slot:
+       _STR → (pick A) → ASTR → (slide right) → STAR.
+       Fixed 8px gap so the slide distance (block + gap) is known.
     ============================================================ */
     .help-demo {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      min-height: 160px;
+      justify-content: flex-end;
+      min-height: 220px;
       margin-bottom: 24px;
     }
 
     .demo-word {
+      position: relative;
       display: flex;
-      gap: var(--block-gap);
+      gap: 8px;
       transition: opacity 0.5s ease;
     }
 
@@ -575,6 +579,7 @@
       font-weight: 700;
       text-transform: uppercase;
       box-shadow: var(--shadow-block);
+      transition: transform 0.7s cubic-bezier(0.3, 0.8, 0.3, 1);
     }
 
     .demo-vblock.consonant {
@@ -585,28 +590,90 @@
     .demo-vblock.vowel {
       background-color: var(--color-vowel-bg);
       color: var(--color-vowel-text);
-    }
-
-    .demo-slot {
       position: relative;
-      width: 52px;
-      height: 52px;
-      border-radius: var(--block-radius);
-      border: 2px dashed rgba(0, 0, 0, 0.25);
+      z-index: 2; /* glides above the consonants while sliding */
     }
 
-    .demo-slot .demo-vblock {
+    .demo-vblock.blank { opacity: 0.8; }
+
+    /* Vowel picker — a small vertical wheel above the blank square */
+    .demo-picker {
       position: absolute;
-      inset: 0;
-      transform: translateY(70px);
+      left: 0;
+      bottom: calc(100% + 8px);
+      width: 52px;
+      height: 108px;
+      overflow: hidden;
+      border-radius: var(--block-radius);
+      background: var(--color-bg);
+      box-shadow: var(--shadow-block);
       opacity: 0;
-      transition: transform 0.7s cubic-bezier(0.2, 0.85, 0.3, 1), opacity 0.4s ease;
+      transition: opacity 0.3s ease;
     }
 
-    .demo-slot .demo-vblock.demo-drop--in {
-      transform: translateY(0);
-      opacity: 1;
+    .demo-picker.visible { opacity: 1; }
+
+    .demo-picker-list {
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.7s cubic-bezier(0.3, 0.8, 0.3, 1);
     }
+
+    .demo-picker-item {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-serif);
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: var(--color-vowel-text);
+      opacity: 0.35;
+      transition: opacity 0.3s ease, color 0.3s ease;
+    }
+
+    .demo-picker-item.active {
+      opacity: 1;
+      color: var(--color-vowel-bg);
+    }
+
+    .demo-picker-highlight {
+      position: absolute;
+      left: 4px;
+      right: 4px;
+      top: 36px;
+      height: 36px;
+      border: 2px solid var(--color-vowel-bg);
+      border-radius: 6px;
+      pointer-events: none;
+    }
+
+    .help-text {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 8px;
+    }
+
+    .help-toggle {
+      margin: 0 auto 20px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1.5px solid var(--color-vowel-bg);
+      background: transparent;
+      color: var(--color-vowel-bg);
+      font-size: 1.2rem;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s ease, transform 0.15s ease;
+    }
+
+    .help-toggle:hover { opacity: 0.75; }
+    .help-toggle:active { transform: scale(0.92); }
 
     /* ============================================================
        SECTION: RESULTS SCREEN
@@ -757,6 +824,17 @@
       <div class="help-demo">
         <div class="demo-word" id="demo-vowel" aria-hidden="true"></div>
       </div>
+      <div class="help-text" id="help-text" style="display:none">
+        <div class="instruction-step">
+          <div class="step-num">1</div>
+          <div class="step-text">Drag an orange block onto a vowel to pick it up, then drop it into the correct spot.</div>
+        </div>
+        <div class="instruction-step">
+          <div class="step-num">2</div>
+          <div class="step-text">Solve all 5 words for today. Speed counts, but every "Give Up" adds a time penalty!</div>
+        </div>
+      </div>
+      <button class="help-toggle" id="help-toggle" type="button" aria-label="Show text instructions">→</button>
 
       <button id="help-modal-close">Got it</button>
     </div>
@@ -2366,38 +2444,82 @@
     function buildVowelDemo() {
       demoVowel.innerHTML = '';
       demoVowel.classList.remove('demo-fade');
-      const layout = [
-        { type: 'consonant', ch: 'S' },
-        { type: 'consonant', ch: 'T' },
-        { type: 'slot',      ch: 'A' },
-        { type: 'consonant', ch: 'R' }
-      ];
-      let dropBlock = null;
-      layout.forEach(cell => {
-        if (cell.type === 'slot') {
-          const slot = document.createElement('div');
-          slot.className = 'demo-slot';
-          dropBlock = document.createElement('div');
-          dropBlock.className = 'demo-vblock vowel';
-          dropBlock.textContent = cell.ch;
-          slot.appendChild(dropBlock);
-          demoVowel.appendChild(slot);
-        } else {
-          const b = document.createElement('div');
-          b.className = 'demo-vblock consonant';
-          b.textContent = cell.ch;
-          demoVowel.appendChild(b);
-        }
+
+      // Row in DOM order: [vowel _][S][T][R] → reads "_STR"
+      const vowelBlock = document.createElement('div');
+      vowelBlock.className = 'demo-vblock vowel blank';
+      vowelBlock.textContent = '';
+
+      const sBlock = document.createElement('div');
+      sBlock.className = 'demo-vblock consonant';
+      sBlock.textContent = 'S';
+
+      const tBlock = document.createElement('div');
+      tBlock.className = 'demo-vblock consonant';
+      tBlock.textContent = 'T';
+
+      const rBlock = document.createElement('div');
+      rBlock.className = 'demo-vblock consonant';
+      rBlock.textContent = 'R';
+
+      demoVowel.appendChild(vowelBlock);
+      demoVowel.appendChild(sBlock);
+      demoVowel.appendChild(tBlock);
+      demoVowel.appendChild(rBlock);
+
+      // Vowel picker — a small vertical wheel above the blank square
+      const picker = document.createElement('div');
+      picker.className = 'demo-picker';
+      const list = document.createElement('div');
+      list.className = 'demo-picker-list';
+      const items = ['A', 'E', 'I', 'O', 'U'].map(v => {
+        const it = document.createElement('div');
+        it.className = 'demo-picker-item';
+        it.textContent = v;
+        list.appendChild(it);
+        return it;
       });
-      return dropBlock;
+      const highlight = document.createElement('div');
+      highlight.className = 'demo-picker-highlight';
+      picker.appendChild(list);
+      picker.appendChild(highlight);
+      demoVowel.appendChild(picker);
+
+      return { vowelBlock, sBlock, tBlock, picker, list, items };
     }
 
     async function runVowelDemo() {
+      const STEP = 60; // 52px block + 8px gap
       while (vowelDemoRunning) {
-        const dropBlock = buildVowelDemo();
+        const els = buildVowelDemo();
+        // Picker starts scrolled so a lower vowel sits in the highlight window.
+        els.list.style.transform = 'translateY(-36px)';
+        await vowelDemoWait(800); if (!vowelDemoRunning) return;
+
+        // 1. The blank square brings up the vowel picker.
+        els.picker.classList.add('visible');
+        await vowelDemoWait(750); if (!vowelDemoRunning) return;
+
+        // 2. Scroll up to highlight A.
+        els.list.style.transform = 'translateY(36px)';
+        await vowelDemoWait(650); if (!vowelDemoRunning) return;
+        els.items[0].classList.add('active');
+        await vowelDemoWait(550); if (!vowelDemoRunning) return;
+
+        // 3. The blank becomes A; the picker closes.
+        els.vowelBlock.textContent = 'A';
+        els.vowelBlock.classList.remove('blank');
+        els.picker.classList.remove('visible');
+        await vowelDemoWait(800); if (!vowelDemoRunning) return;
+
+        // 4. A slides right into its slot; S and T shift left → STAR.
+        els.vowelBlock.style.transform = 'translateX(' + (STEP * 2) + 'px)';
+        els.sBlock.style.transform = 'translateX(' + (-STEP) + 'px)';
+        els.tBlock.style.transform = 'translateX(' + (-STEP) + 'px)';
         await vowelDemoWait(900); if (!vowelDemoRunning) return;
-        dropBlock.classList.add('demo-drop--in'); // vowel rises into the gap
-        await vowelDemoWait(2400); if (!vowelDemoRunning) return;
+
+        // 5. Hold on the completed word, then reset.
+        await vowelDemoWait(1500); if (!vowelDemoRunning) return;
         demoVowel.classList.add('demo-fade');
         await vowelDemoWait(600); if (!vowelDemoRunning) return;
       }
@@ -2416,12 +2538,40 @@
       if (demoVowel) { demoVowel.innerHTML = ''; demoVowel.classList.remove('demo-fade'); }
     }
 
+    /* Toggle between the animated demo and the written instructions. */
+    const helpToggle = document.getElementById('help-toggle');
+    const helpTextEl = document.getElementById('help-text');
+    const helpDemoWrap = demoVowel ? demoVowel.closest('.help-demo') : null;
+
+    function setHelpView(showText) {
+      if (!helpTextEl || !helpDemoWrap) return;
+      if (showText) {
+        stopVowelDemo();
+        helpDemoWrap.style.display = 'none';
+        helpTextEl.style.display = 'flex';
+        helpToggle.textContent = '←';
+        helpToggle.setAttribute('aria-label', 'Show animation');
+      } else {
+        helpTextEl.style.display = 'none';
+        helpDemoWrap.style.display = 'flex';
+        helpToggle.textContent = '→';
+        helpToggle.setAttribute('aria-label', 'Show text instructions');
+        startVowelDemo();
+      }
+    }
+
+    if (helpToggle) {
+      helpToggle.addEventListener('click', () => {
+        setHelpView(helpTextEl.style.display === 'none');
+      });
+    }
+
     function showHelp() {
       helpModal.classList.add('visible');
       helpModal.setAttribute('aria-hidden', 'false');
       elapsedTimer.pause();
       giveUpCountdown.stop();
-      startVowelDemo();
+      setHelpView(false);
     }
 
     function hideHelp() {

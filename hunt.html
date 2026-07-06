@@ -691,6 +691,32 @@
       color: #fff;
     }
 
+    .help-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .help-toggle {
+      margin: 0 auto 20px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1.5px solid var(--color-hunt-primary);
+      background: transparent;
+      color: var(--color-hunt-primary);
+      font-size: 1.2rem;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s ease, transform 0.15s ease;
+    }
+
+    .help-toggle:hover { opacity: 0.75; }
+    .help-toggle:active { transform: scale(0.92); }
+
     /* ============================================================
        SECTION: ANIMATIONS
     ============================================================ */
@@ -810,6 +836,29 @@
       <div class="help-demo">
         <div class="demo-grid" id="demo-hunt" aria-hidden="true"></div>
       </div>
+      <div class="help-text" id="help-text" style="display:none">
+        <div class="instruction-step">
+          <div class="step-num">1</div>
+          <div class="step-text">Find <strong>6 hidden words</strong> in the letter grid — 3 easy and 3 hard.</div>
+        </div>
+        <div class="instruction-step">
+          <div class="step-num">2</div>
+          <div class="step-text">Drag across letters to select a word. All 6 words belong to the same <strong>mystery category</strong>.</div>
+        </div>
+        <div class="instruction-step">
+          <div class="step-num">3</div>
+          <div class="step-text">Words run <strong>left-to-right</strong> or <strong>top-to-bottom</strong> only — no backwards or diagonal.</div>
+        </div>
+        <div class="instruction-step">
+          <div class="step-num">4</div>
+          <div class="step-text">Find all 3 easy words to <strong>reveal the category</strong>.</div>
+        </div>
+        <div class="instruction-step">
+          <div class="step-num">5</div>
+          <div class="step-text">Stuck? Tap the <strong>hint</strong> button to reveal the first letter of a word.</div>
+        </div>
+      </div>
+      <button class="help-toggle" id="help-toggle" type="button" aria-label="Show text instructions">→</button>
       <button id="help-modal-close">Got it</button>
     </div>
   </div>
@@ -1688,9 +1737,36 @@
     }
 
     function setupHelpModal() {
+      const helpToggle = document.getElementById('help-toggle');
+      const helpTextEl = document.getElementById('help-text');
+      const helpDemoWrap = demoHunt ? demoHunt.closest('.help-demo') : null;
+
+      function setHelpView(showText) {
+        if (!helpTextEl || !helpDemoWrap) return;
+        if (showText) {
+          stopHuntDemo();
+          helpDemoWrap.style.display = 'none';
+          helpTextEl.style.display = 'flex';
+          helpToggle.textContent = '←';
+          helpToggle.setAttribute('aria-label', 'Show animation');
+        } else {
+          helpTextEl.style.display = 'none';
+          helpDemoWrap.style.display = 'flex';
+          helpToggle.textContent = '→';
+          helpToggle.setAttribute('aria-label', 'Show text instructions');
+          startHuntDemo();
+        }
+      }
+
+      if (helpToggle) {
+        helpToggle.addEventListener('click', () => {
+          setHelpView(helpTextEl.style.display === 'none');
+        });
+      }
+
       document.getElementById('help-btn').addEventListener('click', () => {
         document.getElementById('help-modal').style.display = 'flex';
-        startHuntDemo();
+        setHelpView(false);
       });
       document.getElementById('help-modal-close').addEventListener('click', () => {
         document.getElementById('help-modal').style.display = 'none';
