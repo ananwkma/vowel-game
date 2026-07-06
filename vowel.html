@@ -554,7 +554,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 220px;
+      min-height: 340px;
       margin-bottom: 24px;
     }
 
@@ -562,9 +562,10 @@
       position: relative;
       display: flex;
       gap: 8px;
-      /* Reserve the picker's height above the row so the whole cluster
-         (picker + row) centers as one unit within .help-demo. */
-      margin-top: 116px;
+      /* Reserve the picker's span above (A,E) and below (I,O,U) the row
+         so the whole cluster centers as one unit within .help-demo. */
+      margin-top: 112px;
+      margin-bottom: 168px;
       transition: opacity 0.5s ease;
     }
 
@@ -599,72 +600,67 @@
 
     .demo-vblock.blank { opacity: 0.8; }
 
-    /* Vowel picker — a small vertical wheel above the blank square */
+    /* Vowel picker — full vertical column overlaying the blank slot:
+       A / E above, the orange "_" box centered on the slot, I / O / U below.
+       Positioned so the "_" box (item index 2) sits over the blank square.
+       Item pitch = 52 + 4 gap = 56px; top = -(2 * 56) = -112px. */
     .demo-picker {
       position: absolute;
       left: 0;
-      bottom: calc(100% + 8px);
+      top: -112px;
       width: 52px;
-      height: 108px;
-      overflow: hidden;
-      border-radius: var(--block-radius);
-      background: var(--color-bg);
-      box-shadow: var(--shadow-block);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
       opacity: 0;
       transition: opacity 0.3s ease;
     }
 
     .demo-picker.visible { opacity: 1; }
 
-    .demo-picker-list {
-      display: flex;
-      flex-direction: column;
-      transition: transform 0.7s cubic-bezier(0.3, 0.8, 0.3, 1);
-    }
-
     .demo-picker-item {
-      height: 36px;
+      width: 52px;
+      height: 52px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: var(--font-serif);
       font-weight: 700;
-      font-size: 1.3rem;
+      font-size: 1.5rem;
       color: var(--color-vowel-text);
-      opacity: 0.35;
-      transition: opacity 0.3s ease, color 0.3s ease;
+      opacity: 0.4;
+      transition: opacity 0.3s ease;
     }
 
-    .demo-picker-item.active {
-      opacity: 1;
-      color: var(--color-vowel-bg);
-    }
+    .demo-picker-item.active { opacity: 1; }
 
-    /* Guide slot between E and I — the empty vowel box holding "_". */
+    /* The empty vowel box holding "_" (guide slot), centered on the word slot. */
     .demo-picker-item.sep { opacity: 1; }
 
     .demo-picker-slot {
-      width: 30px;
-      height: 30px;
-      border-radius: 5px;
+      width: 52px;
+      height: 52px;
+      border-radius: var(--block-radius);
       background: var(--color-vowel-bg);
       color: var(--color-vowel-text);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1rem;
+      font-size: 1.5rem;
       font-weight: 700;
+      box-shadow: var(--shadow-block);
     }
 
     .demo-picker-highlight {
       position: absolute;
-      left: 4px;
-      right: 4px;
-      top: 36px;
-      height: 36px;
+      left: -3px;
+      right: -3px;
+      top: 112px; /* rests on the "_" box (index 2); animates up to A (top 0) */
+      height: 52px;
       border: 2px solid var(--color-vowel-bg);
-      border-radius: 6px;
+      border-radius: 8px;
       pointer-events: none;
+      transition: top 0.7s cubic-bezier(0.3, 0.8, 0.3, 1);
     }
 
     .help-text {
@@ -2486,12 +2482,10 @@
       demoVowel.appendChild(tBlock);
       demoVowel.appendChild(rBlock);
 
-      // Vowel picker — a small vertical wheel above the blank square
+      // Vowel picker — full vertical column overlaying the blank square:
+      // A, E above; the orange "_" box centered on the slot; I, O, U below.
       const picker = document.createElement('div');
       picker.className = 'demo-picker';
-      const list = document.createElement('div');
-      list.className = 'demo-picker-list';
-      // Order matches the real picker: A, E, [orange "_" box], I, O, U.
       const items = ['A', 'E', '_', 'I', 'O', 'U'].map(v => {
         const it = document.createElement('div');
         it.className = 'demo-picker-item' + (v === '_' ? ' sep' : '');
@@ -2503,35 +2497,32 @@
         } else {
           it.textContent = v;
         }
-        list.appendChild(it);
+        picker.appendChild(it);
         return it;
       });
       const highlight = document.createElement('div');
       highlight.className = 'demo-picker-highlight';
-      picker.appendChild(list);
       picker.appendChild(highlight);
       demoVowel.appendChild(picker);
 
-      return { vowelBlock, sBlock, tBlock, picker, list, items };
+      return { vowelBlock, sBlock, tBlock, picker, items, highlight };
     }
 
     async function runVowelDemo() {
       const STEP = 60; // 52px block + 8px gap
       while (vowelDemoRunning) {
         const els = buildVowelDemo();
-        // Picker starts scrolled so a lower vowel sits in the highlight window.
-        els.list.style.transform = 'translateY(-36px)';
         await vowelDemoWait(800); if (!vowelDemoRunning) return;
 
-        // 1. The blank square brings up the vowel picker.
+        // 1. The blank square brings up the vowel picker (highlight on "_").
         els.picker.classList.add('visible');
-        await vowelDemoWait(750); if (!vowelDemoRunning) return;
+        await vowelDemoWait(900); if (!vowelDemoRunning) return;
 
-        // 2. Scroll up to highlight A.
-        els.list.style.transform = 'translateY(36px)';
-        await vowelDemoWait(650); if (!vowelDemoRunning) return;
+        // 2. The selection scrolls up to A.
+        els.highlight.style.top = '0px';
+        await vowelDemoWait(700); if (!vowelDemoRunning) return;
         els.items[0].classList.add('active');
-        await vowelDemoWait(550); if (!vowelDemoRunning) return;
+        await vowelDemoWait(600); if (!vowelDemoRunning) return;
 
         // 3. The blank becomes A; the picker closes.
         els.vowelBlock.textContent = 'A';
