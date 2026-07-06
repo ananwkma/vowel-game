@@ -672,7 +672,7 @@
     .demo-cat {
       font-family: var(--font-hunt-serif);
       font-weight: 700;
-      font-size: 0.95rem;
+      font-size: 1.35rem;
       letter-spacing: 0.18em;
       text-transform: uppercase;
       color: var(--color-hunt-text);
@@ -717,12 +717,12 @@
 
     .demo-dots {
       display: flex;
-      gap: 8px;
+      gap: 6px;
     }
 
     .demo-dot {
-      width: 10px;
-      height: 10px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: rgba(28, 27, 24, 0.2);
       transition: background-color 0.3s ease;
@@ -1724,12 +1724,17 @@
        once all three are found. Pure animation, no text.
     ============================================================ */
     const demoHunt = document.getElementById('demo-hunt');
-    // 4x4 grid, row-major: BLUE (0-3), RED (4-6), TAN (8-10), rest filler
-    const HUNT_DEMO_LETTERS = ['B','L','U','E','R','E','D','X','T','A','N','Y','Z','W','Q','K'];
+    // 4x4 grid, row-major. BLUE across row0, RED across row1,
+    // TAN down column 3 (indices 7/11/15), rest filler:
+    //   B L U E
+    //   R E D T
+    //   K M P A
+    //   W Z Q N
+    const HUNT_DEMO_LETTERS = ['B','L','U','E','R','E','D','T','K','M','P','A','W','Z','Q','N'];
     const HUNT_DEMO_WORDS = [
-      { cells: [4, 5, 6] },      // RED
-      { cells: [8, 9, 10] },     // TAN
-      { cells: [0, 1, 2, 3] }    // BLUE
+      { cells: [4, 5, 6] },       // RED  (left-to-right)
+      { cells: [7, 11, 15] },     // TAN  (top-to-bottom)
+      { cells: [0, 1, 2, 3] }     // BLUE (left-to-right)
     ];
     let huntDemoTimers = [];
     let huntDemoRunning = false;
@@ -1742,6 +1747,17 @@
     function buildHuntDemo() {
       demoHunt.innerHTML = '';
       demoHunt.classList.remove('demo-fade');
+
+      // Progress dots (one per word) — above the category, like the real game
+      const dots = document.createElement('div');
+      dots.className = 'demo-dots';
+      huntDotEls = HUNT_DEMO_WORDS.map(() => {
+        const d = document.createElement('div');
+        d.className = 'demo-dot';
+        dots.appendChild(d);
+        return d;
+      });
+      demoHunt.appendChild(dots);
 
       // Mystery category label
       huntCatEl = document.createElement('div');
@@ -1759,17 +1775,6 @@
         huntGridEl.appendChild(c);
       });
       demoHunt.appendChild(huntGridEl);
-
-      // Progress dots (one per word)
-      const dots = document.createElement('div');
-      dots.className = 'demo-dots';
-      huntDotEls = HUNT_DEMO_WORDS.map(() => {
-        const d = document.createElement('div');
-        d.className = 'demo-dot';
-        dots.appendChild(d);
-        return d;
-      });
-      demoHunt.appendChild(dots);
     }
 
     async function runHuntDemo() {
