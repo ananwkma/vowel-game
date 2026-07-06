@@ -1876,6 +1876,16 @@
         if (progress && progress.length > 1) restoreProgress(progress);
         else initGame();
       }
+
+      // First launch: auto-show the how-to (with animated demo)
+      try {
+        if (localStorage.getItem('ladder_introduced') !== 'true' && !saved) {
+          helpModal.classList.add('visible');
+          helpModal.setAttribute('aria-hidden', 'false');
+          setHelpView(false);
+          localStorage.setItem('ladder_introduced', 'true');
+        }
+      } catch (e) {}
     });
   </script>
 </body>

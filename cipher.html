@@ -1629,14 +1629,25 @@
             });
 
             // 7. Check if already completed today
+            let completedToday = false;
             if (!IS_DEBUG) {
                 const statusRaw = localStorage.getItem(DailyStatus.KEY);
                 const status = statusRaw ? JSON.parse(statusRaw) : {};
                 const today = new Date().toISOString().split('T')[0];
                 if (status.cipher && status.cipher.dateKey === today && status.cipher.completed) {
+                    completedToday = true;
                     showResults({ solved: status.cipher.solved ?? true, percentSolved: status.cipher.percentSolved ?? 100, solvedShareString: status.cipher.solvedShareString });
                 }
             }
+
+            // First launch: auto-show the how-to (with animated demo)
+            try {
+                if (localStorage.getItem('cipher_introduced') !== 'true' && !completedToday) {
+                    elHelpModal.classList.add('visible');
+                    setHelpView(false);
+                    localStorage.setItem('cipher_introduced', 'true');
+                }
+            } catch (e) {}
 
             // Debug: update back-link to preserve ?debug param
             if (IS_DEBUG) document.getElementById('back-link').href = 'index.html?debug';

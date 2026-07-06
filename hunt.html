@@ -1817,7 +1817,7 @@
       if (demoHunt) { demoHunt.innerHTML = ''; demoHunt.classList.remove('demo-fade'); }
     }
 
-    function setupHelpModal() {
+    function setupHelpModal(autoShow) {
       const helpToggle = document.getElementById('help-toggle');
       const helpTextEl = document.getElementById('help-text');
       const helpDemoWrap = demoHunt ? demoHunt.closest('.help-demo') : null;
@@ -1859,6 +1859,15 @@
           stopHuntDemo();
         }
       });
+
+      // First launch: auto-show the how-to (with animated demo)
+      try {
+        if (autoShow && localStorage.getItem('hunt_introduced') !== 'true') {
+          document.getElementById('help-modal').style.display = 'flex';
+          setHelpView(false);
+          localStorage.setItem('hunt_introduced', 'true');
+        }
+      } catch (e) {}
     }
 
     /* ============================================================
@@ -1931,7 +1940,7 @@
       setupDragSelection();
       setupHintButton();
       setupGiveUp();
-      setupHelpModal();
+      setupHelpModal(true);
       setupShare();
 
       // Handle resize
