@@ -375,6 +375,55 @@
         }
 
         /* ============================================================
+           SECTION: HELP DEMO (animated how-to)
+           Number blocks fill with letters until the word is decoded;
+           the repeated number fills all its positions at once.
+        ============================================================ */
+        .help-demo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 140px;
+            margin-bottom: 8px;
+        }
+
+        .demo-cipher {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+
+        .demo-cipher.demo-fade { opacity: 0; }
+
+        .demo-cblock {
+            width: 44px;
+            height: 44px;
+            border-radius: 5px;
+            font-family: var(--font-serif);
+            font-weight: 700;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-sm);
+            background-color: var(--color-secondary);
+            color: var(--color-secondary-text);
+            transition: background-color 0.35s ease, color 0.35s ease, transform 0.2s ease;
+        }
+
+        .demo-cblock.selected {
+            background-color: var(--color-primary);
+            color: var(--color-primary-text);
+            transform: translateY(-3px);
+        }
+
+        .demo-cblock.correct {
+            background-color: var(--color-cipher-success);
+            color: var(--color-primary-text);
+        }
+
+        /* ============================================================
            SECTION: RESULTS SCREEN
         ============================================================ */
         #results-screen {
@@ -542,21 +591,8 @@
     <div id="help-modal" aria-hidden="true">
         <div id="help-modal-content">
             <h2>How to Play</h2>
-            <div class="instruction-step">
-                <div class="step-num">1</div>
-                <div class="step-text">Each number in the quote represents a letter. Every occurrence of the same number is the same letter.</div>
-            </div>
-            <div class="instruction-step">
-                <div class="step-num">2</div>
-                <div class="step-text"><strong>Tap a number block</strong> to select it (all matching numbers highlight), then <strong>type a letter</strong> to assign it.</div>
-            </div>
-            <div class="instruction-step">
-                <div class="step-num">3</div>
-                <div class="step-text">You can reassign any number at any time. Assigning a letter to one number automatically frees it from any other number.</div>
-            </div>
-            <div class="instruction-step">
-                <div class="step-num">4</div>
-                <div class="step-text">When every number is correctly decoded, the quote is revealed and you win!</div>
+            <div class="help-demo">
+                <div class="demo-cipher" id="demo-cipher" aria-hidden="true"></div>
             </div>
             <button id="help-modal-close">Got it</button>
         </div>
@@ -1233,14 +1269,82 @@
             }, 5000);
         }
 
+        /* ============================================================
+           SECTION: HELP DEMO (animated how-to)
+           Loops a slow decode of HELLO (numbers 1 2 3 3 4). Typing the
+           repeated number 3 fills both L positions at once. No text.
+        ============================================================ */
+        const demoCipher = document.getElementById('demo-cipher');
+        const CIPHER_DEMO_NUMS = [1, 2, 3, 3, 4];
+        const CIPHER_DEMO_STEPS = [
+            { num: 1, letter: 'H' },
+            { num: 2, letter: 'E' },
+            { num: 3, letter: 'L' },
+            { num: 4, letter: 'O' }
+        ];
+        let cipherDemoTimers = [];
+        let cipherDemoRunning = false;
+
+        function cipherDemoWait(ms) {
+            return new Promise(resolve => { cipherDemoTimers.push(setTimeout(resolve, ms)); });
+        }
+
+        function buildCipherDemo() {
+            demoCipher.innerHTML = '';
+            demoCipher.classList.remove('demo-fade');
+            CIPHER_DEMO_NUMS.forEach(num => {
+                const b = document.createElement('div');
+                b.className = 'demo-cblock';
+                b.dataset.num = num;
+                b.textContent = num;
+                demoCipher.appendChild(b);
+            });
+        }
+
+        async function runCipherDemo() {
+            while (cipherDemoRunning) {
+                buildCipherDemo();
+                await cipherDemoWait(1000); if (!cipherDemoRunning) return;
+                for (const step of CIPHER_DEMO_STEPS) {
+                    const blocks = demoCipher.querySelectorAll(`.demo-cblock[data-num="${step.num}"]`);
+                    blocks.forEach(b => b.classList.add('selected'));
+                    await cipherDemoWait(700); if (!cipherDemoRunning) return;
+                    blocks.forEach(b => {
+                        b.textContent = step.letter;
+                        b.classList.remove('selected');
+                        b.classList.add('correct');
+                    });
+                    await cipherDemoWait(800); if (!cipherDemoRunning) return;
+                }
+                await cipherDemoWait(1800); if (!cipherDemoRunning) return;
+                demoCipher.classList.add('demo-fade');
+                await cipherDemoWait(600); if (!cipherDemoRunning) return;
+            }
+        }
+
+        function startCipherDemo() {
+            if (cipherDemoRunning || !demoCipher) return;
+            cipherDemoRunning = true;
+            runCipherDemo();
+        }
+
+        function stopCipherDemo() {
+            cipherDemoRunning = false;
+            cipherDemoTimers.forEach(t => clearTimeout(t));
+            cipherDemoTimers = [];
+            if (demoCipher) { demoCipher.innerHTML = ''; demoCipher.classList.remove('demo-fade'); }
+        }
+
         document.getElementById('help-btn').addEventListener('click', () => {
             elHelpModal.classList.add('visible');
+            startCipherDemo();
         });
         document.getElementById('help-modal-close').addEventListener('click', () => {
             elHelpModal.classList.remove('visible');
+            stopCipherDemo();
         });
         elHelpModal.addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) e.currentTarget.classList.remove('visible');
+            if (e.target === e.currentTarget) { e.currentTarget.classList.remove('visible'); stopCipherDemo(); }
         });
 
         // Tab: advance to next unsolved block; Backspace/Delete: clear current assignment

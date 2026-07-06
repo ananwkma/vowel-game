@@ -544,6 +544,71 @@
     }
 
     /* ============================================================
+       SECTION: HELP DEMO (animated how-to)
+       An amber vowel block rises into the empty gap to complete a word.
+    ============================================================ */
+    .help-demo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 160px;
+      margin-bottom: 24px;
+    }
+
+    .demo-word {
+      display: flex;
+      gap: var(--block-gap);
+      transition: opacity 0.5s ease;
+    }
+
+    .demo-word.demo-fade { opacity: 0; }
+
+    .demo-vblock {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--block-radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      box-shadow: var(--shadow-block);
+    }
+
+    .demo-vblock.consonant {
+      background-color: var(--color-consonant-bg);
+      color: var(--color-consonant-text);
+    }
+
+    .demo-vblock.vowel {
+      background-color: var(--color-vowel-bg);
+      color: var(--color-vowel-text);
+    }
+
+    .demo-slot {
+      position: relative;
+      width: 52px;
+      height: 52px;
+      border-radius: var(--block-radius);
+      border: 2px dashed rgba(0, 0, 0, 0.25);
+    }
+
+    .demo-slot .demo-vblock {
+      position: absolute;
+      inset: 0;
+      transform: translateY(70px);
+      opacity: 0;
+      transition: transform 0.7s cubic-bezier(0.2, 0.85, 0.3, 1), opacity 0.4s ease;
+    }
+
+    .demo-slot .demo-vblock.demo-drop--in {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* ============================================================
        SECTION: RESULTS SCREEN
        Full-puzzle completion card shown after the 5th word.
     ============================================================ */
@@ -688,15 +753,9 @@
   <div id="help-modal" aria-hidden="true">
     <div id="help-modal-content">
       <h2>How to Play</h2>
-      
-      <div class="instruction-step">
-        <div class="step-num">1</div>
-        <div class="step-text" id="instruction-main-text">Drag an orange block over a vowel to select it, then drop it in the correct spot.</div>
-      </div>
 
-      <div class="instruction-step">
-        <div class="step-num">2</div>
-        <div class="step-text">Solve all 5 words for today. Speed counts, but every "Give Up" adds a time penalty!</div>
+      <div class="help-demo">
+        <div class="demo-word" id="demo-vowel" aria-hidden="true"></div>
       </div>
 
       <button id="help-modal-close">Got it</button>
@@ -1032,11 +1091,6 @@
     let mobileState = 'idle';
     let mobileTapBlock = null;
     const MOBILE_DRAG_THRESHOLD = 8; // px before tap becomes a drag
-
-    // Set device-appropriate instruction text
-    document.getElementById('instruction-main-text').textContent = isMobile
-      ? 'Tap an orange block to pick a vowel. Then drag it into the correct spot to solve the word.'
-      : 'Drag an orange block over a vowel to select it, then drop it in the correct spot.';
 
     /* ============================================================
        SECTION: WORD ENGINE
@@ -2296,16 +2350,84 @@
     const helpBtn = document.getElementById('help-btn');
     const helpCloseBtn = document.getElementById('help-modal-close');
 
+    /* ============================================================
+       SECTION: HELP DEMO (animated how-to)
+       Loops a slow solve: the amber vowel A rises into the gap of
+       S T _ R to complete STAR. Pure animation, no text.
+    ============================================================ */
+    const demoVowel = document.getElementById('demo-vowel');
+    let vowelDemoTimers = [];
+    let vowelDemoRunning = false;
+
+    function vowelDemoWait(ms) {
+      return new Promise(resolve => { vowelDemoTimers.push(setTimeout(resolve, ms)); });
+    }
+
+    function buildVowelDemo() {
+      demoVowel.innerHTML = '';
+      demoVowel.classList.remove('demo-fade');
+      const layout = [
+        { type: 'consonant', ch: 'S' },
+        { type: 'consonant', ch: 'T' },
+        { type: 'slot',      ch: 'A' },
+        { type: 'consonant', ch: 'R' }
+      ];
+      let dropBlock = null;
+      layout.forEach(cell => {
+        if (cell.type === 'slot') {
+          const slot = document.createElement('div');
+          slot.className = 'demo-slot';
+          dropBlock = document.createElement('div');
+          dropBlock.className = 'demo-vblock vowel';
+          dropBlock.textContent = cell.ch;
+          slot.appendChild(dropBlock);
+          demoVowel.appendChild(slot);
+        } else {
+          const b = document.createElement('div');
+          b.className = 'demo-vblock consonant';
+          b.textContent = cell.ch;
+          demoVowel.appendChild(b);
+        }
+      });
+      return dropBlock;
+    }
+
+    async function runVowelDemo() {
+      while (vowelDemoRunning) {
+        const dropBlock = buildVowelDemo();
+        await vowelDemoWait(900); if (!vowelDemoRunning) return;
+        dropBlock.classList.add('demo-drop--in'); // vowel rises into the gap
+        await vowelDemoWait(2400); if (!vowelDemoRunning) return;
+        demoVowel.classList.add('demo-fade');
+        await vowelDemoWait(600); if (!vowelDemoRunning) return;
+      }
+    }
+
+    function startVowelDemo() {
+      if (vowelDemoRunning || !demoVowel) return;
+      vowelDemoRunning = true;
+      runVowelDemo();
+    }
+
+    function stopVowelDemo() {
+      vowelDemoRunning = false;
+      vowelDemoTimers.forEach(t => clearTimeout(t));
+      vowelDemoTimers = [];
+      if (demoVowel) { demoVowel.innerHTML = ''; demoVowel.classList.remove('demo-fade'); }
+    }
+
     function showHelp() {
       helpModal.classList.add('visible');
       helpModal.setAttribute('aria-hidden', 'false');
       elapsedTimer.pause();
       giveUpCountdown.stop();
+      startVowelDemo();
     }
 
     function hideHelp() {
       helpModal.classList.remove('visible');
       helpModal.setAttribute('aria-hidden', 'true');
+      stopVowelDemo();
       if (!puzzleState.complete) {
         elapsedTimer.start();
         giveUpCountdown.start();

@@ -647,6 +647,51 @@
     #help-modal-close:active { transform: translateY(2px); }
 
     /* ============================================================
+       SECTION: HELP DEMO (animated how-to)
+       A selection sweeps across a row of letters and locks in a word.
+    ============================================================ */
+    .help-demo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 200px;
+      margin-bottom: 20px;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 42px);
+      grid-template-rows: repeat(4, 42px);
+      gap: 4px;
+      transition: opacity 0.5s ease;
+    }
+
+    .demo-grid.demo-fade { opacity: 0; }
+
+    .demo-gcell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-hunt-serif);
+      font-weight: 700;
+      font-size: 1.1rem;
+      border-radius: 3px;
+      background: rgba(28, 27, 24, 0.06);
+      color: var(--color-hunt-text);
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .demo-gcell.active {
+      background-color: var(--color-hunt-primary);
+      color: #fff;
+    }
+
+    .demo-gcell.found {
+      background-color: var(--color-hunt-success);
+      color: #fff;
+    }
+
+    /* ============================================================
        SECTION: ANIMATIONS
     ============================================================ */
     @keyframes stamp-reveal {
@@ -762,25 +807,8 @@
   <div id="help-modal" style="display:none">
     <div id="help-modal-content">
       <h2>How to Play</h2>
-      <div class="instruction-step">
-        <div class="step-num">1</div>
-        <div class="step-text">Find <strong>6 hidden words</strong> in the letter grid — 3 easy and 3 hard.</div>
-      </div>
-      <div class="instruction-step">
-        <div class="step-num">2</div>
-        <div class="step-text">Drag across letters to select a word. All 6 words belong to the same <strong>mystery category</strong>.</div>
-      </div>
-      <div class="instruction-step">
-        <div class="step-num">3</div>
-        <div class="step-text">Words run <strong>left-to-right</strong> or <strong>top-to-bottom</strong> only — no backwards or diagonal.</div>
-      </div>
-      <div class="instruction-step">
-        <div class="step-num">4</div>
-        <div class="step-text">Find all 3 easy words to <strong>reveal the category</strong>.</div>
-      </div>
-      <div class="instruction-step">
-        <div class="step-num">5</div>
-        <div class="step-text">Stuck? Tap the <strong>hint</strong> button to reveal the first letter of a word.</div>
+      <div class="help-demo">
+        <div class="demo-grid" id="demo-hunt" aria-hidden="true"></div>
       </div>
       <button id="help-modal-close">Got it</button>
     </div>
@@ -1601,16 +1629,77 @@
        SECTION: HELP MODAL
        Help overlay toggle handlers.
     ============================================================ */
+    /* ============================================================
+       SECTION: HELP DEMO (animated how-to)
+       Loops a slow sweep-select of FROG across the top row of a small
+       grid, then locks it in as a found word. Pure animation, no text.
+    ============================================================ */
+    const demoHunt = document.getElementById('demo-hunt');
+    const HUNT_DEMO_LETTERS = ['F','R','O','G','A','T','E','L','N','I','S','B','K','M','U','D'];
+    const HUNT_DEMO_WORD = [0, 1, 2, 3];
+    let huntDemoTimers = [];
+    let huntDemoRunning = false;
+
+    function huntDemoWait(ms) {
+      return new Promise(resolve => { huntDemoTimers.push(setTimeout(resolve, ms)); });
+    }
+
+    function buildHuntDemo() {
+      demoHunt.innerHTML = '';
+      demoHunt.classList.remove('demo-fade');
+      HUNT_DEMO_LETTERS.forEach(ch => {
+        const c = document.createElement('div');
+        c.className = 'demo-gcell';
+        c.textContent = ch;
+        demoHunt.appendChild(c);
+      });
+    }
+
+    async function runHuntDemo() {
+      while (huntDemoRunning) {
+        buildHuntDemo();
+        await huntDemoWait(900); if (!huntDemoRunning) return;
+        for (const idx of HUNT_DEMO_WORD) {
+          demoHunt.children[idx].classList.add('active'); // sweep the selection
+          await huntDemoWait(550); if (!huntDemoRunning) return;
+        }
+        await huntDemoWait(400); if (!huntDemoRunning) return;
+        HUNT_DEMO_WORD.forEach(idx => {
+          demoHunt.children[idx].classList.remove('active');
+          demoHunt.children[idx].classList.add('found'); // lock in the word
+        });
+        await huntDemoWait(1800); if (!huntDemoRunning) return;
+        demoHunt.classList.add('demo-fade');
+        await huntDemoWait(600); if (!huntDemoRunning) return;
+      }
+    }
+
+    function startHuntDemo() {
+      if (huntDemoRunning || !demoHunt) return;
+      huntDemoRunning = true;
+      runHuntDemo();
+    }
+
+    function stopHuntDemo() {
+      huntDemoRunning = false;
+      huntDemoTimers.forEach(t => clearTimeout(t));
+      huntDemoTimers = [];
+      if (demoHunt) { demoHunt.innerHTML = ''; demoHunt.classList.remove('demo-fade'); }
+    }
+
     function setupHelpModal() {
       document.getElementById('help-btn').addEventListener('click', () => {
         document.getElementById('help-modal').style.display = 'flex';
+        startHuntDemo();
       });
       document.getElementById('help-modal-close').addEventListener('click', () => {
         document.getElementById('help-modal').style.display = 'none';
+        stopHuntDemo();
       });
       document.getElementById('help-modal').addEventListener('click', (e) => {
         if (e.target === document.getElementById('help-modal')) {
           document.getElementById('help-modal').style.display = 'none';
+          stopHuntDemo();
         }
       });
     }
