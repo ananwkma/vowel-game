@@ -553,7 +553,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: center;
       min-height: 220px;
       margin-bottom: 24px;
     }
@@ -562,6 +562,9 @@
       position: relative;
       display: flex;
       gap: 8px;
+      /* Reserve the picker's height above the row so the whole cluster
+         (picker + row) centers as one unit within .help-demo. */
+      margin-top: 116px;
       transition: opacity 0.5s ease;
     }
 
@@ -635,6 +638,12 @@
     .demo-picker-item.active {
       opacity: 1;
       color: var(--color-vowel-bg);
+    }
+
+    /* Guide separator (the "_" resting slot) between E and I — matches the real picker. */
+    .demo-picker-item.sep {
+      opacity: 0.3;
+      font-size: 1rem;
     }
 
     .demo-picker-highlight {
@@ -2472,9 +2481,10 @@
       picker.className = 'demo-picker';
       const list = document.createElement('div');
       list.className = 'demo-picker-list';
-      const items = ['A', 'E', 'I', 'O', 'U'].map(v => {
+      // Order matches the real picker: A, E, _ (guide), I, O, U.
+      const items = ['A', 'E', '_', 'I', 'O', 'U'].map(v => {
         const it = document.createElement('div');
-        it.className = 'demo-picker-item';
+        it.className = 'demo-picker-item' + (v === '_' ? ' sep' : '');
         it.textContent = v;
         list.appendChild(it);
         return it;

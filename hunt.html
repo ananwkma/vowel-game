@@ -648,14 +648,41 @@
 
     /* ============================================================
        SECTION: HELP DEMO (animated how-to)
-       A selection sweeps across a row of letters and locks in a word.
+       Find RED, TAN, BLUE; a grey dot turns green per find, and the
+       hidden category "???" reveals as "COLORS" once all three are found.
     ============================================================ */
     .help-demo {
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 200px;
+      min-height: 240px;
       margin-bottom: 20px;
+    }
+
+    .demo-hunt {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      transition: opacity 0.5s ease;
+    }
+
+    .demo-hunt.demo-fade { opacity: 0; }
+
+    .demo-cat {
+      font-family: var(--font-hunt-serif);
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-hunt-text);
+      opacity: 0.5;
+      transition: color 0.4s ease, opacity 0.4s ease;
+    }
+
+    .demo-cat.revealed {
+      opacity: 1;
+      color: var(--color-hunt-success);
     }
 
     .demo-grid {
@@ -663,10 +690,7 @@
       grid-template-columns: repeat(4, 42px);
       grid-template-rows: repeat(4, 42px);
       gap: 4px;
-      transition: opacity 0.5s ease;
     }
-
-    .demo-grid.demo-fade { opacity: 0; }
 
     .demo-gcell {
       display: flex;
@@ -690,6 +714,21 @@
       background-color: var(--color-hunt-success);
       color: #fff;
     }
+
+    .demo-dots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .demo-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(28, 27, 24, 0.2);
+      transition: background-color 0.3s ease;
+    }
+
+    .demo-dot.found { background: var(--color-hunt-success); }
 
     .help-text {
       display: flex;
@@ -834,7 +873,7 @@
     <div id="help-modal-content">
       <h2>How to Play</h2>
       <div class="help-demo">
-        <div class="demo-grid" id="demo-hunt" aria-hidden="true"></div>
+        <div class="demo-hunt" id="demo-hunt" aria-hidden="true"></div>
       </div>
       <div class="help-text" id="help-text" style="display:none">
         <div class="instruction-step">
@@ -1680,14 +1719,21 @@
     ============================================================ */
     /* ============================================================
        SECTION: HELP DEMO (animated how-to)
-       Loops a slow sweep-select of FROG across the top row of a small
-       grid, then locks it in as a found word. Pure animation, no text.
+       Loops finding RED, TAN, BLUE in a small grid: each find turns a
+       grey dot green, and the hidden category "???" reveals as "COLORS"
+       once all three are found. Pure animation, no text.
     ============================================================ */
     const demoHunt = document.getElementById('demo-hunt');
-    const HUNT_DEMO_LETTERS = ['F','R','O','G','A','T','E','L','N','I','S','B','K','M','U','D'];
-    const HUNT_DEMO_WORD = [0, 1, 2, 3];
+    // 4x4 grid, row-major: BLUE (0-3), RED (4-6), TAN (8-10), rest filler
+    const HUNT_DEMO_LETTERS = ['B','L','U','E','R','E','D','X','T','A','N','Y','Z','W','Q','K'];
+    const HUNT_DEMO_WORDS = [
+      { cells: [4, 5, 6] },      // RED
+      { cells: [8, 9, 10] },     // TAN
+      { cells: [0, 1, 2, 3] }    // BLUE
+    ];
     let huntDemoTimers = [];
     let huntDemoRunning = false;
+    let huntGridEl = null, huntCatEl = null, huntDotEls = [];
 
     function huntDemoWait(ms) {
       return new Promise(resolve => { huntDemoTimers.push(setTimeout(resolve, ms)); });
@@ -1696,28 +1742,58 @@
     function buildHuntDemo() {
       demoHunt.innerHTML = '';
       demoHunt.classList.remove('demo-fade');
+
+      // Mystery category label
+      huntCatEl = document.createElement('div');
+      huntCatEl.className = 'demo-cat';
+      huntCatEl.textContent = '???';
+      demoHunt.appendChild(huntCatEl);
+
+      // Letter grid
+      huntGridEl = document.createElement('div');
+      huntGridEl.className = 'demo-grid';
       HUNT_DEMO_LETTERS.forEach(ch => {
         const c = document.createElement('div');
         c.className = 'demo-gcell';
         c.textContent = ch;
-        demoHunt.appendChild(c);
+        huntGridEl.appendChild(c);
       });
+      demoHunt.appendChild(huntGridEl);
+
+      // Progress dots (one per word)
+      const dots = document.createElement('div');
+      dots.className = 'demo-dots';
+      huntDotEls = HUNT_DEMO_WORDS.map(() => {
+        const d = document.createElement('div');
+        d.className = 'demo-dot';
+        dots.appendChild(d);
+        return d;
+      });
+      demoHunt.appendChild(dots);
     }
 
     async function runHuntDemo() {
       while (huntDemoRunning) {
         buildHuntDemo();
         await huntDemoWait(900); if (!huntDemoRunning) return;
-        for (const idx of HUNT_DEMO_WORD) {
-          demoHunt.children[idx].classList.add('active'); // sweep the selection
-          await huntDemoWait(550); if (!huntDemoRunning) return;
+        for (let w = 0; w < HUNT_DEMO_WORDS.length; w++) {
+          const cells = HUNT_DEMO_WORDS[w].cells;
+          for (const idx of cells) {
+            huntGridEl.children[idx].classList.add('active'); // sweep the selection
+            await huntDemoWait(380); if (!huntDemoRunning) return;
+          }
+          await huntDemoWait(300); if (!huntDemoRunning) return;
+          cells.forEach(idx => {
+            huntGridEl.children[idx].classList.remove('active');
+            huntGridEl.children[idx].classList.add('found'); // lock in the word
+          });
+          huntDotEls[w].classList.add('found'); // grey dot turns green
+          await huntDemoWait(650); if (!huntDemoRunning) return;
         }
-        await huntDemoWait(400); if (!huntDemoRunning) return;
-        HUNT_DEMO_WORD.forEach(idx => {
-          demoHunt.children[idx].classList.remove('active');
-          demoHunt.children[idx].classList.add('found'); // lock in the word
-        });
-        await huntDemoWait(1800); if (!huntDemoRunning) return;
+        // All found → reveal the category
+        huntCatEl.textContent = 'COLORS';
+        huntCatEl.classList.add('revealed');
+        await huntDemoWait(2000); if (!huntDemoRunning) return;
         demoHunt.classList.add('demo-fade');
         await huntDemoWait(600); if (!huntDemoRunning) return;
       }
